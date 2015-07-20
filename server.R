@@ -5,13 +5,27 @@ shinyServer(function(input, output, session) {
   
   ##Reactive expression object for original row count
   datareactive <- reactive ({ 
-    inputDataFile <- input$countFile       
-    if (is.null(inputDataFile)) org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
-    else org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )
+    #inputDataFile <- input$countFile       
+    if (!is.null(input$countFile)) {
+      inputDataFile <- input$countFile 
+      org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )
+    } else if (!is.null(input$countFileMulti)) {
+      inputDataFile <- input$countFileMulti
+      org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
+    } else if (is.null(input$countFile)) {
+      org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
+    }  
     
-    inputMetatab <- input$metaTab
-    if (is.null(inputMetatab)) metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
-    else metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
+    #inputMetatab <- input$metaTab
+    if (!is.null(input$metaTab)) {
+      inputMetatab <- input$metaTab
+      metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
+    } else if (!is.null(input$metaTabMulti)) {
+      inputMetatab <- input$metaTabMulti
+      metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
+    } else if (is.null(input$metaTab)) {
+      metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
+    }  
     
     if (dim(metadata)[2]>2) {
       groupinfo <- metadata[,2]

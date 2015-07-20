@@ -12,7 +12,10 @@ sidebar <- dashboardSidebar(
                        menuSubItem("Workflow", tabName = "workflow"),
                        menuSubItem("Q & A", tabName ="QuestionsAndAnswers")
                        ),
-              menuItem("Data Input", tabName="dataInput", icon = icon("file")),
+              menuItem("Data Input", icon = icon("file"),
+                       menuSubItem("Single-factor Experiment", tabName = "dataInputSingle"),
+                       menuSubItem("Multi-factor Experiment", tabName ="dataInputMulti")
+                       ),
               menuItem("Data Summarization", tabName="dataSummary", icon = icon("table")),
               menuItem("DE analysis", icon = icon("area-chart"), 
                        menuSubItem("edgeR", tabName="edger"),
@@ -231,7 +234,7 @@ body <- dashboardBody(
     
     #########################################
     ## First tab content for data input
-    tabItem(tabName="dataInput",
+    tabItem(tabName="dataInputSingle",
             fluidRow(
               box(title = "Input data",
                   solidHeader = T, status = "info",
@@ -382,6 +385,60 @@ body <- dashboardBody(
               )
             )
               ),
+    
+    tabItem(tabName="dataInputMulti",
+            
+            
+            ##Raw count input box under Data Input tab panel
+            box(title = "Input 1: Raw Count Data",
+                solidHeader = T, status = "info",
+                width = 6,
+                fileInput(inputId="countFileMulti", 
+                          label=h4("Raw Count Table"), 
+                          accept=c('text/tab-separated-values',
+                                   'text/csv',
+                                   'text/comma-separated-values',
+                                   'text/tab-separated-values',
+                                   '.txt',
+                                   '.csv',
+                                   '.tsv')
+                ),
+                radioButtons(inputId="coutFileSepMulti", 
+                             label="Separator",
+                             choices=c(Comma=',',
+                                       Semicolon=';',
+                                       Tab='\t'
+                             ),
+                             selected='\t'
+                )
+            ),
+            ##Meta-data input box under Data Input tab panel
+            box(title = "Input 2: Meta-data Table",
+                solidHeader = T, status = "info",
+                width = 6,
+                fileInput(inputId="metaTabMulti", 
+                          label=h4("Metadata Table"),
+                          accept = c('text/tab-separated-values',
+                                     'text/csv',
+                                     'text/comma-separated-values',
+                                     'text/tab-separated-values',
+                                     '.txt',
+                                     '.csv',
+                                     '.tsv')
+                ), 
+                radioButtons(inputId="metaSepMulti", 
+                             label="Separator",
+                             choices=c(Comma=',',
+                                       Semicolon=';',
+                                       Tab='\t'
+                             ),
+                             selected='\t'
+                ),
+                br(),
+                actionButton("dataSubmitMulti", label = "Submit")
+            )
+            
+            ),
     
     ## End first tab content for data input panel
     #########################################
