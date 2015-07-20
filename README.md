@@ -14,13 +14,13 @@ The input of this App is 2 plain text files
 ##App execution
 To run this App after downloading this App from github to your local PC, please follow the steps as below:
 
-1. If 'Download ZIP', upzip the downloaded file to the Desktop, if 'Clone in Desktop' via git, the whole App foler ("DEAPP-shiny") should be downloaded to the Desktop. 
+1. If 'Download ZIP', upzip the downloaded file to the Desktop, if 'Clone in Desktop' via git, the whole App folder ("DEAPP-shiny") should be downloaded to the Desktop. 
 
 2. Open R or RStudio (if installed) with R version >= 3.1.2.
 
-3. Set your working directory to where this App are unzipped or downloaed. 
+3. Set your working directory to where this App are unzipped or downloaded. 
 
-   For example, I downloaded this App via 'Download ZIP' and upzipped it to the Desktop, then I need to set the working directory in R by setwd("~/Desktop/DEAPP-shiny-master").
+   For example, I downloaded this App via 'Download ZIP' and unzipped it to the Desktop, then I need to set the working directory in R by setwd("~/Desktop/DEAPP-shiny-master").
    
 4. Install all depended CRAN R packages (shiny, shinydashboard, DT, ggplot2) and R Bioconductor packages (edgeR, limma, DESeq2) by sourcing the R installation program with source("install/prep.R"). 
 
@@ -35,4 +35,4 @@ To run this App after downloading this App from github to your local PC, please 
 6. A web page will be open in you Browser to display all DE analysis results with initial provided test data, and the "Data Input" tab could allow you to uploaded you own count results together with the experimental factor information for fast efficient DE analysis with 3 different analysis methods.
 
 ##Feedback
-If you have further questions or suggestions regarding this App, please contact Yan Li at yli22@bsd.uchicago.edu from the bioinformatics core at the Center for Research Informatics (CRI), University of Chicago.
+If you have further questions or suggestions regarding this App, please contact Yan Li at yli22@bsd.uchicago.edu from the bioinformatics core at the Center for Research Informatics (CRI), biological science division (BSD), University of Chicago.
