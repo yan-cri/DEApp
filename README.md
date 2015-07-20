@@ -1,8 +1,15 @@
-# DEAPP-shiny
+# DEAPP: a web implementation of differential expression analysis using shiny
+
+##Introduction
 This DE analysis App is developed to 1). conduct differential expression (DE) analysis with edgeR, limma-voom, and DESeq2, and 2). cross-validate the DE analysis results with these 3 different DE analysis methods.
 
-The input of this App is 2 plain text files, one includes the count results of all tags with respect to each sample, another one includes the experimental group factor information for each sample. Initial DE analysis is based on the provided RNA-seq (http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0031229) pre-analyais count results. Detailed information about these 2 input files can be seen in the "Introduction" tab of this App.
+##Input files
+The input of this App is 2 plain text files, one includes the count results of all tags with respect to each sample, another one includes the experimental group factor information for each sample. 
 
+###Test data
+Initial DE analysis is based on the provided RNA-seq (http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0031229) pre-analyais count results. Detailed information about these 2 input files can be seen in the "Introduction" tab of this App.
+
+##App execution
 To run this App, please follow the steps as below:
 1. Open R or RStudio with R version >= 3.1.2, 
 2. Set your working directory to where the App programs (ui.R and server.R) are located. 
@@ -13,11 +20,5 @@ To run this App, please follow the steps as below:
 4. run this DE analysis App by shiny::runApp()
 5. A web page will be open in you Browser to display all DE analysis results with initial provided test data, and the "Data Input" tab could allow you to uploaded you own count results together with the experimental factor information for fast efficient DE analysis with 3 different analysis methods.
 
+##Feedback
 If you have further questions regarding this App, please contact Yan Li at yli22@bsd.uchicago.edu from the bioinformatics core at the Center for Research Informatics (CRI), University of Chicago.
-
-Yan Li
-yli22@bsd.uchicago.edu
-07-08-2015
-
- 
-
