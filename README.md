@@ -20,17 +20,17 @@ To run this App after downloading this App from github to your local PC, please 
 
 3. Set your working directory to where this App are unzipped or downloaded. 
 
-   For example, I downloaded this App via 'Download ZIP' and unzipped it to the Desktop, then I need to set the working directory in R by setwd("~/Desktop/DEAPP-shiny-master").
+   For example, I downloaded this App via 'Download ZIP' and unzipped it to the Desktop, then I need to set the working directory in R by `setwd("~/Desktop/DEAPP-shiny-master")`.
    
-4. Install all depended CRAN R packages (shiny, shinydashboard, DT, ggplot2) and R Bioconductor packages (edgeR, limma, DESeq2) by sourcing the R installation program with source("install/prep.R"). 
+4. Install all depended CRAN R packages (shiny, shinydashboard, DT, ggplot2) and R Bioconductor packages (edgeR, limma, DESeq2) by sourcing the R installation program with `source("install/prep.R")`. 
 
     If all depended packages are successfully installed, logical value “TRUE” should be returned and printed on the R Console pane for each package after sourcing the installation program. 
     
-    If not, please manually install all above requested depended packages in R, restart R/RStudio and source the package installation code again with source("install/prep.R") to make sure that logical value “TRUE” will be returned and printed on the R Console. 
+    If not, please manually install all above requested depended packages in R, restart R/RStudio and source the package installation code again with `source("install/prep.R")` to make sure that logical value “TRUE” will be returned and printed on the R Console. 
     
     If some packages still cannot be installed, try to update your R and corresponding Bioconductor version, and repeat this step again until you can see logical value “TRUE” are returned and printed on the R Console for each requested R package.
     
-5. run this App by shiny::runApp()
+5. run this App by `shiny::runApp()`
 
 6. A web page will be open in you Browser to display all DE analysis results with initial provided test data, and the "Data Input" tab could allow you to uploaded you own count results together with the experimental factor information for fast efficient DE analysis with 3 different analysis methods.
 
