@@ -7,7 +7,11 @@ header <- dashboardHeader(
 
 sidebar <- dashboardSidebar( 
   sidebarMenu(id="menu1",
-              menuItem("Introduction", tabName="intro" , icon = icon("user")),
+              menuItem("Introduction", icon = icon("user"),
+                       menuSubItem("Data Input", tabName = "intro"),
+                       menuSubItem("Workflow", tabName = "workflow"),
+                       menuSubItem("Q & A", tabName ="QuestionsAndAnswers")
+                       ),
               menuItem("Data Input", tabName="dataInput", icon = icon("file")),
               menuItem("Data Summarization", tabName="dataSummary", icon = icon("table")),
               menuItem("DE analysis", icon = icon("area-chart"), 
@@ -15,7 +19,8 @@ sidebar <- dashboardSidebar(
                        menuSubItem("Limma-Voom", tabName="limmavoom"),
                        menuSubItem("DEseq2", tabName="deseq2")
               ),
-              menuItem("Methods Comparison", icon = icon("bar-chart-o"),tabName="decomp")        
+              menuItem("Methods Comparison", icon = icon("bar-chart-o"),tabName="decomp"),
+              menuItem("Feedback", tabName="feedback")
   )
 )
 
@@ -109,15 +114,18 @@ body <- dashboardBody(
             ##DE analysis methods section
             h3("3. DE analysis methods", style="padding-left: 1em"),
             p("This App implements 3 different methods to conduct DE analysis, 
-              they are edgeR, limma-voom, and DEseq2. 
-              The analysis results with respect to different methods can be seen 
+              they are ",
+              a("edgeR, ", href="http://bioconductor.org/packages/release/bioc/html/edgeR.html"),
+              a("limma-voom, ", href="http://www.genomebiology.com/2014/15/2/R29"), "and ",
+              a("DESeq2 ", href="http://bioconductor.org/packages/release/bioc/html/DESeq2.html"),
+              ". The analysis results with respect to different methods can be seen 
               under the 'DE analysis' tab button. 
               For the single-factor experiment, the DE analysis is conducted between any 
               2 levels of that single-factor; 
               for the multi-factor experiment, the DE analysis is conducted in a way 
               to combine all the experimental factors into one combined factor, 
               so that DE analysis can be conducted in any 2 chosen combined factor levels."
-              , style="padding-left: 2em"),
+              , style="padding-left: 2em")
             #h4("1. edgeR", style="padding-left: 3em"),
             #p("The multi-factor experiment DE analysis is conducted in a way to combine all the experimental 
             #  factors into tone combined factor, followed with the DE analysis in any chosen combined factor levels."
@@ -129,9 +137,12 @@ body <- dashboardBody(
             #      conducted based on the single-factor experimental design and multi-factor experimental design.
             #      Resutls of method comparison can be seen with the 'Methods Comparison' tab button"),
             
+            ),
+    
+    tabItem(tabName="workflow",
             ############################################
             ##Workflow section
-            h2("Workflow"),
+            h3("Analysis Workflow"),
             p("To distinguish the user input, analysis results, example and pre-processing results, 
               various color box is used in this App to clarify them."
               , style="padding-left: 0em"),
@@ -165,12 +176,14 @@ body <- dashboardBody(
             img(src="workflow.png", width=1000),
             p("The above workflow can also be downloaded ",
               a("here.", href=as.character(paste("file://~",getwd(),"/www/workflow.pdf", sep="")))
-              , style="padding-left: 0em"),
-            
+              , style="padding-left: 0em")
+            ),
+    
+    tabItem(tabName="QuestionsAndAnswers",
             ############################################
             ##Q&A section
-            
-            h2("Q&A"),
+            h3("Frequently Asked Questions and Answers"),
+            br(),
             p("Q1. Can I use this App to analyze RPKM data, such as quantified results from cuffquant?"
               , style="padding-left: 2em; font-weight: bold"),
             p("A: No, this App can only be used to analyze raw count data via edgeR, limma-voom, and DESeq2. 
@@ -197,8 +210,11 @@ body <- dashboardBody(
               so that DE analysis can be conducted in any 2 chosen combined factor levels.
               Additionally, please make sure there is more than 1 biological replicate (>=2 samples) 
               for each factor/combined-factor levels."
-              , style="padding-left: 4em"),
+              , style="padding-left: 4em")
             
+    ),
+    
+    tabItem(tabName='feedback',
             ############################################
             ##Feedback section
             h2("Feedback"),
@@ -208,7 +224,6 @@ body <- dashboardBody(
               If you have any questions, comments, or suggestions, feel free to contact our core at bioinformatics@bsd.uchicago.edu or the developer at yli22@bsd.uchicago.edu"),
             br(),
             img(src="cri.png")
-            
             ),
     
     ## End introduction tab panel
