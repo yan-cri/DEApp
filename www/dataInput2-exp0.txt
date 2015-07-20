@@ -1,0 +1,1 @@
+Sample	GroupSample1	controlSample2	controlSample3	treatedSample4	treatedSample5	treated......	......

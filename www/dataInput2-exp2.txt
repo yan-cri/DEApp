@@ -1,0 +1,1 @@
+Sample	Group	Time	Drug	......Sample1	control	1h	1	Sample2	control	2h	1	Sample3	control	1h	2	Sample4	control	2h	2	Sample5	treated	1h	1	Sample6	treated	2h	1	Sample7	treated	1h	2	Sample8	treated	2h	2	......	......	......	......	

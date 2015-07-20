@@ -1,0 +1,1 @@
+Sample	Group	Time	......Sample1	control	1h	Sample2	control	2h	Sample3	control	1h	Sample4	control	2h	Sample5	treated	1h	Sample6	treated	2h	Sample7	treated	1h	Sample8	treated	2h	
