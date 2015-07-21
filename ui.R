@@ -444,7 +444,7 @@ body <- dashboardBody(
                                      selected='\t'
                         ),
                         br(),
-                        actionButton("dataSubmitMulti", label = "Submit")
+                        actionButton("MultiSubmit", label = "Submit")
                     )
                     
                   ),

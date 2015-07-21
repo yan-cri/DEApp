@@ -5,16 +5,32 @@ shinyServer(function(input, output, session) {
   
   ##Reactive expression object for original row count
   datareactive <- reactive ({  
-    #inputDataFile <- input$countFile       
-    if ( !is.null(input$countFile) & is.null(input$countFileMulti) ) {
+    #inputDataFile <- input$countFile      
+    countSubmit <- 0
+    countMultisubmit <- 0
+    if ( !is.null(input$countFile) & is.null(input$countFileMulti) ) {      
       inputDataFile <- input$countFile 
-      org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )
+      org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )   
     } else if ( !is.null(input$countFileMulti) & is.null(input$countFile) ) {
       inputDataFile <- input$countFileMulti
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
     } else if (is.null(input$countFile) & is.null(input$countFileMulti) ) {
       org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
-    }  
+    } else { 
+      countSubmit <- countSubmit + 1
+      countMultisubmit <- countMultisubmit + 2   
+      
+      #if (as.numeric(input$dataSubmit) %% 2 == 0) buttonCount <- as.numeric(input$dataSubmit)
+      #else buttonCount <- as.numeric(input$dataSubmit)+1
+        
+      if (as.numeric(input$dataSubmit) %% 2 == 0) {
+        inputDataFile <- input$countFile 
+        org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )
+      } else {
+        inputDataFile <- input$countFileMulti
+        org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
+      }
+    }
     
     #inputMetatab <- input$metaTab
     if ( !is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
@@ -25,7 +41,16 @@ shinyServer(function(input, output, session) {
       metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
     } else if ( is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
       metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
-    }  
+    } else {
+      if ( as.numeric(countSubmit) %% 2 == 0 ) {
+        metadata <- read.delim((input$metaTab)$datapath, header=T, sep=input$metaSep)
+      } else {
+        metadata <- read.delim((input$metaTabMulti)$datapath, header=T, sep=input$metaSepMulti)
+      }
+    }
+    
+    print(paste("Final sumbit is",c(countSubmit, countMultisubmit), sep=":"))
+    print(c(str(input$dataSubmit), str(input$MultiSubmit)))
     
     if (dim(metadata)[2]>2) {
       groupinfo <- metadata[,2]
@@ -383,7 +408,7 @@ shinyServer(function(input, output, session) {
   #################################################
   ##Multi-factor Exp Res Summary
   output$overallDataSummaryMulti <- renderTable({ 
-    if ( input$dataSubmitMulti ) {
+    if ( input$MultiSubmit ) {
       isolate({
         no.samples <- length(colnames(datareactive()$counts))
         no.gene <- dim((datareactive())$counts)[1]
@@ -396,7 +421,7 @@ shinyServer(function(input, output, session) {
   },digits=0, align="l|c")
   
   output$sampleGroupMulti <- renderTable({ 
-    if ( input$dataSubmitMulti ) {
+    if ( input$MultiSubmit ) {
       isolate({
         groupinfo <- as.matrix(summary((datareactive())$samples$group))
         colnames(groupinfo) <- "No. in each group"
@@ -407,7 +432,7 @@ shinyServer(function(input, output, session) {
   },digits=0, align="l|c")
   
   output$sampleInfoMulti <- renderText({ 
-    if ( input$dataSubmitMulti ) {
+    if ( input$MultiSubmit ) {
       isolate({
         paste(as.character(rownames((datareactive())$samples)), collapse=", " )
       })
@@ -415,7 +440,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$sampleTitleMulti <- renderText({ 
-    if ( input$dataSubmitMulti ) {
+    if ( input$MultiSubmit ) {
       isolate({
         no.samples <- length(colnames(datareactive()$counts))
         paste("A total of ", as.character(no.samples), " samples in the experiment, they are:", sep="")
@@ -424,7 +449,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$expDesignMulti <- renderText({
-    if ( input$dataSubmitMulti ) {
+    if ( input$MultiSubmit ) {
       isolate({        
         inputMetatab <- input$metaTabMulti
         metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
@@ -439,7 +464,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$GroupLevelMulti <- renderText({ 
-    if ( input$dataSubmitMulti ) {
+    if ( input$MultiSubmit ) {
       isolate({ 
         inputMetatab <- input$metaTabMulti
         metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
@@ -473,7 +498,7 @@ shinyServer(function(input, output, session) {
   }, align="l|cc", digits=c(0,0,2), display=c("s", "e", "f"))
   
   output$rmlowLibsizeNormfactor <- renderTable({ 
-    input$rmlow | input$dataSubmitMulti
+    input$rmlow | input$MultiSubmit | input$dataSubmit
     isolate({ 
       tab <- (rmlowReactive())$samples[, -1]
       colnames(tab) <- c("Library sizes", "Normalization factors")
@@ -493,7 +518,7 @@ shinyServer(function(input, output, session) {
   },digits=0, align="l|c")
   
   output$rmlowSamplesize <- renderTable({ 
-    input$rmlow | input$dataSubmitMulti
+    input$rmlow | input$MultiSubmit | input$dataSubmit
     isolate({ 
       no.samples <- length(colnames(rmlowReactive()$counts))
       no.gene <- dim(rmlowReactive()$counts)[1]
@@ -505,7 +530,7 @@ shinyServer(function(input, output, session) {
   },digits=0, align="l|c")
   
   output$sampleBoxplot <- renderPlot({ 
-    input$rmlow | input$dataSubmitMulti
+    input$rmlow | input$MultiSubmit | input$dataSubmit
     isolate({
       Group <- as.factor(rmlowReactive()$samples$group)
       bx.p<-boxplot(cpm(rmlowReactive(), log=T)[,])
@@ -516,7 +541,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$sampleMDS <- renderPlot({ 
-    input$rmlow | input$dataSubmitMulti
+    input$rmlow | input$MultiSubmit | input$dataSubmit
     isolate({
       Group <- as.factor(rmlowReactive()$samples$group)
       par(mar=c(5,5,4,2))
