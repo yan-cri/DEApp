@@ -536,7 +536,7 @@ shinyServer(function(input, output, session) {
   
   ##Estimation dispersion BCV
   output$edgerBCV <- renderPlot({ 
-    input$edgerdeAnalysis
+    if (input$edgerdeAnalysis)
     isolate({ 
       par(mar=c(5,5,2,2))
       plotBCV(edgerDispersionEst(), cex=0.5, cex.lab=1.8, cex.axis=1.5)
@@ -544,7 +544,11 @@ shinyServer(function(input, output, session) {
   })
   
   output$edgerCommonDisp <- renderText({
-    paste("Esitmated biological coefficient of variation (BCV) is ", round(sqrt(edgerDispersionEst()$common.dispersion)*100, 4), "%", sep="")
+    if(input$edgerdeAnalysis)
+      isolate({
+        paste("Esitmated biological coefficient of variation (BCV) is ", round(sqrt(edgerDispersionEst()$common.dispersion)*100, 4), "%", sep="")
+      })
+    
   })
   
   output$edgerTagwiseDispExp <- renderText({
@@ -552,7 +556,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$edgerTagwiseDisp <- renderTable({ 
-    input$edgerdeAnalysis
+    if(input$edgerdeAnalysis)
     isolate({ 
       res<- as.table(t(summary(sqrt(edgerDispersionEst()$tagwise.dispersion))))
       res <- t(res)
@@ -563,7 +567,7 @@ shinyServer(function(input, output, session) {
   ##############
   ##tab panel for DE analysis results 
   output$edgerRes <- DT::renderDataTable({ 
-    input$edgerdeAnalysis
+    if(input$edgerdeAnalysis)
     isolate({ 
       tp <- topTags(edgerDEres(), n=Inf, adjust.method="BH", sort.by="PValue")
       res <- tp$table[,c("logFC", "PValue", "FDR")]
@@ -578,11 +582,14 @@ shinyServer(function(input, output, session) {
   )
   
   output$edgerTestDGEtitle <- renderText({
-    paste(paste(as.character(input$edgercompGroup2), as.character(input$edgercompGroup1), sep="-"), " DE analysis", sep="")
+    if(input$edgerdeAnalysis)
+      isolate({
+        paste(paste(as.character(input$edgercompGroup2), as.character(input$edgercompGroup1), sep="-"), " DE analysis", sep="")
+      })   
   })
   
   output$edgerTestDGE <- renderTable({ 
-    input$edgerdeAnalysis
+    if(input$edgerdeAnalysis)
     isolate({ 
       edgerDGEsummary <- as.data.frame(summary((edgerDEfilter()$table)$filter))      
       #colnames(edgerDGEsummary) <- paste("No. of gene (",paste(as.character(input$edgercompGroup2), as.character(input$edgercompGroup1), sep="-"), ")", sep="")
@@ -596,7 +603,7 @@ shinyServer(function(input, output, session) {
   }, align="l|c", digits=0)
   
   output$edgerVolcano <- renderPlot({
-    input$edgerdeAnalysis
+    if(input$edgerdeAnalysis)
     isolate({
       fcval <- as.numeric(input$edgerfc)
       fdr <- as.numeric(input$edgerfdr)
@@ -638,17 +645,20 @@ shinyServer(function(input, output, session) {
   })
   
   output$voomBCV <- renderPlot({
-    Group <- rmlowReactive()$samples$group
-    f <- factor(Group, levels=levels(Group))
-    design <- model.matrix(~0+f)
-    rownames(design) <- rownames(rmlowReactive()$samples)
-    colnames(design) <- levels(Group)
-    par(mar=c(4,4,2,2))
-    voom(rmlowReactive(), design=design, plot=T, normalize="quantile")
+    if(input$voomdeAnalysis)
+      isolate({
+        Group <- rmlowReactive()$samples$group
+        f <- factor(Group, levels=levels(Group))
+        design <- model.matrix(~0+f)
+        rownames(design) <- rownames(rmlowReactive()$samples)
+        colnames(design) <- levels(Group)
+        par(mar=c(4,4,2,2))
+        voom(rmlowReactive(), design=design, plot=T, normalize="quantile")
+      })
   })
   
   output$voomRes <- DT::renderDataTable({
-    input$voomdeAnalysis
+    if (input$voomdeAnalysis)
     isolate({ 
       tpvoom <- topTable(voomDEres(), n=Inf, adjust.method="BH", sort.by="p")
       res <- tpvoom[,c("logFC","P.Value", "adj.P.Val")]
@@ -661,11 +671,14 @@ shinyServer(function(input, output, session) {
   )
   
   output$voomTestDGEtitle <- renderText({
-    paste(paste(as.character(input$voomcompGroup2), as.character(input$voomcompGroup1), sep="-"), " DE analysis", sep="")
+    if(input$voomdeAnalysis)
+      isolate({
+        paste(paste(as.character(input$voomcompGroup2), as.character(input$voomcompGroup1), sep="-"), " DE analysis", sep="")
+      })   
   })
   
   output$voomTestDGE <- renderTable({
-    input$voomdeAnalysis
+    if(input$voomdeAnalysis)
     isolate({
       voomDGEsummary <- as.data.frame(summary(voomDEfilter()$filter))
       colnames(voomDGEsummary) <- "Number"
@@ -680,7 +693,7 @@ shinyServer(function(input, output, session) {
   }, align="l|c", digits=0)
   
   output$voomVolcano <- renderPlot({
-    input$voomdeAnalysis
+    if (input$voomdeAnalysis)
     isolate({
       plotres <- voomDEfilter()
       levels(plotres$filter) <- c("Down-regulated", "Non-DE", "Up-regulated")
@@ -715,14 +728,12 @@ shinyServer(function(input, output, session) {
   
   ################################################
   ###DEseq2 panel DE analysis
-  output$deseq2GroupLevel <- renderText({ 
-    
-    paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")
-    
+  output$deseq2GroupLevel <- renderText({  
+    paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")  
   })
   
   output$deseq2BCV <- renderPlot({
-    input$deseq2deAnalysis
+    if (input$deseq2deAnalysis)
     isolate({
       par(mar=c(4,5,2,2))
       plotDispEsts(deseq2Res(), cex.lab=1.8, cex.axis=1.5)
@@ -730,7 +741,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$deseq2Res <- DT::renderDataTable({
-    input$deseq2deAnalysis
+    if (input$deseq2deAnalysis)
     isolate({
       res.pre <- deseq2DEres()[,c("log2FoldChange", "pvalue", "padj")]
       res <- as.data.frame(res.pre) 
@@ -743,11 +754,14 @@ shinyServer(function(input, output, session) {
   )
   
   output$deseq2TestDGEtitle <- renderText({
-    paste(paste(as.character(input$deseq2compGroup2), as.character(input$deseq2compGroup1), sep="-"), " DE analysis", sep="")
+    if (input$deseq2deAnalysis)
+      isolate({
+        paste(paste(as.character(input$deseq2compGroup2), as.character(input$deseq2compGroup1), sep="-"), " DE analysis", sep="")
+      })
   })
   
   output$deseq2TestDGE <- renderTable({
-    input$deseq2deAnalysis
+    if (input$deseq2deAnalysis)
     isolate({
       deseq2DGEsummary <- as.data.frame(summary(deseq2DEfilter()$filter))
       #colnames(deseq2DGEsummary) <- paste("No. of gene (",paste(as.character(input$deseq2compGroup2), as.character(input$deseq2compGroup1), sep="-"), ")", sep="")
@@ -761,7 +775,7 @@ shinyServer(function(input, output, session) {
   }, align="l|c", digits=0)
   
   output$deseq2Volcano <- renderPlot({
-    input$deseq2deAnalysis
+    if (input$deseq2deAnalysis)
     isolate({
       plotres <- deseq2DEfilter()
       levels(plotres$filter) <- c("Down-regulated", "Non-DE", "Up-regulated")
@@ -802,7 +816,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$decomp <- renderPlot({
-    input$decompAnalysis
+    if (input$decompAnalysis)
     isolate({      
       if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
         venncount <- vennCounts(as.matrix(cbind(cbind(edgerDecomp()$table$filter, voomDecomp()$filter),deseq2Decomp()$filter)))
@@ -826,7 +840,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$decompTitle <- renderText({
-    input$decompAnalysis
+    if (input$decompAnalysis)
     isolate({
       if (input$decompP == 'normp') {
         title <- paste("Below results are based on the nominal p ", 
@@ -843,7 +857,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$decompText <- renderText({
-    input$decompAnalysis
+    if (input$decompAnalysis)
     isolate({
       res.matrix <- decompRes()
       if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
@@ -878,7 +892,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$decompTab <- renderTable({
-    input$decompAnalysis
+    if (input$decompAnalysis)
     isolate({
       res.matrix <- decompRes()
       if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {

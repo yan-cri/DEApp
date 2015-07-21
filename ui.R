@@ -391,93 +391,99 @@ body <- dashboardBody(
               ),
     
     tabItem(tabName="dataInputMulti",
-            
             fluidRow(
-              ##Raw count input box under Data Input tab panel
-              box(title = "Input 1: Raw Count Data",
+              box(title = "Input data",
                   solidHeader = T, status = "info",
-                  width = 6,
-                  fileInput(inputId="countFileMulti", 
-                            label=h4("Raw Count Table"), 
-                            accept=c('text/tab-separated-values',
-                                     'text/csv',
-                                     'text/comma-separated-values',
-                                     'text/tab-separated-values',
-                                     '.txt',
-                                     '.csv',
-                                     '.tsv')
+                  collapsible = T, collapsed = F,
+                  width = 12,
+                  
+                  fluidRow(
+                    ##Raw count input box under Data Input tab panel
+                    box(title = "Input 1: Raw Count Data",
+                        solidHeader = T, status = "info",
+                        width = 6,
+                        fileInput(inputId="countFileMulti", 
+                                  label=h4("Raw Count Table"), 
+                                  accept=c('text/tab-separated-values',
+                                           'text/csv',
+                                           'text/comma-separated-values',
+                                           'text/tab-separated-values',
+                                           '.txt',
+                                           '.csv',
+                                           '.tsv')
+                        ),
+                        radioButtons(inputId="coutFileSepMulti", 
+                                     label="Separator",
+                                     choices=c(Comma=',',
+                                               Semicolon=';',
+                                               Tab='\t'
+                                     ),
+                                     selected='\t'
+                        )
+                    ),
+                    ##Meta-data input box under Data Input tab panel
+                    box(title = "Input 2: Meta-data Table",
+                        solidHeader = T, status = "info",
+                        width = 6,
+                        fileInput(inputId="metaTabMulti", 
+                                  label=h4("Metadata Table"),
+                                  accept = c('text/tab-separated-values',
+                                             'text/csv',
+                                             'text/comma-separated-values',
+                                             'text/tab-separated-values',
+                                             '.txt',
+                                             '.csv',
+                                             '.tsv')
+                        ), 
+                        radioButtons(inputId="metaSepMulti", 
+                                     label="Separator",
+                                     choices=c(Comma=',',
+                                               Semicolon=';',
+                                               Tab='\t'
+                                     ),
+                                     selected='\t'
+                        ),
+                        br(),
+                        actionButton("dataSubmitMulti", label = "Submit")
+                    )
+                    
                   ),
-                  radioButtons(inputId="coutFileSepMulti", 
-                               label="Separator",
-                               choices=c(Comma=',',
-                                         Semicolon=';',
-                                         Tab='\t'
-                               ),
-                               selected='\t'
-                  )
-              ),
-              ##Meta-data input box under Data Input tab panel
-              box(title = "Input 2: Meta-data Table",
-                  solidHeader = T, status = "info",
-                  width = 6,
-                  fileInput(inputId="metaTabMulti", 
-                            label=h4("Metadata Table"),
-                            accept = c('text/tab-separated-values',
-                                       'text/csv',
-                                       'text/comma-separated-values',
-                                       'text/tab-separated-values',
-                                       '.txt',
-                                       '.csv',
-                                       '.tsv')
-                  ), 
-                  radioButtons(inputId="metaSepMulti", 
-                               label="Separator",
-                               choices=c(Comma=',',
-                                         Semicolon=';',
-                                         Tab='\t'
-                               ),
-                               selected='\t'
-                  ),
-                  br(),
-                  actionButton("dataSubmitMulti", label = "Submit")
-              )
-              
-            ),
-            
-            helpText(HTML("<div style=\" color: black; font-size: 20px;\">Note: Please make sure the format of you input data are the same as examples of input data shown as below.</div>")),
-            
-            fluidRow(
-              box(title = "Example of input 1",
-                  solidHeader = T, status = "warning",
-                  width = 6,
-                  tableOutput("countTabSampMulti1"),
-                  tags$style("#countTabSampMulti1 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#countTabSampMulti1 th {border: 1px solid black;}","#countTabSampMulti1 td {border: 1px solid black;}"),
-                  helpText(HTML("<div style=\"color: black \">The example of the input data1 - 'raw count data', 
+                  
+                  helpText(HTML("<div style=\" color: black; font-size: 20px;\">Note: Please make sure the format of you input data are the same as examples of input data shown as below.</div>")),
+                  
+                  fluidRow(
+                    box(title = "Example of input 1",
+                        solidHeader = T, status = "warning",
+                        width = 6,
+                        tableOutput("countTabSampMulti1"),
+                        tags$style("#countTabSampMulti1 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#countTabSampMulti1 th {border: 1px solid black;}","#countTabSampMulti1 td {border: 1px solid black;}"),
+                        helpText(HTML("<div style=\"color: black \">The example of the input data1 - 'raw count data', 
                                 the 1st column corresponds to the tag ID, such as gene ID, transcript ID, or miRNA ID; 
                                 and 1st row corresponds to the sample ID. 
                                 The full 'Raw Count Data' text file can be seen "), 
-                           a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/TestDataMulti-feature-count-res.txt", sep="")))
-                  )
-                  ),
-              
-              box(title = "Example of input 2",
-                  solidHeader = T, status = "warning",
-                  width = 6,
-                  fluidRow(tableOutput("multimetaTabSamp1"),
-                           tags$style("#multimetaTabSamp1 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#multimetaTabSamp1 th {border: 1px solid black;}","#multimetaTabSamp1 td {border: 1px solid black;}", "#multimetaTabSamp1 caption {font-size: 16px; color: black; text-align: center;}"),
-                           br(),
-                           br(),
-                           helpText(HTML("<div style=\"color: black; padding-left: 1em; padding-right: 1em; margin-top: 1cm \"> Example of the meta-data table for single-factor experiment (left) and multi-factor experiment (right), 
+                                 a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/TestDataMulti-feature-count-res.txt", sep="")))
+                        )
+                    ),
+                    
+                    box(title = "Example of input 2",
+                        solidHeader = T, status = "warning",
+                        width = 6,
+                        fluidRow(tableOutput("multimetaTabSamp1"),
+                                 tags$style("#multimetaTabSamp1 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#multimetaTabSamp1 th {border: 1px solid black;}","#multimetaTabSamp1 td {border: 1px solid black;}", "#multimetaTabSamp1 caption {font-size: 16px; color: black; text-align: center;}"),
+                                 br(),
+                                 br(),
+                                 helpText(HTML("<div style=\"color: black; padding-left: 1em; padding-right: 1em; margin-top: 1cm \"> Example of the meta-data table for single-factor experiment (left) and multi-factor experiment (right), 
                                         the 1st column corresponds to the sample name, the rest columns correspond to the experimental factors. 
                                         <br>For single-factor experiment (left table), the experimental factor - 'Group' is listed in the 2nd column.
                                         <br>For multi-factor experiment (right table), experimental factors are listed in columns one by one.
                                         <br>Since this App is presenting a single-factor experiment, the 'Meta-data Table' is as the single-factor experimental meta-data table on the left, and the full text file of this test data can be seen")
-                                    , a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/metatableMulti.txt", sep="")))
-                                    )
-                           )
+                                          , a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/metatableMulti.txt", sep="")))
+                                 )
+                        )
+                    )
                   )
-            ),
-              
+              )
+            ),            
             
             fluidRow(
               box(title = "Input Information Summary",
