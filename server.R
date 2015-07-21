@@ -8,6 +8,7 @@ shinyServer(function(input, output, session) {
     #inputDataFile <- input$countFile      
     countSubmit <- 0
     countMultisubmit <- 0
+
     if ( !is.null(input$countFile) & is.null(input$countFileMulti) ) {      
       inputDataFile <- input$countFile 
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )   
@@ -18,15 +19,22 @@ shinyServer(function(input, output, session) {
       org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
     } else { 
       countSubmit <- countSubmit + 1
-      countMultisubmit <- countMultisubmit + 2   
+      countMultisubmit <- countMultisubmit + 2 
+            
+      if (as.numeric(input$dataSubmit) %% 2 == 0) buttonCount1 <- as.numeric(input$dataSubmit)
+      else buttonCount1 <- as.numeric(input$dataSubmit)+1
       
-      #if (as.numeric(input$dataSubmit) %% 2 == 0) buttonCount <- as.numeric(input$dataSubmit)
-      #else buttonCount <- as.numeric(input$dataSubmit)+1
+      if (as.numeric(input$MultiSubmit) %% 2 == 0) buttonCount2 <- as.numeric(input$MultiSubmit)+1
+      else buttonCount2 <- as.numeric(input$MultiSubmit)
         
-      if (as.numeric(input$dataSubmit) %% 2 == 0) {
+      print(paste("buttion value is", c(buttonCount1, buttonCount2), sep=":"))
+      
+      if (as.numeric(buttonCount1) %% 2 == 0) {
         inputDataFile <- input$countFile 
         org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )
-      } else {
+      } 
+      
+      if (as.numberic(buttonCount1) %% 2 !=0) {
         inputDataFile <- input$countFileMulti
         org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
       }
@@ -51,6 +59,7 @@ shinyServer(function(input, output, session) {
     
     print(paste("Final sumbit is",c(countSubmit, countMultisubmit), sep=":"))
     print(c(str(input$dataSubmit), str(input$MultiSubmit)))
+    
     
     if (dim(metadata)[2]>2) {
       groupinfo <- metadata[,2]
