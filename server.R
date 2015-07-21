@@ -4,26 +4,26 @@
 shinyServer(function(input, output, session) {
   
   ##Reactive expression object for original row count
-  datareactive <- reactive ({ 
+  datareactive <- reactive ({  
     #inputDataFile <- input$countFile       
-    if (!is.null(input$countFile)) {
+    if ( !is.null(input$countFile) & is.null(input$countFileMulti) ) {
       inputDataFile <- input$countFile 
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )
-    } else if (!is.null(input$countFileMulti)) {
+    } else if ( !is.null(input$countFileMulti) & is.null(input$countFile) ) {
       inputDataFile <- input$countFileMulti
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
-    } else if (is.null(input$countFile)) {
+    } else if (is.null(input$countFile) & is.null(input$countFileMulti) ) {
       org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
     }  
     
     #inputMetatab <- input$metaTab
-    if (!is.null(input$metaTab)) {
+    if ( !is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
       inputMetatab <- input$metaTab
       metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
-    } else if (!is.null(input$metaTabMulti)) {
+    } else if ( !is.null(input$metaTabMulti) & is.null(input$metaTab) ) {
       inputMetatab <- input$metaTabMulti
       metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
-    } else if (is.null(input$metaTab)) {
+    } else if ( is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
       metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
     }  
     
@@ -112,7 +112,7 @@ shinyServer(function(input, output, session) {
     design <- model.matrix(~0+f)
     rownames(design) <- rownames(rmlowReactive()$samples)
     colnames(design) <- levels(Group)
-    
+    par(mar=c(0,0,0,0))
     v <- voom(rmlowReactive(), design=design, plot=T, normalize="quantile")
     fit <- lmFit(v, design)
     fit
@@ -291,18 +291,18 @@ shinyServer(function(input, output, session) {
   caption.placement = getOption("xtable.caption.placement", "top"), 
   caption.width = getOption("xtable.caption.width", NULL))
   
-  output$multimetaTabSamp <- renderTable({
-    metadata <- read.delim(paste(getwd(),"/www/dataInput2-exp1.txt",sep=""), header=T)
-    metadata
-  }, include.rownames=F, align="llccc")
+  output$countTabSampMulti1 <- renderTable({     
+    org.counts <- read.delim(paste(getwd(),"www/Multi-dataInput1-exp.txt",sep="/"), header=T, row.names=1)
+    org.counts
+  }, align="l|cccccc")
   
   output$multimetaTabSamp22 <- renderTable({
-    metadata <- read.delim(paste(getwd(),"/www/dataInput2-exp2.txt",sep=""), header=T)
+    metadata <- read.delim(paste(getwd(),"/www/Multi-dataInput2-exp2.txt",sep=""), header=T)
     metadata
   }, include.rownames=F, align="llcccc")
   
   output$multimetaTabSamp1 <- renderTable({
-    metadata <- read.delim(paste(getwd(),"/www/dataInput2-exp1.txt",sep=""), header=T)
+    metadata <- read.delim(paste(getwd(),"/www/Multi-dataInput2-exp1.txt",sep=""), header=T)
     metadata
   }, align="ll|ccc", include.rownames=F, caption = "Multi-factor",
   caption.placement = getOption("xtable.caption.placement", "top"), 
@@ -310,9 +310,10 @@ shinyServer(function(input, output, session) {
   
   ################################################################################################
   ################################################################################################
+  
   output$overallDataSummary <- renderTable({ 
     input$dataSubmit
-    isolate({ 
+    isolate({
       no.samples <- length(colnames(datareactive()$counts))
       no.gene <- dim((datareactive())$counts)[1]
       res.summary <- rbind(no.samples, no.gene)
@@ -320,11 +321,12 @@ shinyServer(function(input, output, session) {
       colnames(res.summary) <- "Number"
       res.summary
     })
+    
   },digits=0, align="l|c")
   
   output$sampleGroup <- renderTable({ 
     input$dataSubmit
-    isolate({ 
+    isolate({
       groupinfo <- as.matrix(summary((datareactive())$samples$group))
       colnames(groupinfo) <- "No. in each group"
       groupinfo
@@ -333,55 +335,130 @@ shinyServer(function(input, output, session) {
   
   output$sampleInfo <- renderText({ 
     input$dataSubmit
-    isolate({ 
+    isolate({
       paste(as.character(rownames((datareactive())$samples)), collapse=", " )
     })
   })
   
   output$sampleTitle <- renderText({ 
     input$dataSubmit
-    isolate({ 
+    isolate({
       no.samples <- length(colnames(datareactive()$counts))
       paste("A total of ", as.character(no.samples), " samples in the experiment, they are:", sep="")
-    })
+    })  
   })
   
   output$expDesign <- renderText({
     input$dataSubmit
-    isolate({ 
+    isolate({
       inputMetatab <- input$metaTab
+      
       if (is.null(inputMetatab)) metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
       else metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
       
       if (dim(metadata)[2]>2) {
-        paste("This is a multi-factor experiment with ", (dim(metadata)[2]-1), " factors levels, they are", sep="" )
+        paste("ERROR: Your input data is multi-factor experiment, please use 'Multi-factor Experiment' tab to input your data.")
       } else {
         paste("This is a single-factor experiment with factor - '", as.character(colnames(metadata)[2]), "', the level of this factor is",sep="")
-      }
-      
+      }  
     })
   })
   
   output$GroupLevel <- renderText({ 
     input$dataSubmit
-    isolate({ 
+    isolate({
       inputMetatab <- input$metaTab
+      
       if (is.null(inputMetatab)) metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
       else metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
       
       if (dim(metadata)[2]>2) {
-        factor <- paste(as.character(colnames(metadata)[-1]), collapse=", ")        
-        group <- paste(as.character(levels((datareactive())$samples$group)), collapse=", ") 
-        
-        factor.group <- paste("\nFactor - ", as.character(colnames(metadata)[2]), " includes factore levels of " , paste(as.character(levels(as.factor(metadata[,2]))), collapse=", "), ".",sep="")          
-        for (i in 3:length(metadata[1,])) factor.group <- paste(factor.group, "\n", paste("Factor - ", as.character(colnames(metadata)[i]), " include factor levels of " ,paste(as.character(levels(as.factor(metadata[,i]))), collapse=", "), ".", sep=""), sep="")
-        
-        paste(as.character(factor), ".", as.character(factor.group), "\n\nThe combined factor levels are ", as.character(group), ".", sep="")
+        paste("ERROR!!!")
       } else {
-        paste(as.character(levels((datareactive())$samples$group)), collapse=", ") 
+        paste(as.character(levels(as.factor(metadata[,2]))), collapse=", ") 
       }
-      
     })
+  })
+  
+  #################################################
+  ##Multi-factor Exp Res Summary
+  output$overallDataSummaryMulti <- renderTable({ 
+    if ( input$dataSubmitMulti ) {
+      isolate({
+        no.samples <- length(colnames(datareactive()$counts))
+        no.gene <- dim((datareactive())$counts)[1]
+        res.summary <- rbind(no.samples, no.gene)
+        rownames(res.summary) <- c("Samples", "Tags")
+        colnames(res.summary) <- "Number"
+        res.summary
+      })
+    }    
+  },digits=0, align="l|c")
+  
+  output$sampleGroupMulti <- renderTable({ 
+    if ( input$dataSubmitMulti ) {
+      isolate({
+        groupinfo <- as.matrix(summary((datareactive())$samples$group))
+        colnames(groupinfo) <- "No. in each group"
+        groupinfo
+      })
+    }
+    
+  },digits=0, align="l|c")
+  
+  output$sampleInfoMulti <- renderText({ 
+    if ( input$dataSubmitMulti ) {
+      isolate({
+        paste(as.character(rownames((datareactive())$samples)), collapse=", " )
+      })
+    }
+  })
+  
+  output$sampleTitleMulti <- renderText({ 
+    if ( input$dataSubmitMulti ) {
+      isolate({
+        no.samples <- length(colnames(datareactive()$counts))
+        paste("A total of ", as.character(no.samples), " samples in the experiment, they are:", sep="")
+      }) 
+    }     
+  })
+  
+  output$expDesignMulti <- renderText({
+    if ( input$dataSubmitMulti ) {
+      isolate({        
+        inputMetatab <- input$metaTabMulti
+        metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
+        if (dim(metadata)[2]>2) {
+          paste("This is a multi-factor experiment with ", (dim(metadata)[2]-1), " factors levels, they are", sep="" )
+        } else {
+          paste("ERROR: Your data input is a single-factor experiment, please use 'Single-facotr Experiment' tab to input your data.")
+        }       
+      })
+    }
+    
+  })
+  
+  output$GroupLevelMulti <- renderText({ 
+    if ( input$dataSubmitMulti ) {
+      isolate({ 
+        inputMetatab <- input$metaTabMulti
+        metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
+        
+        if (dim(metadata)[2]>2) {
+          factor <- paste(as.character(colnames(metadata)[-1]), collapse=", ")        
+          group <- paste(as.character(levels((datareactive())$samples$group)), collapse=", ") 
+          
+          factor.group <- paste("\nFactor - ", as.character(colnames(metadata)[2]), " includes factore levels of " , paste(as.character(levels(as.factor(metadata[,2]))), collapse=", "), ".",sep="")          
+          for (i in 3:length(metadata[1,])) factor.group <- paste(factor.group, "\n", paste("Factor - ", as.character(colnames(metadata)[i]), " include factor levels of " ,paste(as.character(levels(as.factor(metadata[,i]))), collapse=", "), ".", sep=""), sep="")
+          
+          paste(as.character(factor), ".", as.character(factor.group), "\n\nThe combined factor levels are ", as.character(group), ".", sep="")
+        } else {
+          paste("ERROR!") 
+        }
+        
+      })
+    }
+    
   })
   
   ##End data input tab panel
@@ -396,7 +473,7 @@ shinyServer(function(input, output, session) {
   }, align="l|cc", digits=c(0,0,2), display=c("s", "e", "f"))
   
   output$rmlowLibsizeNormfactor <- renderTable({ 
-    input$rmlow
+    input$rmlow | input$dataSubmitMulti
     isolate({ 
       tab <- (rmlowReactive())$samples[, -1]
       colnames(tab) <- c("Library sizes", "Normalization factors")
@@ -405,19 +482,18 @@ shinyServer(function(input, output, session) {
   }, align="l|cc", digits=c(0,0,2), display=c("s", "e", "f"))
   
   output$orgSamplesize <- renderTable({ 
-    input$rmlow
-    isolate({ 
-      no.samples <- length(colnames(datareactive()$counts))
-      no.gene <- dim((datareactive())$counts)[1]
-      res.summary <- rbind(no.samples, no.gene)
-      rownames(res.summary) <- c("Samples", "Tags")
-      colnames(res.summary) <- "Number"
-      res.summary
-    })
+    
+    no.samples <- length(colnames(datareactive()$counts))
+    no.gene <- dim((datareactive())$counts)[1]
+    res.summary <- rbind(no.samples, no.gene)
+    rownames(res.summary) <- c("Samples", "Tags")
+    colnames(res.summary) <- "Number"
+    res.summary
+    
   },digits=0, align="l|c")
   
   output$rmlowSamplesize <- renderTable({ 
-    input$rmlow
+    input$rmlow | input$dataSubmitMulti
     isolate({ 
       no.samples <- length(colnames(rmlowReactive()$counts))
       no.gene <- dim(rmlowReactive()$counts)[1]
@@ -429,7 +505,7 @@ shinyServer(function(input, output, session) {
   },digits=0, align="l|c")
   
   output$sampleBoxplot <- renderPlot({ 
-    input$rmlow
+    input$rmlow | input$dataSubmitMulti
     isolate({
       Group <- as.factor(rmlowReactive()$samples$group)
       bx.p<-boxplot(cpm(rmlowReactive(), log=T)[,])
@@ -440,7 +516,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$sampleMDS <- renderPlot({ 
-    input$rmlow
+    input$rmlow | input$dataSubmitMulti
     isolate({
       Group <- as.factor(rmlowReactive()$samples$group)
       par(mar=c(5,5,4,2))
@@ -558,10 +634,7 @@ shinyServer(function(input, output, session) {
   ################################################
   ###Limma-voom panel DE analysis
   output$voomGroupLevel <- renderText({ 
-    input$dataSubmit
-    isolate({ 
-      paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")     
-    })
+    paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")     
   })
   
   output$voomBCV <- renderPlot({
@@ -643,10 +716,9 @@ shinyServer(function(input, output, session) {
   ################################################
   ###DEseq2 panel DE analysis
   output$deseq2GroupLevel <- renderText({ 
-    input$dataSubmit
-    isolate({ 
-      paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")
-    })
+    
+    paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")
+    
   })
   
   output$deseq2BCV <- renderPlot({
@@ -724,10 +796,9 @@ shinyServer(function(input, output, session) {
   ################################################
   ##DE comparison results
   output$compGroupLevel <- renderText({ 
-    input$dataSubmit
-    isolate({ 
-      paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")
-    })
+    
+    paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")
+        
   })
   
   output$decomp <- renderPlot({

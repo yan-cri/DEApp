@@ -1,0 +1,1 @@
+Sample	Group	TimeGK2	control	1hGK12	VT	2hGK13	VT	2hGK14	VT	2hGK15	control	1hGK16	VT	1hGK17	VT	1hGK18	control	2hGK19	control	2hGK20	control	2h
