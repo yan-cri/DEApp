@@ -2,13 +2,43 @@
 ## Developed by Yan Li, last update on June, 2015
 
 shinyServer(function(input, output, session) {
+  singleButtonValue <- reactiveValues(singleOldButtonvalue=0)
+  singleButtonValueOrgKeep <- reactiveValues(singleNewButtonvalue=0)
   
+  multiButtonValue <- reactiveValues(multioldButtonvalue=0)
+  multiButtonValueOrgKeep <- reactiveValues(multiNewButtonvalue=0)
+  
+  session$onFlush(once=FALSE, function(){
+    isolate({ 
+      multiButtonValueOrgKeep$multiNewButtonvalue<-multiButtonValue$multioldButtonvalue
+      multiButtonValue$multioldButtonvalue<-as.numeric(input$MultiSubmit) 
+    })
+  })
+  session$onFlush(once=FALSE, function(){
+    isolate({ 
+      singleButtonValueOrgKeep$singleNewButtonvalue<-singleButtonValue$singleOldButtonvalue
+      singleButtonValue$singleOldButtonvalue<-as.numeric(input$dataSubmit) 
+              })
+  })
+    
   ##Reactive expression object for original row count
   datareactive <- reactive ({  
-    #inputDataFile <- input$countFile      
-    countSubmit <- 0
-    countMultisubmit <- 0
-
+    
+#     print("*********")
+#     print(singleButtonValue$singleOldButtonvalue)
+#     print(as.numeric(input$dataSubmit))
+#     print(singleButtonValueOrgKeep$singleNewButtonvalue)
+#     
+#     print( as.numeric(input$dataSubmit) > singleButtonValueOrgKeep$singleNewButtonvalue)
+#     print("===========")
+#     #print(multiButtonValue$multioldButtonvalue)
+#     print(as.numeric(input$MultiSubmit))
+#     print(multiButtonValueOrgKeep$multiNewButtonvalue)
+#     print( as.numeric(input$MultiSubmit) > multiButtonValueOrgKeep$multiNewButtonvalue )
+#     
+#     print("********")
+#     print("============************============")
+    
     if ( !is.null(input$countFile) & is.null(input$countFileMulti) ) {      
       inputDataFile <- input$countFile 
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )   
@@ -17,27 +47,25 @@ shinyServer(function(input, output, session) {
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
     } else if (is.null(input$countFile) & is.null(input$countFileMulti) ) {
       org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
-    } else { 
-      countSubmit <- countSubmit + 1
-      countMultisubmit <- countMultisubmit + 2 
-            
-      if (as.numeric(input$dataSubmit) %% 2 == 0) buttonCount1 <- as.numeric(input$dataSubmit)
-      else buttonCount1 <- as.numeric(input$dataSubmit)+1
+    } else if (!is.null(input$countFile) & !is.null(input$countFileMulti) ){
+#       print("*********")
+#       print(singleButtonValueOrgKeep$singleNewButtonvalue)
+#       print(as.numeric(input$dataSubmit))
+#       print( as.numeric(input$dataSubmit) > singleButtonValueOrgKeep$singleNewButtonvalue)
+#       print("===========")
+#       print(multiButtonValueOrgKeep$multiNewButtonvalue)
+#       print(as.numeric(input$MultiSubmit))
+#       print( as.numeric(input$MultiSubmit) > multiButtonValueOrgKeep$multiNewButtonvalue )
       
-      if (as.numeric(input$MultiSubmit) %% 2 == 0) buttonCount2 <- as.numeric(input$MultiSubmit)+1
-      else buttonCount2 <- as.numeric(input$MultiSubmit)
-        
-      print(paste("buttion value is", c(buttonCount1, buttonCount2), sep=":"))
-      
-      if (as.numeric(buttonCount1) %% 2 == 0) {
+      if ( as.numeric(input$dataSubmit) > singleButtonValueOrgKeep$singleNewButtonvalue ) {
         inputDataFile <- input$countFile 
-        org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )
-      } 
-      
-      if (as.numberic(buttonCount1) %% 2 !=0) {
+        org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )   
+      }
+      if ( as.numeric(input$MultiSubmit) > multiButtonValueOrgKeep$multiNewButtonvalue ) {
         inputDataFile <- input$countFileMulti
         org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
       }
+      
     }
     
     #inputMetatab <- input$metaTab
@@ -49,17 +77,17 @@ shinyServer(function(input, output, session) {
       metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
     } else if ( is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
       metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
-    } else {
-      if ( as.numeric(countSubmit) %% 2 == 0 ) {
-        metadata <- read.delim((input$metaTab)$datapath, header=T, sep=input$metaSep)
-      } else {
-        metadata <- read.delim((input$metaTabMulti)$datapath, header=T, sep=input$metaSepMulti)
+    } else if (!is.null(input$countFile) & !is.null(input$countFileMulti) ) {
+      if ( as.numeric(input$dataSubmit) > singleButtonValueOrgKeep$singleNewButtonvalue ) {
+        inputMetatab <- input$metaTab
+        metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep) 
       }
+      if ( as.numeric(input$MultiSubmit) > multiButtonValueOrgKeep$multiNewButtonvalue ) {
+        inputMetatab <- input$metaTabMulti
+        metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
+      }
+      
     }
-    
-    print(paste("Final sumbit is",c(countSubmit, countMultisubmit), sep=":"))
-    print(c(str(input$dataSubmit), str(input$MultiSubmit)))
-    
     
     if (dim(metadata)[2]>2) {
       groupinfo <- metadata[,2]
@@ -76,7 +104,7 @@ shinyServer(function(input, output, session) {
     org.count <- calcNormFactors(org.count, lib.size=T, method="TMM")
     org.count
   })
-  
+    
   #Reactive expression object for the counts remove low expression tags
   rmlowReactive <- reactive({
     dge.count <- calcNormFactors(datareactive())
@@ -507,7 +535,7 @@ shinyServer(function(input, output, session) {
   }, align="l|cc", digits=c(0,0,2), display=c("s", "e", "f"))
   
   output$rmlowLibsizeNormfactor <- renderTable({ 
-    input$rmlow | input$MultiSubmit | input$dataSubmit
+    input$rmlow | input$MultiSubmit | input$dataSubmit 
     isolate({ 
       tab <- (rmlowReactive())$samples[, -1]
       colnames(tab) <- c("Library sizes", "Normalization factors")
@@ -571,10 +599,10 @@ shinyServer(function(input, output, session) {
   ##Estimation dispersion BCV
   output$edgerBCV <- renderPlot({ 
     if (input$edgerdeAnalysis)
-    isolate({ 
-      par(mar=c(5,5,2,2))
-      plotBCV(edgerDispersionEst(), cex=0.5, cex.lab=1.8, cex.axis=1.5)
-    })
+      isolate({ 
+        par(mar=c(5,5,2,2))
+        plotBCV(edgerDispersionEst(), cex=0.5, cex.lab=1.8, cex.axis=1.5)
+      })
   })
   
   output$edgerCommonDisp <- renderText({
@@ -591,24 +619,24 @@ shinyServer(function(input, output, session) {
   
   output$edgerTagwiseDisp <- renderTable({ 
     if(input$edgerdeAnalysis)
-    isolate({ 
-      res<- as.table(t(summary(sqrt(edgerDispersionEst()$tagwise.dispersion))))
-      res <- t(res)
-      colnames(res) <- "Tagwise"
-      res
-    })
+      isolate({ 
+        res<- as.table(t(summary(sqrt(edgerDispersionEst()$tagwise.dispersion))))
+        res <- t(res)
+        colnames(res) <- "Tagwise"
+        res
+      })
   }, digits=3, align = "l|c")
   ##############
   ##tab panel for DE analysis results 
   output$edgerRes <- DT::renderDataTable({ 
     if(input$edgerdeAnalysis)
-    isolate({ 
-      tp <- topTags(edgerDEres(), n=Inf, adjust.method="BH", sort.by="PValue")
-      res <- tp$table[,c("logFC", "PValue", "FDR")]
-      #res$FC <- 2^res$logFC
-      res$logFC <- round(res$logFC, digits = 3)
-      res
-    })
+      isolate({ 
+        tp <- topTags(edgerDEres(), n=Inf, adjust.method="BH", sort.by="PValue")
+        res <- tp$table[,c("logFC", "PValue", "FDR")]
+        #res$FC <- 2^res$logFC
+        res$logFC <- round(res$logFC, digits = 3)
+        res
+      })
   }, 
   options = list(order = list(2, 'asc'), pageLength = 20, 
                  columnDefs = list(list(className = 'dt-center', targets = c(1,2,3)))),  
@@ -624,41 +652,41 @@ shinyServer(function(input, output, session) {
   
   output$edgerTestDGE <- renderTable({ 
     if(input$edgerdeAnalysis)
-    isolate({ 
-      edgerDGEsummary <- as.data.frame(summary((edgerDEfilter()$table)$filter))      
-      #colnames(edgerDGEsummary) <- paste("No. of gene (",paste(as.character(input$edgercompGroup2), as.character(input$edgercompGroup1), sep="-"), ")", sep="")
-      colnames(edgerDGEsummary) <- "Number"
-      if (!is.null(rownames(edgerDGEsummary)==-1)) rownames(edgerDGEsummary)[rownames(edgerDGEsummary)==-1] <- "down-regulated DEG"
-      if (!is.null(rownames(edgerDGEsummary)==1)) rownames(edgerDGEsummary)[rownames(edgerDGEsummary)==1] <- "up-regulated DEG"
-      if (!is.null(rownames(edgerDGEsummary)==0)) rownames(edgerDGEsummary)[rownames(edgerDGEsummary)==0] <- "Non DEG"
-      
-      edgerDGEsummary
-    })
+      isolate({ 
+        edgerDGEsummary <- as.data.frame(summary((edgerDEfilter()$table)$filter))      
+        #colnames(edgerDGEsummary) <- paste("No. of gene (",paste(as.character(input$edgercompGroup2), as.character(input$edgercompGroup1), sep="-"), ")", sep="")
+        colnames(edgerDGEsummary) <- "Number"
+        if (!is.null(rownames(edgerDGEsummary)==-1)) rownames(edgerDGEsummary)[rownames(edgerDGEsummary)==-1] <- "down-regulated DEG"
+        if (!is.null(rownames(edgerDGEsummary)==1)) rownames(edgerDGEsummary)[rownames(edgerDGEsummary)==1] <- "up-regulated DEG"
+        if (!is.null(rownames(edgerDGEsummary)==0)) rownames(edgerDGEsummary)[rownames(edgerDGEsummary)==0] <- "Non DEG"
+        
+        edgerDGEsummary
+      })
   }, align="l|c", digits=0)
   
   output$edgerVolcano <- renderPlot({
     if(input$edgerdeAnalysis)
-    isolate({
-      fcval <- as.numeric(input$edgerfc)
-      fdr <- as.numeric(input$edgerfdr)
-      plotres <- edgerDEfilter()$table
-      levels(plotres$filter) <- c("Down-regulated", "Non-DE", "Up-regulated")
-      par(mar=c(4,4,2,2))
-      if (input$edgerP == 'normp') {
-        g <- ggplot(data=plotres, aes(x=logFC, y=-log10(PValue), colour=filter, shape=filter))
-        g <- g + labs(x="log2 FC", y="-log10 (nominal p)")
-      } else if (input$edgerP == 'fdrp') {
-        g <- ggplot(data=plotres, aes(x=logFC, y=-log10(FDR), colour=filter, shape=filter))
-        g <- g + labs(x="log2 FC", y="-log10 (FDR adjusted-p)")
-      }
-      g <- g + geom_point(size=4) + geom_hline(yintercept=-log10(as.numeric(input$edgerfdr))) 
-      g <- g + geom_vline(xintercept=log2(fcval)) + geom_vline(xintercept=-log2(fcval))
-      g <- g + theme(legend.title=element_blank(),legend.position = "top", legend.direction="vertical")
-      g <- g + theme(axis.title.x=element_text(size=rel(1.5))) + theme(axis.title.y=element_text(size=rel(1.5),vjust=1.5))
-      g <- g + theme(axis.text.x=element_text(size=rel(1.5))) + theme(axis.text.y=element_text(size=rel(1.5)))
-      g <- g + theme(legend.text=element_text(size=rel(1.2)))
-      g
-    })
+      isolate({
+        fcval <- as.numeric(input$edgerfc)
+        fdr <- as.numeric(input$edgerfdr)
+        plotres <- edgerDEfilter()$table
+        levels(plotres$filter) <- c("Down-regulated", "Non-DE", "Up-regulated")
+        par(mar=c(4,4,2,2))
+        if (input$edgerP == 'normp') {
+          g <- ggplot(data=plotres, aes(x=logFC, y=-log10(PValue), colour=filter, shape=filter))
+          g <- g + labs(x="log2 FC", y="-log10 (nominal p)")
+        } else if (input$edgerP == 'fdrp') {
+          g <- ggplot(data=plotres, aes(x=logFC, y=-log10(FDR), colour=filter, shape=filter))
+          g <- g + labs(x="log2 FC", y="-log10 (FDR adjusted-p)")
+        }
+        g <- g + geom_point(size=4) + geom_hline(yintercept=-log10(as.numeric(input$edgerfdr))) 
+        g <- g + geom_vline(xintercept=log2(fcval)) + geom_vline(xintercept=-log2(fcval))
+        g <- g + theme(legend.title=element_blank(),legend.position = "top", legend.direction="vertical")
+        g <- g + theme(axis.title.x=element_text(size=rel(1.5))) + theme(axis.title.y=element_text(size=rel(1.5),vjust=1.5))
+        g <- g + theme(axis.text.x=element_text(size=rel(1.5))) + theme(axis.text.y=element_text(size=rel(1.5)))
+        g <- g + theme(legend.text=element_text(size=rel(1.2)))
+        g
+      })
   })
   
   output$edgerDownload <- downloadHandler(  
@@ -693,12 +721,12 @@ shinyServer(function(input, output, session) {
   
   output$voomRes <- DT::renderDataTable({
     if (input$voomdeAnalysis)
-    isolate({ 
-      tpvoom <- topTable(voomDEres(), n=Inf, adjust.method="BH", sort.by="p")
-      res <- tpvoom[,c("logFC","P.Value", "adj.P.Val")]
-      res$logFC <- round(res$logFC, digits=3)
-      res
-    })
+      isolate({ 
+        tpvoom <- topTable(voomDEres(), n=Inf, adjust.method="BH", sort.by="p")
+        res <- tpvoom[,c("logFC","P.Value", "adj.P.Val")]
+        res$logFC <- round(res$logFC, digits=3)
+        res
+      })
   }, 
   options = list(order = list(2, 'asc'), columnDefs = list(list(className = 'dt-center', targets = c(1,2,3))), pageLength = 20),  
   colnames = c("log2FC"=2, "p"=3, "FDR"=4, "Tag/Gene Name"=1)
@@ -713,39 +741,39 @@ shinyServer(function(input, output, session) {
   
   output$voomTestDGE <- renderTable({
     if(input$voomdeAnalysis)
-    isolate({
-      voomDGEsummary <- as.data.frame(summary(voomDEfilter()$filter))
-      colnames(voomDGEsummary) <- "Number"
-      #colnames(voomDGEsummary) <- paste("No. of gene (",paste(as.character(input$voomcompGroup2), as.character(input$voomcompGroup1), sep="-"), ")", sep="")
-      #rownames(voomDGEsummary) <- c("down-regulated DEG", "Non DEG", "up-regulated DEG")
-      if (!is.null(rownames(voomDGEsummary)==-1)) rownames(voomDGEsummary)[rownames(voomDGEsummary)==-1] <- "down-regulated DEG"
-      if (!is.null(rownames(voomDGEsummary)==1)) rownames(voomDGEsummary)[rownames(voomDGEsummary)==1] <- "up-regulated DEG"
-      if (!is.null(rownames(voomDGEsummary)==0)) rownames(voomDGEsummary)[rownames(voomDGEsummary)==0] <- "Non DEG"
-      
-      voomDGEsummary
-    })
+      isolate({
+        voomDGEsummary <- as.data.frame(summary(voomDEfilter()$filter))
+        colnames(voomDGEsummary) <- "Number"
+        #colnames(voomDGEsummary) <- paste("No. of gene (",paste(as.character(input$voomcompGroup2), as.character(input$voomcompGroup1), sep="-"), ")", sep="")
+        #rownames(voomDGEsummary) <- c("down-regulated DEG", "Non DEG", "up-regulated DEG")
+        if (!is.null(rownames(voomDGEsummary)==-1)) rownames(voomDGEsummary)[rownames(voomDGEsummary)==-1] <- "down-regulated DEG"
+        if (!is.null(rownames(voomDGEsummary)==1)) rownames(voomDGEsummary)[rownames(voomDGEsummary)==1] <- "up-regulated DEG"
+        if (!is.null(rownames(voomDGEsummary)==0)) rownames(voomDGEsummary)[rownames(voomDGEsummary)==0] <- "Non DEG"
+        
+        voomDGEsummary
+      })
   }, align="l|c", digits=0)
   
   output$voomVolcano <- renderPlot({
     if (input$voomdeAnalysis)
-    isolate({
-      plotres <- voomDEfilter()
-      levels(plotres$filter) <- c("Down-regulated", "Non-DE", "Up-regulated")
-      if (input$voomP == 'normp') {
-        g <- ggplot(data=plotres, aes(x=logFC, y=-log10(P.Value), colour=filter, shape=filter))
-        g <- g + labs(x="log2 FC", y="-log10 (nominal p)")
-      } else if (input$voomP == 'fdrp') {
-        g <- ggplot(data=plotres, aes(x=logFC, y=-log10(adj.P.Val), colour=filter, shape=filter))
-        g <- g + labs(x="log2 FC", y="-log10 (FDR adjusted-p)")
-      }
-      g <- g + geom_point(size=4) + geom_hline(yintercept=-log10(as.numeric(input$voomfdr))) 
-      g <- g + geom_vline(xintercept=log2(as.numeric(input$voomfc))) + geom_vline(xintercept=-log2(as.numeric(input$voomfc)))
-      g <- g + theme(legend.title=element_blank(),legend.position = "top", legend.direction="vertical")
-      g <- g + theme(axis.title.x=element_text(size=rel(1.5))) + theme(axis.title.y=element_text(size=rel(1.5),vjust=1.5))
-      g <- g + theme(axis.text.x=element_text(size=rel(1.5))) + theme(axis.text.y=element_text(size=rel(1.5)))
-      g <- g + theme(legend.text=element_text(size=rel(1.2)))
-      g
-    })
+      isolate({
+        plotres <- voomDEfilter()
+        levels(plotres$filter) <- c("Down-regulated", "Non-DE", "Up-regulated")
+        if (input$voomP == 'normp') {
+          g <- ggplot(data=plotres, aes(x=logFC, y=-log10(P.Value), colour=filter, shape=filter))
+          g <- g + labs(x="log2 FC", y="-log10 (nominal p)")
+        } else if (input$voomP == 'fdrp') {
+          g <- ggplot(data=plotres, aes(x=logFC, y=-log10(adj.P.Val), colour=filter, shape=filter))
+          g <- g + labs(x="log2 FC", y="-log10 (FDR adjusted-p)")
+        }
+        g <- g + geom_point(size=4) + geom_hline(yintercept=-log10(as.numeric(input$voomfdr))) 
+        g <- g + geom_vline(xintercept=log2(as.numeric(input$voomfc))) + geom_vline(xintercept=-log2(as.numeric(input$voomfc)))
+        g <- g + theme(legend.title=element_blank(),legend.position = "top", legend.direction="vertical")
+        g <- g + theme(axis.title.x=element_text(size=rel(1.5))) + theme(axis.title.y=element_text(size=rel(1.5),vjust=1.5))
+        g <- g + theme(axis.text.x=element_text(size=rel(1.5))) + theme(axis.text.y=element_text(size=rel(1.5)))
+        g <- g + theme(legend.text=element_text(size=rel(1.2)))
+        g
+      })
   })
   
   output$voomDownload <- downloadHandler(  
@@ -768,20 +796,20 @@ shinyServer(function(input, output, session) {
   
   output$deseq2BCV <- renderPlot({
     if (input$deseq2deAnalysis)
-    isolate({
-      par(mar=c(4,5,2,2))
-      plotDispEsts(deseq2Res(), cex.lab=1.8, cex.axis=1.5)
-    })
+      isolate({
+        par(mar=c(4,5,2,2))
+        plotDispEsts(deseq2Res(), cex.lab=1.8, cex.axis=1.5)
+      })
   })
   
   output$deseq2Res <- DT::renderDataTable({
     if (input$deseq2deAnalysis)
-    isolate({
-      res.pre <- deseq2DEres()[,c("log2FoldChange", "pvalue", "padj")]
-      res <- as.data.frame(res.pre) 
-      res$log2FoldChange <- round(res$log2FoldChange, digits=3)
-      res
-    })
+      isolate({
+        res.pre <- deseq2DEres()[,c("log2FoldChange", "pvalue", "padj")]
+        res <- as.data.frame(res.pre) 
+        res$log2FoldChange <- round(res$log2FoldChange, digits=3)
+        res
+      })
   }, 
   options = list(order = list(2, 'asc'), columnDefs = list(list(className = 'dt-center', targets = c(1,2,3))), pageLength = 20),  
   colnames = c("log2FC"=2, "p"=3, "FDR"=4,"Tag/Gene Name"=1)
@@ -796,38 +824,38 @@ shinyServer(function(input, output, session) {
   
   output$deseq2TestDGE <- renderTable({
     if (input$deseq2deAnalysis)
-    isolate({
-      deseq2DGEsummary <- as.data.frame(summary(deseq2DEfilter()$filter))
-      #colnames(deseq2DGEsummary) <- paste("No. of gene (",paste(as.character(input$deseq2compGroup2), as.character(input$deseq2compGroup1), sep="-"), ")", sep="")
-      colnames(deseq2DGEsummary) <- "Number"
-      if (!is.null(rownames(deseq2DGEsummary)==-1)) rownames(deseq2DGEsummary)[rownames(deseq2DGEsummary)==-1] <- "down-regulated DEG"
-      if (!is.null(rownames(deseq2DGEsummary)==1)) rownames(deseq2DGEsummary)[rownames(deseq2DGEsummary)==1] <- "up-regulated DEG"
-      if (!is.null(rownames(deseq2DGEsummary)==0)) rownames(deseq2DGEsummary)[rownames(deseq2DGEsummary)==0] <- "Non DEG"
-      
-      deseq2DGEsummary
-    })
+      isolate({
+        deseq2DGEsummary <- as.data.frame(summary(deseq2DEfilter()$filter))
+        #colnames(deseq2DGEsummary) <- paste("No. of gene (",paste(as.character(input$deseq2compGroup2), as.character(input$deseq2compGroup1), sep="-"), ")", sep="")
+        colnames(deseq2DGEsummary) <- "Number"
+        if (!is.null(rownames(deseq2DGEsummary)==-1)) rownames(deseq2DGEsummary)[rownames(deseq2DGEsummary)==-1] <- "down-regulated DEG"
+        if (!is.null(rownames(deseq2DGEsummary)==1)) rownames(deseq2DGEsummary)[rownames(deseq2DGEsummary)==1] <- "up-regulated DEG"
+        if (!is.null(rownames(deseq2DGEsummary)==0)) rownames(deseq2DGEsummary)[rownames(deseq2DGEsummary)==0] <- "Non DEG"
+        
+        deseq2DGEsummary
+      })
   }, align="l|c", digits=0)
   
   output$deseq2Volcano <- renderPlot({
     if (input$deseq2deAnalysis)
-    isolate({
-      plotres <- deseq2DEfilter()
-      levels(plotres$filter) <- c("Down-regulated", "Non-DE", "Up-regulated")
-      if (input$deseq2P == 'normp') {
-        g <- ggplot(data=plotres, aes(x=log2FoldChange, y=-log10(pvalue), colour=filter, shape=filter))
-        g <- g + labs(x="log2 FC", y="-log10 (nominal p)")
-      } else if (input$deseq2P == 'fdrp') {
-        g <- ggplot(data=plotres, aes(x=log2FoldChange, y=-log10(padj), colour=filter, shape=filter))
-        g <- g + labs(x="log2 FC", y="-log10 (FDR adjusted-p)")
-      }   
-      g <- g + geom_point(size=4) + geom_hline(yintercept=-log10(as.numeric(input$deseq2fdr))) 
-      g <- g + geom_vline(xintercept=log2(as.numeric(input$deseq2fc))) + geom_vline(xintercept=-log2(as.numeric(input$deseq2fc)))
-      g <- g + theme(legend.title=element_blank(),legend.position = "top", legend.direction="vertical")
-      g <- g + theme(axis.title.x=element_text(size=rel(1.5))) + theme(axis.title.y=element_text(size=rel(1.5),vjust=1.5))
-      g <- g + theme(axis.text.x=element_text(size=rel(1.5))) + theme(axis.text.y=element_text(size=rel(1.5)))
-      g <- g + theme(legend.text=element_text(size=rel(1.2)))
-      g
-    })
+      isolate({
+        plotres <- deseq2DEfilter()
+        levels(plotres$filter) <- c("Down-regulated", "Non-DE", "Up-regulated")
+        if (input$deseq2P == 'normp') {
+          g <- ggplot(data=plotres, aes(x=log2FoldChange, y=-log10(pvalue), colour=filter, shape=filter))
+          g <- g + labs(x="log2 FC", y="-log10 (nominal p)")
+        } else if (input$deseq2P == 'fdrp') {
+          g <- ggplot(data=plotres, aes(x=log2FoldChange, y=-log10(padj), colour=filter, shape=filter))
+          g <- g + labs(x="log2 FC", y="-log10 (FDR adjusted-p)")
+        }   
+        g <- g + geom_point(size=4) + geom_hline(yintercept=-log10(as.numeric(input$deseq2fdr))) 
+        g <- g + geom_vline(xintercept=log2(as.numeric(input$deseq2fc))) + geom_vline(xintercept=-log2(as.numeric(input$deseq2fc)))
+        g <- g + theme(legend.title=element_blank(),legend.position = "top", legend.direction="vertical")
+        g <- g + theme(axis.title.x=element_text(size=rel(1.5))) + theme(axis.title.y=element_text(size=rel(1.5),vjust=1.5))
+        g <- g + theme(axis.text.x=element_text(size=rel(1.5))) + theme(axis.text.y=element_text(size=rel(1.5)))
+        g <- g + theme(legend.text=element_text(size=rel(1.2)))
+        g
+      })
   })
   
   output$deseq2Download <- downloadHandler(  
@@ -846,104 +874,104 @@ shinyServer(function(input, output, session) {
   output$compGroupLevel <- renderText({ 
     
     paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")
-        
+    
   })
   
   output$decomp <- renderPlot({
     if (input$decompAnalysis)
-    isolate({      
-      if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
-        venncount <- vennCounts(as.matrix(cbind(cbind(edgerDecomp()$table$filter, voomDecomp()$filter),deseq2Decomp()$filter)))
-        vennDiagram(venncount, names=c("edgeR","voom", "DESeq2"),
-                    mar=c(0,0,0,0), circle.col=c("red", "green", "blue"), 
-                    counts.col=c(1, "red"), lwd=3)
-      } else if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods) {
-        vennDiagram(cbind(edgerDecomp()$table$filter, voomDecomp()$filter), include=c("both"), 
-                    names=c("edgeR", "voom"),mar=c(0,0,0,0), circle.col=c("red", "green"), 
-                    counts.col=c(1, "red"), lwd=3)
-      } else if (as.character("edger")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
-        vennDiagram(cbind(edgerDecomp()$table$filter, deseq2Decomp()$filter), include=c("both"), 
-                    names=c("edgeR", "DESeq2"),mar=c(0,0,0,0), circle.col=c("red", "green"), 
-                    counts.col=c(1, "red"), lwd=3)
-      } else if (as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
-        vennDiagram(cbind(voomDecomp()$filter, deseq2Decomp()$filter), include=c("both"), 
-                    names=c("voom", "DESeq2"),mar=c(0,0,0,0), circle.col=c("red", "green"), 
-                    counts.col=c(1, "red"), lwd=3)
-      }
-    })
+      isolate({      
+        if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+          venncount <- vennCounts(as.matrix(cbind(cbind(edgerDecomp()$table$filter, voomDecomp()$filter),deseq2Decomp()$filter)))
+          vennDiagram(venncount, names=c("edgeR","voom", "DESeq2"),
+                      mar=c(0,0,0,0), circle.col=c("red", "green", "blue"), 
+                      counts.col=c(1, "red"), lwd=3)
+        } else if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods) {
+          vennDiagram(cbind(edgerDecomp()$table$filter, voomDecomp()$filter), include=c("both"), 
+                      names=c("edgeR", "voom"),mar=c(0,0,0,0), circle.col=c("red", "green"), 
+                      counts.col=c(1, "red"), lwd=3)
+        } else if (as.character("edger")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+          vennDiagram(cbind(edgerDecomp()$table$filter, deseq2Decomp()$filter), include=c("both"), 
+                      names=c("edgeR", "DESeq2"),mar=c(0,0,0,0), circle.col=c("red", "green"), 
+                      counts.col=c(1, "red"), lwd=3)
+        } else if (as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+          vennDiagram(cbind(voomDecomp()$filter, deseq2Decomp()$filter), include=c("both"), 
+                      names=c("voom", "DESeq2"),mar=c(0,0,0,0), circle.col=c("red", "green"), 
+                      counts.col=c(1, "red"), lwd=3)
+        }
+      })
   })
   
   output$decompTitle <- renderText({
     if (input$decompAnalysis)
-    isolate({
-      if (input$decompP == 'normp') {
-        title <- paste("Below results are based on the nominal p ", 
-                       "with filtering level of norminal p = ", as.character(input$decompfdr),
-                       " and FC = ", as.character(input$decompfc), sep="")
-      }
-      if (input$decompP == 'fdrp') {
-        title <- paste("Below results are based on the FDR-adjusted p ", 
-                       "with filtering level of FDR-adjusted p = ", as.character(input$decompfdr),
-                       " and FC = ", as.character(input$decompfc), sep="")
-      }
-      title
-    })
+      isolate({
+        if (input$decompP == 'normp') {
+          title <- paste("Below results are based on the nominal p ", 
+                         "with filtering level of norminal p = ", as.character(input$decompfdr),
+                         " and FC = ", as.character(input$decompfc), sep="")
+        }
+        if (input$decompP == 'fdrp') {
+          title <- paste("Below results are based on the FDR-adjusted p ", 
+                         "with filtering level of FDR-adjusted p = ", as.character(input$decompfdr),
+                         " and FC = ", as.character(input$decompfc), sep="")
+        }
+        title
+      })
   })
   
   output$decompText <- renderText({
     if (input$decompAnalysis)
-    isolate({
-      res.matrix <- decompRes()
-      if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
-        res.text.edgeR <- round(res.matrix[7,1]/res.matrix[1,1]*100, digits=2)
-        res.text.voom <- round(res.matrix[7,1]/res.matrix[2,1]*100, digits=2)
-        res.text.deseq2 <- round(res.matrix[7,1]/res.matrix[3,1]*100, digits=2)
-        res.text <- paste(as.character(res.text.edgeR),"% identified DEGs with edgeR were identified by all three methods.\n",
-                          as.character(res.text.voom),"% identified DEGs with limma-voom were identified by all three methods.\n", 
-                          as.character(res.text.deseq2),"% identified DEG withe DESeq2 were identified by all three methods.\n",
-                          sep="")     
-      } else if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods) {
-        res.text.edgeR <- round(res.matrix[4,1]/res.matrix[1,1]*100, digits=2)
-        res.text.voom <- round(res.matrix[4,1]/res.matrix[2,1]*100, digits=2)
-        res.text <- paste(as.character(res.text.edgeR),"% identified DEGs with edgeR were identified by both edgeR and limma-voom.\n",
-                          as.character(res.text.voom),"% identified DEGs with limma-voom were identified by both edgeR and limma-voom.\n",
-                          sep="")        
-      } else if (as.character("edger")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
-        res.text.edgeR <- round(res.matrix[5,1]/res.matrix[1,1]*100, digits=2)
-        res.text.deseq2 <- round(res.matrix[5,1]/res.matrix[3,1]*100, digits=2)
-        res.text <- paste(as.character(res.text.edgeR),"% identified DEGs with edgeR were identified by both edgeR and DESeq2.\n",
-                          as.character(res.text.deseq2),"% identified DEGs with DESeq2 were identified by both edgeR and DESeq2.\n",
-                          sep="")  
-      } else if (as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
-        res.text.voom <- round(res.matrix[6,1]/res.matrix[2,1]*100, digits=2)
-        res.text.deseq2 <- round(res.matrix[6,1]/res.matrix[3,1]*100, digits=2)
-        res.text <- paste(as.character(res.text.voom),"% identified DEGs with limma-voom were identified by both limma-voom and DESeq2.\n",
-                          as.character(res.text.deseq2),"% identified DEGs with DESeq2 were identified by both limma-voom and DESeq2.\n",
-                          sep="")  
-      }
-      res.text
-    })
+      isolate({
+        res.matrix <- decompRes()
+        if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+          res.text.edgeR <- round(res.matrix[7,1]/res.matrix[1,1]*100, digits=2)
+          res.text.voom <- round(res.matrix[7,1]/res.matrix[2,1]*100, digits=2)
+          res.text.deseq2 <- round(res.matrix[7,1]/res.matrix[3,1]*100, digits=2)
+          res.text <- paste(as.character(res.text.edgeR),"% identified DEGs with edgeR were identified by all three methods.\n",
+                            as.character(res.text.voom),"% identified DEGs with limma-voom were identified by all three methods.\n", 
+                            as.character(res.text.deseq2),"% identified DEG withe DESeq2 were identified by all three methods.\n",
+                            sep="")     
+        } else if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods) {
+          res.text.edgeR <- round(res.matrix[4,1]/res.matrix[1,1]*100, digits=2)
+          res.text.voom <- round(res.matrix[4,1]/res.matrix[2,1]*100, digits=2)
+          res.text <- paste(as.character(res.text.edgeR),"% identified DEGs with edgeR were identified by both edgeR and limma-voom.\n",
+                            as.character(res.text.voom),"% identified DEGs with limma-voom were identified by both edgeR and limma-voom.\n",
+                            sep="")        
+        } else if (as.character("edger")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+          res.text.edgeR <- round(res.matrix[5,1]/res.matrix[1,1]*100, digits=2)
+          res.text.deseq2 <- round(res.matrix[5,1]/res.matrix[3,1]*100, digits=2)
+          res.text <- paste(as.character(res.text.edgeR),"% identified DEGs with edgeR were identified by both edgeR and DESeq2.\n",
+                            as.character(res.text.deseq2),"% identified DEGs with DESeq2 were identified by both edgeR and DESeq2.\n",
+                            sep="")  
+        } else if (as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+          res.text.voom <- round(res.matrix[6,1]/res.matrix[2,1]*100, digits=2)
+          res.text.deseq2 <- round(res.matrix[6,1]/res.matrix[3,1]*100, digits=2)
+          res.text <- paste(as.character(res.text.voom),"% identified DEGs with limma-voom were identified by both limma-voom and DESeq2.\n",
+                            as.character(res.text.deseq2),"% identified DEGs with DESeq2 were identified by both limma-voom and DESeq2.\n",
+                            sep="")  
+        }
+        res.text
+      })
   })
   
   output$decompTab <- renderTable({
     if (input$decompAnalysis)
-    isolate({
-      res.matrix <- decompRes()
-      if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
-        res <- res.matrix
-      } else if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods) {
-        res <- data.frame(x <- res.matrix[c(1,2,4),])
-        rownames(res) <- rownames(res.matrix)[c(1,2,4)]   
-      } else if (as.character("edger")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
-        res <- data.frame(x <- res.matrix[c(1,3,5),])
-        rownames(res) <- rownames(res.matrix)[c(1,3,5)]
-      } else if (as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
-        res <- data.frame(x <- res.matrix[c(2,3,6),])
-        rownames(res) <- rownames(res.matrix)[c(2,3,6)]
-      }
-      colnames(res) <- "No. identified DEGs"
-      res
-    })
+      isolate({
+        res.matrix <- decompRes()
+        if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+          res <- res.matrix
+        } else if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods) {
+          res <- data.frame(x <- res.matrix[c(1,2,4),])
+          rownames(res) <- rownames(res.matrix)[c(1,2,4)]   
+        } else if (as.character("edger")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+          res <- data.frame(x <- res.matrix[c(1,3,5),])
+          rownames(res) <- rownames(res.matrix)[c(1,3,5)]
+        } else if (as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+          res <- data.frame(x <- res.matrix[c(2,3,6),])
+          rownames(res) <- rownames(res.matrix)[c(2,3,6)]
+        }
+        colnames(res) <- "No. identified DEGs"
+        res
+      })
   },digits = 0, align="l|c")
   
 }) 

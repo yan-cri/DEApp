@@ -290,6 +290,7 @@ body <- dashboardBody(
                         ),
                         br(),
                         actionButton("dataSubmit", label = "Submit")
+                        #submitButton("dataSubmit")
                     )
                   ),
                   
@@ -445,6 +446,7 @@ body <- dashboardBody(
                         ),
                         br(),
                         actionButton("MultiSubmit", label = "Submit")
+                        #submitButton("MultiSubmit")
                     )
                     
                   ),
