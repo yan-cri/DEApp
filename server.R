@@ -2,43 +2,10 @@
 ## Developed by Yan Li, last update on June, 2015
 
 shinyServer(function(input, output, session) {
-  singleButtonValue <- reactiveValues(singleOldButtonvalue=0)
-  singleButtonValueOrgKeep <- reactiveValues(singleNewButtonvalue=0)
-  
-  multiButtonValue <- reactiveValues(multioldButtonvalue=0)
-  multiButtonValueOrgKeep <- reactiveValues(multiNewButtonvalue=0)
-  
-  session$onFlush(once=FALSE, function(){
-    isolate({ 
-      multiButtonValueOrgKeep$multiNewButtonvalue<-multiButtonValue$multioldButtonvalue
-      multiButtonValue$multioldButtonvalue<-as.numeric(input$MultiSubmit) 
-    })
-  })
-  session$onFlush(once=FALSE, function(){
-    isolate({ 
-      singleButtonValueOrgKeep$singleNewButtonvalue<-singleButtonValue$singleOldButtonvalue
-      singleButtonValue$singleOldButtonvalue<-as.numeric(input$dataSubmit) 
-              })
-  })
     
   ##Reactive expression object for original row count
   datareactive <- reactive ({  
-    
-#     print("*********")
-#     print(singleButtonValue$singleOldButtonvalue)
-#     print(as.numeric(input$dataSubmit))
-#     print(singleButtonValueOrgKeep$singleNewButtonvalue)
-#     
-#     print( as.numeric(input$dataSubmit) > singleButtonValueOrgKeep$singleNewButtonvalue)
-#     print("===========")
-#     #print(multiButtonValue$multioldButtonvalue)
-#     print(as.numeric(input$MultiSubmit))
-#     print(multiButtonValueOrgKeep$multiNewButtonvalue)
-#     print( as.numeric(input$MultiSubmit) > multiButtonValueOrgKeep$multiNewButtonvalue )
-#     
-#     print("********")
-#     print("============************============")
-    
+   
     if ( !is.null(input$countFile) & is.null(input$countFileMulti) ) {      
       inputDataFile <- input$countFile 
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )   
@@ -47,26 +14,7 @@ shinyServer(function(input, output, session) {
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
     } else if (is.null(input$countFile) & is.null(input$countFileMulti) ) {
       org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
-    } else if (!is.null(input$countFile) & !is.null(input$countFileMulti) ){
-#       print("*********")
-#       print(singleButtonValueOrgKeep$singleNewButtonvalue)
-#       print(as.numeric(input$dataSubmit))
-#       print( as.numeric(input$dataSubmit) > singleButtonValueOrgKeep$singleNewButtonvalue)
-#       print("===========")
-#       print(multiButtonValueOrgKeep$multiNewButtonvalue)
-#       print(as.numeric(input$MultiSubmit))
-#       print( as.numeric(input$MultiSubmit) > multiButtonValueOrgKeep$multiNewButtonvalue )
-      
-      if ( as.numeric(input$dataSubmit) > singleButtonValueOrgKeep$singleNewButtonvalue ) {
-        inputDataFile <- input$countFile 
-        org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )   
-      }
-      if ( as.numeric(input$MultiSubmit) > multiButtonValueOrgKeep$multiNewButtonvalue ) {
-        inputDataFile <- input$countFileMulti
-        org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
-      }
-      
-    }
+    } 
     
     #inputMetatab <- input$metaTab
     if ( !is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
@@ -77,17 +25,7 @@ shinyServer(function(input, output, session) {
       metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
     } else if ( is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
       metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
-    } else if (!is.null(input$countFile) & !is.null(input$countFileMulti) ) {
-      if ( as.numeric(input$dataSubmit) > singleButtonValueOrgKeep$singleNewButtonvalue ) {
-        inputMetatab <- input$metaTab
-        metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep) 
-      }
-      if ( as.numeric(input$MultiSubmit) > multiButtonValueOrgKeep$multiNewButtonvalue ) {
-        inputMetatab <- input$metaTabMulti
-        metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
-      }
-      
-    }
+    } 
     
     if (dim(metadata)[2]>2) {
       groupinfo <- metadata[,2]
@@ -419,7 +357,7 @@ shinyServer(function(input, output, session) {
       else metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
       
       if (dim(metadata)[2]>2) {
-        paste("ERROR: Your input data is multi-factor experiment, please use 'Multi-factor Experiment' tab to input your data.")
+        paste("ERROR: Your input data is multi-factor experiment, please restart the APP and use 'Multi-factor Experiment' tab to input your data.")
       } else {
         paste("This is a single-factor experiment with factor - '", as.character(colnames(metadata)[2]), "', the level of this factor is",sep="")
       }  
@@ -493,7 +431,7 @@ shinyServer(function(input, output, session) {
         if (dim(metadata)[2]>2) {
           paste("This is a multi-factor experiment with ", (dim(metadata)[2]-1), " factors levels, they are", sep="" )
         } else {
-          paste("ERROR: Your data input is a single-factor experiment, please use 'Single-facotr Experiment' tab to input your data.")
+          paste("ERROR: Your data input is a single-factor experiment, please restart the App and use 'Single-facotr Experiment' tab to input your data.")
         }       
       })
     }
