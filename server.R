@@ -3,9 +3,7 @@
 
 shinyServer(function(input, output, session) {
     
-  ##Reactive expression object for original row count
-  datareactive <- reactive ({  
-   
+  inputdata1reactive <- reactive ({
     if ( !is.null(input$countFile) & is.null(input$countFileMulti) ) {      
       inputDataFile <- input$countFile 
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )   
@@ -14,9 +12,13 @@ shinyServer(function(input, output, session) {
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
     } else if (is.null(input$countFile) & is.null(input$countFileMulti) ) {
       org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
-    } 
+    } else {
+      org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
+    }
     
-    #inputMetatab <- input$metaTab
+  }) 
+  
+  inputdata2reactive <- reactive({
     if ( !is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
       inputMetatab <- input$metaTab
       metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
@@ -25,7 +27,16 @@ shinyServer(function(input, output, session) {
       metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
     } else if ( is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
       metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
-    } 
+    } else {
+      metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
+    }
+    
+  })
+  
+  ##Reactive expression object for original row count
+  datareactive <- reactive ({  
+    org.counts <- inputdata1reactive()
+    metadata <- inputdata2reactive()
     
     if (dim(metadata)[2]>2) {
       groupinfo <- metadata[,2]
@@ -339,6 +350,22 @@ shinyServer(function(input, output, session) {
       paste(as.character(rownames((datareactive())$samples)), collapse=", " )
     })
   })
+  
+  output$bothdataError <- renderText({
+    if ( !is.null(input$countFile) & !is.null(input$countFileMulti) ) {
+      paste("ERROR!!! Confusing with your experimental design. Your data has been loaded 
+            to both single-factor and multi-factor experiment, please restart the App and 
+            load your data with either 'Single-factor Experiment' or 'Multi-factor Experiment' tab.")
+    }
+  })
+  
+  output$bothdataErrorMultiTab <- renderText({
+    if ( !is.null(input$countFile) & !is.null(input$countFileMulti) ) {
+      paste("ERROR!!! Confusing with your experimental design. Your data has been loaded 
+            to both single-factor and multi-factor experiment, please restart the App and 
+            load your data with either 'Single-factor Experiment' or 'Multi-factor Experiment' tab.")
+    }
+    })
   
   output$sampleTitle <- renderText({ 
     input$dataSubmit
