@@ -3,7 +3,8 @@
 
 shinyServer(function(input, output, session) {
     
-  inputdata1reactive <- reactive ({
+  
+  inputdata1reactive <- reactive ({  
     if ( !is.null(input$countFile) & is.null(input$countFileMulti) ) {      
       inputDataFile <- input$countFile 
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )   
@@ -14,8 +15,7 @@ shinyServer(function(input, output, session) {
       org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
     } else {
       org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
-    }
-    
+    }    
   }) 
   
   inputdata2reactive <- reactive({
@@ -29,8 +29,7 @@ shinyServer(function(input, output, session) {
       metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
     } else {
       metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
-    }
-    
+    }  
   })
   
   ##Reactive expression object for original row count
@@ -558,7 +557,7 @@ shinyServer(function(input, output, session) {
   ################################################
   ###tab panel edgeR
   output$edgerGroupLevel <- renderText({ 
-    paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")
+    paste("The available group levels are: " , paste(as.character(levels((datareactive())$samples$group)), collapse=", "), ".", sep="")
   })
   
   ##Estimation dispersion BCV

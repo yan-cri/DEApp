@@ -647,10 +647,17 @@ body <- dashboardBody(
                   fluidRow( 
                     ## GLE DE analysis group chosing box under edgeR tab panel
                     box(title = "DE Analysis Group Levels",
-                        footer = "DE analysis is conducted between any 2 specified levels out of available group levels",
+                        #footer = "DE analysis is conducted between any 2 specified levels out of available group levels",
                         width = 4,
                         solidHeader = T,
                         status = "info",
+                        
+                        textOutput("edgerGroupLevel"),
+                        tags$style("#edgerGroupLevel{ font-weight: bold; color: #0033FF; padding-top: .3cm; padding-bottom: .3cm;}"),
+                        p("Please select any 2 levels from the above available group levels for DE analysis."
+                          , style="font-weight: bold"),
+                        
+                        
                         fluidRow(
                           column(6,
                                  textInput(inputId="edgercompGroup1", 
@@ -666,8 +673,8 @@ body <- dashboardBody(
                           #for the single-factor experiment, it can be any 2 levels of the factor level,
                           #for the multi-factor experiment, it can be any 2 levels of the combined factor levels. 
                           #Please provide correct comparison factor levels for DE analysis, which are summarized on the 'Data Input' tab.")
-                        ),
-                        verbatimTextOutput("edgerGroupLevel")
+                        )
+                        
                     ),
                     
                     ## DE filtering criteria option box under edgeR tab panel
@@ -779,10 +786,16 @@ body <- dashboardBody(
                   fluidRow(
                     ## DE analysis group chosing box under limma-voom tab panel
                     box(title = "DE Analysis Group Levels",
-                        footer = "DE analysis is conducted between any 2 specified levels out of available group levels",
+                        #footer = "DE analysis is conducted between any 2 specified levels out of available group levels",
                         width = 4,
                         solidHeader = T,
                         status = "info",
+                        
+                        textOutput("voomGroupLevel"),
+                        tags$style("#voomGroupLevel{ font-weight: bold; color: #0033FF; padding-top: .3cm; padding-bottom: .3cm;}"),
+                        p("Please select any 2 levels from the above available group levels for DE analysis."
+                          , style="font-weight: bold"),
+                        
                         fluidRow(
                           column(6,
                                  textInput(inputId="voomcompGroup1", 
@@ -794,8 +807,7 @@ body <- dashboardBody(
                                            label="Group 2", 
                                            value="treated")
                           )
-                        ),
-                        verbatimTextOutput("voomGroupLevel")
+                        )
                     ),
                     
                     ## DE filtering criteria option box under limma-voom tab panel
@@ -895,10 +907,16 @@ body <- dashboardBody(
                   fluidRow(
                     ## DE analysis group chosing box under deseq2 tab panel
                     box(title = "DE Analysis Group Levels",
-                        footer = "DE analysis is conducted between any 2 specified levels out of available group levels",
+                        #footer = "DE analysis is conducted between any 2 specified levels out of available group levels",
                         width = 4,
                         solidHeader = T,
                         status = "info",
+                        
+                        textOutput("deseq2GroupLevel"),
+                        tags$style("#deseq2GroupLevel{ font-weight: bold; color: #0033FF; padding-top: .3cm; padding-bottom: .3cm;}"),
+                        p("Please select any 2 levels from the above available group levels for DE analysis."
+                          , style="font-weight: bold"),
+                        
                         fluidRow(
                           column(6,
                                  textInput(inputId="deseq2compGroup1", 
@@ -910,8 +928,7 @@ body <- dashboardBody(
                                            label="Group 2", 
                                            value="treated")
                           )
-                        ),
-                        verbatimTextOutput("deseq2GroupLevel")
+                        )
                     ),
                     
                     ## DE filtering criteria option box under deseq2 tab panel
@@ -1023,6 +1040,12 @@ body <- dashboardBody(
                         width = 3,
                         solidHeader = T,
                         status = "info",
+                        
+                        textOutput("compGroupLevel"),
+                        tags$style("#compGroupLevel{ font-weight: bold; color: #0033FF; padding-top: .3cm; padding-bottom: .3cm;}"),
+                        p("Please select any 2 levels from the above available group levels for DE analysis."
+                          , style="font-weight: bold"),
+                        
                         fluidRow(
                           column(6,
                                  textInput(inputId="decompGroup1", 
@@ -1034,8 +1057,7 @@ body <- dashboardBody(
                                            label="Group 2", 
                                            value="treated")
                           )
-                        ),
-                        verbatimTextOutput("compGroupLevel")
+                        )
                     ),
                     box(title = "DE Analysis Filtering Criteria",
                         width = 6,
