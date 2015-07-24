@@ -16,7 +16,7 @@ To run this App after downloading this App from github to your local PC, please 
 
 1. If 'Download ZIP', upzip the downloaded file to the Desktop, if 'Clone in Desktop' via git, the whole App folder ("DEAPP-shiny") should be downloaded to the Desktop. 
 
-2. Open R or RStudio (if installed) with R version >= 3.1.2.
+2. Open R or RStudio (if installed) with R version >= 3.2.
 
 3. Set your working directory to where this App are unzipped or downloaded. 
 
@@ -24,11 +24,7 @@ To run this App after downloading this App from github to your local PC, please 
    
 4. Install all depended CRAN R packages (shiny, shinydashboard, DT, ggplot2) and R Bioconductor packages (edgeR, limma, DESeq2) by sourcing the R installation program with `source("install/prep.R")`. 
 
-    If all depended packages are successfully installed, logical value “TRUE” should be returned and printed on the R Console pane for each package after sourcing the installation program. 
-    
-    If not, please manually install all above requested depended packages in R, restart R/RStudio and source the package installation code again with `source("install/prep.R")` to make sure that logical value “TRUE” will be returned and printed on the R Console. 
-    
-    If some packages still cannot be installed, try to update your R and corresponding Bioconductor version, and repeat this step again until you can see logical value “TRUE” are returned and printed on the R Console for each requested R package.
+    If all depended packages are successfully installed, logical value “TRUE” should be returned and printed on the R Console pane for each package after sourcing the installation program. Otherwise, please check whether you have the R version >=3.2 installed.
     
 5. run this App by `shiny::runApp()`
 
