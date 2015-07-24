@@ -33,6 +33,7 @@ body <- dashboardBody(
     #########################################
     ## Introduction tab panel
     tabItem(tabName="intro",
+            img(src="cri.png"),
             h2("Introduction"),
             p("This Application is developed in R with Shiny, it is developed to 1). conduct differential 
               expression (DE) analysis with edgeR, limma-voom, and DESeq2 based on 
@@ -177,10 +178,12 @@ body <- dashboardBody(
               , style="padding-left: 2em"),
             #includeHTML(path=paste(getwd(),"www/Introduction.html",sep="/"))
             #imageOutput(paste(getwd(),"www/Introduction.pdf",sep="/"))
-            img(src="workflow.png", width=1000),
-            p("The above workflow can also be downloaded ",
+            p("The analysis workflow is summarized as below:"
+              , style="padding-left: 0em, padding-bottom: 4em"),
+            img(src="analysis-workflow.png", width=800, style="display: block; margin-left: auto; margin-right: auto;"),
+            p("The analysis execution workflow with this App can also be downloaded ",
               a("here.", href=as.character(paste("file://~",getwd(),"/www/workflow.pdf", sep="")))
-              , style="padding-left: 0em")
+              , style="padding-left: 0em; padding-top: 2em")
             ),
     
     tabItem(tabName="QuestionsAndAnswers",
@@ -226,8 +229,8 @@ body <- dashboardBody(
               Biological Science Division (BSD), University of Chicago."),
             p("As a bioinformatics core, we are actively improving and expanding our NGS analysis services and products.
               If you have any questions, comments, or suggestions, feel free to contact our core at bioinformatics@bsd.uchicago.edu or the developer at yli22@bsd.uchicago.edu"),
-            br(),
-            img(src="cri.png")
+            br()#,
+            #img(src="cri.png")
             ),
     
     ## End introduction tab panel
