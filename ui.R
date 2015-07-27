@@ -35,7 +35,7 @@ body <- dashboardBody(
     tabItem(tabName="intro",
             img(src="cri.png"),
             h2("Introduction"),
-            p("This Application is developed in R with Shiny, it is developed to 1). conduct differential 
+            p("This interactive web application is developed in R with Shiny, it is developed to 1). conduct differential 
               expression (DE) analysis with edgeR, limma-voom, and DESeq2 based on 
               the user provided input data (raw count results and experimental design information); 
               2). cross-validate the DE analysis results with these 3 different DE analysis methods. 
