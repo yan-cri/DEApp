@@ -1,0 +1,1 @@
+Sample	GroupcontrolA	controlcontrolB	controlthrombinA	treatedthrombinB	treatedthrombinC	treated

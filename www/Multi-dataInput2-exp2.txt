@@ -1,1 +1,1 @@
-Sample	Group	Time	Drug	......Sample1	control	1h	1	Sample2	control	2h	1	Sample3	control	1h	2	Sample4	control	2h	2	Sample5	treated	1h	1	Sample6	treated	2h	1	Sample7	treated	1h	2	Sample8	treated	2h	2	......	......	......	......	
+Sample	Group	Time	Factor3	......Sample1	WT	N4		Sample2	WT	N4		Sample3	WT	V4		Sample4	WT	V4		Sample5	KO	N4		Sample6	KO	N4		Sample7	KO	N4		Sample8	KO	V4		Sample9	KO	V4		......	......	......	......	

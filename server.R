@@ -12,9 +12,9 @@ shinyServer(function(input, output, session) {
       inputDataFile <- input$countFileMulti
       org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
     } else if (is.null(input$countFile) & is.null(input$countFileMulti) ) {
-      org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
+      org.counts <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, row.names=1)
     } else {
-      org.counts <- read.delim(paste(getwd(),"data/TestData-feature-count-res.txt",sep="/"), header=T, row.names=1)
+      org.counts <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, row.names=1)
     }    
   }) 
   
@@ -26,9 +26,9 @@ shinyServer(function(input, output, session) {
       inputMetatab <- input$metaTabMulti
       metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
     } else if ( is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
-      metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
+      metadata <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
     } else {
-      metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
+      metadata <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
     }  
   })
   
@@ -56,8 +56,8 @@ shinyServer(function(input, output, session) {
   #Reactive expression object for the counts remove low expression tags
   rmlowReactive <- reactive({
     dge.count <- calcNormFactors(datareactive())
-    cpm.count <- cpm(dge.count)
-    keep = rowSums(cpm.count >= as.numeric(input$cpmVal) ) >= as.numeric(input$gThreshold)
+    cpm.count <- cpm(dge.count$counts)
+    keep = rowSums(cpm.count > as.numeric(input$cpmVal) ) >= as.numeric(input$gThreshold)
     dge.count.rmlow <- dge.count[keep,]
     dge.count.rmlow$samples$lib.size <- colSums(dge.count.rmlow$counts)
     dge.count.rmlow <- calcNormFactors(dge.count.rmlow, lib.size=T, method="TMM")
@@ -136,7 +136,7 @@ shinyServer(function(input, output, session) {
     rownames(design) <- rownames(rmlowReactive()$samples)
     colnames(design) <- levels(Group)
     
-    comp <- makeContrasts(contrasts=paste(as.character(input$edgercompGroup2), as.character(input$edgercompGroup1), sep="-"), levels=design )
+    comp <- makeContrasts(contrasts=paste(as.character(input$voomcompGroup2), as.character(input$voomcompGroup1), sep="-"), levels=design )
     
     contrast.fit <- contrasts.fit(voomRes(), contrasts=comp)
     contrast.fit <- eBayes(contrast.fit)  
@@ -314,7 +314,7 @@ shinyServer(function(input, output, session) {
   output$multimetaTabSamp1 <- renderTable({
     metadata <- read.delim(paste(getwd(),"/www/Multi-dataInput2-exp1.txt",sep=""), header=T)
     metadata
-  }, align="ll|ccc", include.rownames=F, caption = "Multi-factor",
+  }, align="ll|cc", include.rownames=F, caption = "Multi-factor",
   caption.placement = getOption("xtable.caption.placement", "top"), 
   caption.width = getOption("xtable.caption.width", NULL))
   
@@ -324,6 +324,7 @@ shinyServer(function(input, output, session) {
   output$overallDataSummary <- renderTable({ 
     input$dataSubmit
     isolate({
+
       no.samples <- length(colnames(datareactive()$counts))
       no.gene <- dim((datareactive())$counts)[1]
       res.summary <- rbind(no.samples, no.gene)
@@ -337,7 +338,8 @@ shinyServer(function(input, output, session) {
   output$sampleGroup <- renderTable({ 
     input$dataSubmit
     isolate({
-      groupinfo <- as.matrix(summary((datareactive())$samples$group))
+
+      groupinfo <- as.matrix(summary(datareactive()$samples$group))
       colnames(groupinfo) <- "No. in each group"
       groupinfo
     })
@@ -379,7 +381,7 @@ shinyServer(function(input, output, session) {
     isolate({
       inputMetatab <- input$metaTab
       
-      if (is.null(inputMetatab)) metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
+      if (is.null(inputMetatab)) metadata <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
       else metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
       
       if (dim(metadata)[2]>2) {
@@ -395,7 +397,7 @@ shinyServer(function(input, output, session) {
     isolate({
       inputMetatab <- input$metaTab
       
-      if (is.null(inputMetatab)) metadata <- read.delim(paste(getwd(),"/data/metatable.txt",sep=""), header=T)
+      if (is.null(inputMetatab)) metadata <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
       else metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
       
       if (dim(metadata)[2]>2) {
@@ -584,7 +586,7 @@ shinyServer(function(input, output, session) {
   output$edgerTagwiseDisp <- renderTable({ 
     if(input$edgerdeAnalysis)
       isolate({ 
-        res<- as.table(t(summary(sqrt(edgerDispersionEst()$tagwise.dispersion))))
+        res<- as.table(t(summary(edgerDispersionEst()$tagwise.dispersion)))
         res <- t(res)
         colnames(res) <- "Tagwise"
         res

@@ -1,1 +1,1 @@
-Sample	Group	Time	......Sample1	control	1h	Sample2	control	2h	Sample3	control	1h	Sample4	control	2h	Sample5	treated	1h	Sample6	treated	2h	Sample7	treated	1h	Sample8	treated	2h	
+Sample	Group	TreatmentSample1	WT	N4Sample2	WT	N4Sample3	WT	V4Sample4	WT	V4Sample5	KO	N4Sample6	KO	N4Sample7	KO	N4Sample8	KO	V4Sample9	KO	V4......	......	......

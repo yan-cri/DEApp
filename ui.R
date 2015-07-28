@@ -56,7 +56,7 @@ body <- dashboardBody(
             p("Where, the 1st column corresponds to the tag ID, such as gene ID, transcript ID, or miRNA ID; 
               and 1st row corresponds to the sample ID. 
               The full 'Raw Count Data' text file of the test data used in the App can be seen ", 
-              a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-feature-count-res.txt", sep="")))
+              a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep="")))
               , style="padding-left: 5em"),
             
             h4("2. Meta-data Table", style="padding-left: 3em"),
@@ -76,7 +76,7 @@ body <- dashboardBody(
               to the single factor information - 'Group' for each sample. 
               The 'Meta-data Table' text file of the test data for single-factor experiment
               used in this App is available "
-              , a("here", href=as.character(paste("file://~",getwd(),"/data/metatable.txt", sep=""))) 
+              , a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount-meta.txt", sep=""))) 
               , style="padding-left: 5em"),
             
             h5("2.2 Multi-factor Experiment", style="padding-left: 5em; font-weight: bold"),
@@ -93,7 +93,7 @@ body <- dashboardBody(
             tags$style("#multimetaTabSamp22 table {border: 1px solid black; align: left;margin-left: 6em}","#multimetaTabSamp22 th {border: 1px solid black;}","#multimetaTabSamp22 td {border: 1px solid black;}"),
             
             p("The 'Meta-data Table' text file of multi-factor experiment used as test data for this App is available "
-              , a("here", href=as.character(paste("file://~",getwd(),"/data/metatableMulti.txt", sep=""))) 
+              , a("here", href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv", sep=""))) 
               , style="padding-left: 5em"),
             #####################################################
             ##Filter low expression tags section
@@ -309,7 +309,7 @@ body <- dashboardBody(
                                       the 1st column corresponds to the tag ID, such as gene ID, transcript ID, or miRNA ID; 
                                       and 1st row corresponds to the sample ID. 
                                       The full 'Raw Count Data' text file can be seen "), 
-                                 a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/TestData-feature-count-res.txt", sep="")))
+                                 a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep="")))
                         )
                         ),
                     box(title = "Example of input 2",
@@ -337,9 +337,10 @@ body <- dashboardBody(
                                         the 1st column corresponds to the sample name, the rest columns correspond to the experimental factors. 
                                         <br>For single-factor experiment (left table), the experimental factor - 'Group' is listed in the 2nd column.
                                         <br>For multi-factor experiment (right table), experimental factors are listed in columns one by one.
-                                        <br>Since this App is presenting a single-factor experiment, the 'Meta-data Table' is as the single-factor experimental meta-data table on the left, and the full text file of this test data can be seen"), a(HTML("here</div>"), 
-                                                                                                                                                                                                                                                       href=as.character(paste("file://~",getwd(),"/data/metatable.txt", sep=""))
-                          )
+                                        <br>Since this App is presenting a single-factor experiment, the 'Meta-data Table' is as the single-factor experimental meta-data table on the left, and the full text file of this test data can be seen"), 
+                                   a(HTML("here</div>"), 
+                                     href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount-meta.txt", sep=""))
+                                     )
                           )
                           
                           #helpText("Please specify the factor group level based on your experimental design for DE analysis, 
@@ -468,7 +469,7 @@ body <- dashboardBody(
                                 the 1st column corresponds to the tag ID, such as gene ID, transcript ID, or miRNA ID; 
                                 and 1st row corresponds to the sample ID. 
                                 The full 'Raw Count Data' text file can be seen "), 
-                                 a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/TestDataMulti-feature-count-res.txt", sep="")))
+                                 a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv", sep="")))
                         )
                     ),
                     
@@ -484,7 +485,7 @@ body <- dashboardBody(
                                         <br>For single-factor experiment (left table), the experimental factor - 'Group' is listed in the 2nd column.
                                         <br>For multi-factor experiment (right table), experimental factors are listed in columns one by one.
                                         <br>Since this App is presenting a single-factor experiment, the 'Meta-data Table' is as the single-factor experimental meta-data table on the left, and the full text file of this test data can be seen")
-                                          , a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/metatableMulti.txt", sep="")))
+                                          , a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv", sep="")))
                                  )
                         )
                     )
