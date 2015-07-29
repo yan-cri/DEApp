@@ -2,40 +2,27 @@
 ## Developed by Yan Li, last update on June, 2015
 
 shinyServer(function(input, output, session) {
-    
+  dataObs <- reactiveValues(
+    orgCount = read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, row.names=1),
+    orgMeta = read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
+    )
   
-  inputdata1reactive <- reactive ({  
-    if ( !is.null(input$countFile) & is.null(input$countFileMulti) ) {      
-      inputDataFile <- input$countFile 
-      org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )   
-    } else if ( !is.null(input$countFileMulti) & is.null(input$countFile) ) {
-      inputDataFile <- input$countFileMulti
-      org.counts <- read.delim(inputDataFile$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
-    } else if (is.null(input$countFile) & is.null(input$countFileMulti) ) {
-      org.counts <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, row.names=1)
-    } else {
-      org.counts <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, row.names=1)
-    }    
-  }) 
-  
-  inputdata2reactive <- reactive({
-    if ( !is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
-      inputMetatab <- input$metaTab
-      metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
-    } else if ( !is.null(input$metaTabMulti) & is.null(input$metaTab) ) {
-      inputMetatab <- input$metaTabMulti
-      metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
-    } else if ( is.null(input$metaTab) & is.null(input$metaTabMulti) ) {
-      metadata <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
-    } else {
-      metadata <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
-    }  
+  observeEvent(input$MultiSubmit, {
+    dataObs$orgCount <- read.delim(input$countFileMulti$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
+    dataObs$orgMeta <- read.delim(input$metaTabMulti$datapath, header=T, sep=input$metaSepMulti)
   })
   
+  observeEvent(input$dataSubmit, {
+    dataObs$orgCount <- read.delim(input$countFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )
+    dataObs$orgMeta <- read.delim(input$metaTab$datapath, header=T, sep=input$metaSep)
+  })
+    
   ##Reactive expression object for original row count
   datareactive <- reactive ({  
-    org.counts <- inputdata1reactive()
-    metadata <- inputdata2reactive()
+    org.counts <- dataObs$orgCount
+    print(head(org.counts))
+    metadata <- dataObs$orgMeta
+    print(head(metadata))
     
     if (dim(metadata)[2]>2) {
       groupinfo <- metadata[,2]
@@ -351,23 +338,7 @@ shinyServer(function(input, output, session) {
       paste(as.character(rownames((datareactive())$samples)), collapse=", " )
     })
   })
-  
-  output$bothdataError <- renderText({
-    if ( !is.null(input$countFile) & !is.null(input$countFileMulti) ) {
-      paste("ERROR!!! Confusing with your experimental design. Your data has been loaded 
-            to both single-factor and multi-factor experiment, please restart the App and 
-            load your data with either 'Single-factor Experiment' or 'Multi-factor Experiment' tab.")
-    }
-  })
-  
-  output$bothdataErrorMultiTab <- renderText({
-    if ( !is.null(input$countFile) & !is.null(input$countFileMulti) ) {
-      paste("ERROR!!! Confusing with your experimental design. Your data has been loaded 
-            to both single-factor and multi-factor experiment, please restart the App and 
-            load your data with either 'Single-factor Experiment' or 'Multi-factor Experiment' tab.")
-    }
-    })
-  
+    
   output$sampleTitle <- renderText({ 
     input$dataSubmit
     isolate({

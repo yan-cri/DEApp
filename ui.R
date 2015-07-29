@@ -361,8 +361,6 @@ body <- dashboardBody(
                   footer = "Note: There must be a biological replicates from the experiment for DE analysis",
                   width = 12, 
                   fluidRow(
-                    h4(textOutput("bothdataError")),
-                    tags$style("#bothdataError{color: red; font-size: 20px; padding-left: 2em }"),
                     column(6, 
                            h4(textOutput("sampleTitle")),
                            verbatimTextOutput("sampleInfo")
@@ -499,9 +497,6 @@ body <- dashboardBody(
                   footer = "Note: There must be a biological replicates from the experiment for DE analysis",
                   width = 12, 
                   fluidRow(
-                    h4(textOutput("bothdataErrorMultiTab")),
-                    tags$style("#bothdataErrorMultiTab{color: red; font-size: 20px; padding-left: 2em }"),
-                    
                     column(6, 
                            h4(textOutput("sampleTitleMulti")),
                            verbatimTextOutput("sampleInfoMulti")
