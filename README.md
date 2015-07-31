@@ -4,7 +4,7 @@
 This DE analysis interactive web application (App) is developed in R with Shiny, aiming to 1). conduct differential expression (DE) analysis with edgeR, limma-voom, and DESeq2, and 2). cross-validate the DE analysis results with these 3 different DE analysis methods based on your own provided input files.
 
 ##Input files
-The input of this App is 2 plain text files
+The input of this App is 2 files in '.txt' or '.csv' format.
 
 1. 'Raw Count Data' : includes the count results of all tags with respect to each sample.  
 2. 'Meta-data Table' : includes the experimental group factor information for each sample.
