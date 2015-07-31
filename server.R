@@ -20,9 +20,9 @@ shinyServer(function(input, output, session) {
   ##Reactive expression object for original row count
   datareactive <- reactive ({  
     org.counts <- dataObs$orgCount
-    print(head(org.counts))
+    #print(head(org.counts))
     metadata <- dataObs$orgMeta
-    print(head(metadata))
+    #print(head(metadata))
     
     if (dim(metadata)[2]>2) {
       groupinfo <- metadata[,2]
