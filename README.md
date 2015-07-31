@@ -9,7 +9,8 @@ The input of this App is 2 files in '.txt' or '.csv' format.
 1. 'Raw Count Data' : includes the count results of all tags with respect to each sample.  
 2. 'Meta-data Table' : includes the experimental group factor information for each sample.
 
-**Test data**: Initial DE analysis is based on the pre-processed count results from the RNA-seq experiment published [here](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0031229) . Detailed information about these 2 input files can be seen in the "Introduction" tab of this App.
+**Test data**: 3 sets of data were used to test this App, they are under 'data' folder directory. 
+The default presented DE analysis is based on the count result where are pre-processed with 'featureCount' from the RNA-seq experiment published [here](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0031229). Other 2 sets of data are downloaded from [http://bioinf.wehi.edu.au/edgeRSpringer/](http://bioinf.wehi.edu.au/edgeRSpringer/).
 
 ##App execution
 To run this App after downloading this App from github to your local PC, please follow the steps as below:
