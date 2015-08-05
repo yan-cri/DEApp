@@ -3,7 +3,6 @@
 
 shinyServer(function(input, output, session) {
   dataObs <- reactiveValues(
-    
     orgCount = read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, row.names=1),
     orgMeta = read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
     )
