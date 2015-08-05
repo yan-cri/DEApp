@@ -33,91 +33,92 @@ body <- dashboardBody(
     #########################################
     ## Introduction tab panel
     tabItem(tabName="intro",
-            img(src="cri.png"),
+            #img(src="cri.png"),
             h2("Introduction"),
             p("This interactive web application (DEApp) is developed in R with Shiny, it is aiming to 1). conduct differential 
-              expression (DE) analysis with edgeR, limma-voom, and DESeq2 based on 
-              the provided input data (raw count results and experimental design information); 
+              expression (DE) analysis with ",
+              a("edgeR, ", href="http://bioconductor.org/packages/release/bioc/html/edgeR.html"),
+              a("limma-voom, ", href="http://www.genomebiology.com/2014/15/2/R29"), "and ",
+              a("DESeq2 ", href="http://bioconductor.org/packages/release/bioc/html/DESeq2.html"),
+              " based on the provided input data (raw count results and experimental design information); 
               2). cross-validate the DE analysis results with these 3 different DE analysis methods."
               , style="padding-left: 0em"),
-            p("The goal of this App development is that biologists could easily 
-              conduct and cross-validate DE analysis with 3 different methods with their own data."
+            p("The goal of this App is to provide biologists with an easy way to 
+              conduct and cross-validate DE analysis with 3 different methods on their own data."
               , style="padding-left: 0em"),
             #####################################################
             ##Data input section
             h3("1. Data input", style="padding-left: 1em"),
-            p("The input data of this App is 2 files in '.txt' format or '.csv' format, 
+            p("The input data of this App is 2 files in '.txt' or '.csv' format, 
               they are named as 'Raw Count Data' and 'Meta-data Table'."
               , style="padding-left: 2em"),
             h4("1.1 Raw Count Data", style="padding-left: 3em"),            
-            p("This input data contains summarized count results of all samples in the experiment, 
-              an example of the top part of this input data is presented as below:"
+            p("This input file should contain summarized count results of all samples in the experiment, 
+              an example of the expected input data format is presented as below:"
               , style="padding-left: 5em"),
             tableOutput("countTabSamp"),
             tags$style("#countTabSamp table {border: 1px solid black; align: left; margin-left: 6em}","#countTabSamp th {border: 1px solid black;}","#countTabSamp td {border: 1px solid black;}"),
 
-            p("Where, columns correspond to the sample, rows correspond to the tag. 
-              The 1st column and row indicate the sample ID and tag ID respectively."
+            p("Where, columns correspond to samples, rows correspond to mapped genomic features 
+              (e.g. genes, exons, transcript, miRNAs etc.)."
               , style="padding-left: 5em"),
-            p("An example of full 'Raw Count Data' input plain text file tested in this App is available ", 
+            p("An example of demo 'Raw Count Data' input text file for single-factor experiment 
+              used in this App is provided in the 'data' folder named as 'TestData-featureCount.txt', 
+              it is also accessable ", 
               a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep="")))
               , style="padding-left: 5em"),
             
             h4("1.2 Meta-data Table", style="padding-left: 3em"),
             p("This input data contains summarized experimental design information for each sample. 
-              This App is able to conduct DE analysis of both single-factor and multi-factor experiment, 
-              and the experiment design information is illustrated in this 'Meta-data Table' input."
+              This App is able to conduct DE analysis of both single-factor and multi-factor experiments, 
+              and the experiment design information is illustrated on the below 'Meta-data Table':"
               , style="padding-left: 5em"),
             h5("1.2.1 Single-factor Experiment", style="padding-left: 5em; font-weight: bold"),
-            p("If the experiment only has only one single experimental factor, such as 'Group'. 
-              To illustrate such experimental design, the input 'Meta-data Table' file
-              should be prepared as below."
+            p("If the experiment has one single experimental factor, such as 'Group', 
+              the input 'Meta-data Table' file should be prepared as below:"
               , style="padding-left: 5em"),
             tableOutput("metaTabSamp"),
             tags$style("#metaTabSamp table {border: 1px solid black; align: left;margin-left: 6em}","#metaTabSamp th {border: 1px solid black;}","#metaTabSamp td {border: 1px solid black;}"),
-            
-            p("Where, the 1st column corresponds to the sample name, and the 2nd column corresponds 
-              to the single experimental factor information - 'Group' for each sample."
-              , style="padding-left: 5em"),
-            p("An example of the 'Meta-data Table' plain text file for single-factor experiment tested in this App is accessible "
+            p("An example of corresponding demo 'Meta-data Table' text file for single-factor experiment 
+              used in this App is provided in the 'data' folder named as 'TestData-featureCount-meta.txt', it is also available "
               , a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount-meta.txt", sep=""))) 
               , style="padding-left: 5em"),
+            
             h5("1.2.2 Multi-factor Experiment", style="padding-left: 5em; font-weight: bold"),
-            p("If there are more than one experimental factors used in the experiment, it is a multi-factor experiment,
-              such multi-factor information can be listed in the following columns one by one."   
-              , style="padding-left: 5em"),
-            p("Such as in addition to the 'Group' factor, 
-              I have another experimental factor 'Time' used in the experiment, 
-              this factor information with respect to each sample can be listed to 
-              the 3rd column of the 'Meta-data table'. Similarly, other factor information
-              can be summarized in the 'Meta-data table' in the same way. "   
+            p("For multi-factor experiment, the 'Meta-data Table' should look as below:"   
               , style="padding-left: 5em"),
             tableOutput("multimetaTabSamp22"),
             tags$style("#multimetaTabSamp22 table {border: 1px solid black; align: left;margin-left: 6em}","#multimetaTabSamp22 th {border: 1px solid black;}","#multimetaTabSamp22 td {border: 1px solid black;}"),
             
-            p("An example of the 'Meta-data Table' text file for multi-factor experiment tested in this App is available "
-              , a("here", href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv", sep=""))) 
+            p("An example of the 'Meta-data Table' csv file for multi-factor experiment used in this App 
+              is provided in the 'data' folder named as 'ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv',
+              it is also available "
+              , a("here.", href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv", sep=""))) 
+              , "The corresponding 'Raw Count Data' csv file is also provided in the 'data' folder named as 
+              'ReadCounts-Chen-edgeRSpringer-multiFactor.csv', it is accessable "
+              , a("here.", href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv", sep=""))) 
               , style="padding-left: 5em"),
             
             #####################################################
             ##Filter low expression tags section
             h3("2. Filter low expression tags", style="padding-left: 1em"),
-            p("This step is implemented with the 'Data Summarization' tab in this App, aiming to filter out tags/genes with
-              very low counts. The guideline of this step is to keep tags which are expressed in 
-              at least one sample out of each factor levels."
+            p("For the 'Data Summarization' section on this App, it is aiming to filter out genetic features with
+              very low counts. The guideline of this step is to keep genetic features which are expressed in 
+              at least one sample out of each factor level."
               , style="padding-left: 2em"),
-            p("Such as there are 3 factor/combined-factor levels in the experiment, 
-              then at least 3 samples should better have expression level 
+            p("For example, if there are 3 combined factor levels in the experiment, 
+              then at least 3 samples should have expression level 
               above the expression cutoff value presented in count per million (CPM)."
               , style="padding-left: 2em"),
             withMathJax(),
             p("The expression cutoff (CPM) value is determined according to the library size 
-              and normalization factors with formula $$\\text{CPM} = \\frac{\\text{counts}}{\\text{library size} * \\text{normalization factors} * 1e^{-6}}$$ 
-              Such as the expression cutoff CPM value is 10, 
-              the library size and normalization factors are estimated approximately equal to 2e6 and 1 for majority samples, 
+              and normalization factors with formula $$\\text{CPM} = \\frac{\\text{counts}}{\\text{library size} * \\text{normalization factors} * 10^{-6}}$$ 
+              for example, if the expression cutoff CPM value is 10, 
+              the library size and normalization factors are estimated approximately equal to \\(\\ 2 \\text{ x} 10 ^ 6\\) and 1 for majority samples, 
               then 10 CPM expression cutoff corresponds to about 20 read counts. 
-              Therefore, in this example tags/genes in more than 3 samples have less than 
-              20 read counts (10 CPM) is classified as low expression tags and are removed for further downstream DE analysis."
+              Therefore, in this example genetic features in more than 3 samples have less than 
+              20 read counts (10 CPM) is classified as low expression genetic features 
+              and are removed for further downstream DE analysis."
               , style="padding-left: 2em"),
             #####################################################
             ##DE analysis methods section
@@ -127,13 +128,12 @@ body <- dashboardBody(
               a("edgeR, ", href="http://bioconductor.org/packages/release/bioc/html/edgeR.html"),
               a("limma-voom, ", href="http://www.genomebiology.com/2014/15/2/R29"), "and ",
               a("DESeq2 ", href="http://bioconductor.org/packages/release/bioc/html/DESeq2.html"),
-              ". The DE analysis with respect to different methods is implemented  
-              with sub-tab button under the 'DE analysis' tab button. 
-              For the single-factor experiment, the DE analysis is conducted between any 
+              ". The DE analysis is implemented in the 'DE analysis' section. 
+              For the single-factor experiment, the DE analysis could be conducted between any 
               2 levels of that single-factor; 
-              for the multi-factor experiment, the DE analysis is conducted in a way 
-              to combine all the experimental factors into one combined factor, 
-              so that DE analysis can be conducted in any 2 chosen combined factor levels."
+              for the multi-factor experiment, the DE analysis could be conducted in a way 
+              to combine all the experimental factors into combined factors, 
+              so that DE analysis can be conducted in any 2 selected combined factor levels."
               , style="padding-left: 2em")
             #h4("1. edgeR", style="padding-left: 3em"),
             #p("The multi-factor experiment DE analysis is conducted in a way to combine all the experimental 
@@ -152,52 +152,27 @@ body <- dashboardBody(
             ############################################
             ##Workflow section
             h3("Analysis Workflow"),
-            p("In this App, different color box is used to distinguish the analysis results, 
-              the user input options, the example and pre-processing results."
-              , style="padding-left: 0em"),
-            
-            p("In general, the analysis results are presented in 'Green' color box; 
-              the user input options are provided in 'Blue' color box which allows to set up 
-              various DE analysis criteria, and it is collapsible by clicking 
-              the right top corner '+/-' sign; the example and pre-processing results 
-              are illustrated in 'Yellow' color box, which provides example and 
-              helps you to understand your original input data."
-              , style="padding-left: 0em"),
-            
-            p("Therefore, to conduct DE analysis, you just need to follow the tabs on the left black dashboard panel 
-              from uploading your input data to the end of DE analysis results comparison, 
-              this four steps analysis workflow is summarized and illustrated as below."
-              , style="padding-left: 0em"),
-            
-            p("Step 1: Uploading your input data ('Raw Count Table' and 'Meta-data Table')
-              via sub-tabs under 'Data Input' tab on the black dashboard panel 
-              for single-factor and multi-factor experiment respectively, 
-              and visualizing the summarized results of your input data."
+
+            p(strong("Step 1: "), "Uploade your input data ('Raw Count Table' and 'Meta-data Table')
+              on 'Data Input' section for single-factor or multi-factor experiment, 
+              a summary of your input data will be presented."
+              , style="padding-left: 2em; padding-top: 1em"),
+            p(strong("Step 2: "), "Filter out the low expression genetic features via 'Data Summarization' section panel, 
+              summarized count results after filtering will be presented here."
               , style="padding-left: 2em"),
-            p("Step 2: Filtering out the low expression tags 
-              via 'Data Summarization' tab on the black dashboard panel, 
-              and visualizing summarized count results after filtering. 
-              The low expression filtering criteria (CPM cutoff and sample number) 
-              can be set up in the collapsible 'Blue' color box."
+            p(strong("Step 3: "), "Conduct DE analysis on the 'Data Analysis' section."
               , style="padding-left: 2em"),
-            p("Step 3: Conducting DE analysis via sub-tabs under the 'Data Analysis' tab on the black dashboard panel 
-              corresponding to 3 different analysis methods. The same as low expression cut off options, 
-              the DE analysis options can be set up in the collapsible 'Blue' color box."
-              , style="padding-left: 2em"),
-            p("Step 4: Comparing/cross-validating DE analysis results 
-              via 'Methods Comparison' tab on the black dashboard panel. 
-              There are up to 3 different DE analysis methods to choose 
-              for comparison in the collapsible 'Blue' color box together with other comparison options."
+            p(strong("Step 4: "), "Compare/cross-validate DE analysis results via 'Methods Comparison' section panel."
               , style="padding-left: 2em"),
             #includeHTML(path=paste(getwd(),"www/Introduction.html",sep="/"))
             #imageOutput(paste(getwd(),"www/Introduction.pdf",sep="/"))
             #p("The analysis workflow is summarized as below:"
             #  , style="padding-left: 0em, padding-bottom: 4em"),
           
-            img(src="analysis-workflow.png", width=800, style="display: block; margin-left: auto; margin-right: auto;"),
-            p("The analysis execution workflow with this App is illustrated in a pdf file, which can be downloaded from  ",
+            #img(src="analysis-workflow.png", width=800, style="display: block; margin-left: auto; margin-right: auto;"),
+            p("The analysis execution workflow of this App is illustrated in a pdf file, which can be downloaded from  ",
               a("here.", href=as.character(paste("file://~",getwd(),"/www/workflow.pdf", sep="")))
-              , style="padding-left: 0em; padding-top: 2em")
+              , style="padding-left: 1em; padding-top: 1em")
             ),
     
     tabItem(tabName="QuestionsAndAnswers",
@@ -264,8 +239,12 @@ body <- dashboardBody(
                     box(title = "Input 1: Raw Count Data",
                         solidHeader = T, status = "info",
                         width = 6,
+                        helpText("Upload your 'Raw Count Data' here, if no file selected, 
+                                 the demo file for single-factor experiment will be used and displayed."
+                                 ,style="color:black; padding-right:0em;"),
+                        
                         fileInput(inputId="countFile", 
-                                  label=h4("Raw Count Table"), 
+                                  label=NULL, 
                                   accept=c('text/tab-separated-values',
                                            'text/csv',
                                            'text/comma-separated-values',
@@ -281,14 +260,23 @@ body <- dashboardBody(
                                                Tab='\t'
                                      ),
                                      selected='\t'
-                        )
+                        ),
+                        
+                        helpText("The demo file of 'Raw Count Data' for the single-factor experiment is available ", 
+                                 a("here"), href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep="")),
+                                 style="color: black")
                     ),
                     ##Meta-data input box under Data Input tab panel
                     box(title = "Input 2: Meta-data Table",
                         solidHeader = T, status = "info",
                         width = 6,
+                        helpText("Upload your 'Meta-data Table' here, if no file selected, 
+                                 the corresponding demo file for single-factor experiment 
+                                 will be used and displayed."
+                                 ,style="color:black; padding-right:0em;"),
+                        
                         fileInput(inputId="metaTab", 
-                                  label=h4("Metadata Table"),
+                                  label=NULL,
                                   accept = c('text/tab-separated-values',
                                              'text/csv',
                                              'text/comma-separated-values',
@@ -305,65 +293,16 @@ body <- dashboardBody(
                                      ),
                                      selected='\t'
                         ),
-                        br(),
-                        actionButton("dataSubmit", label = "Submit")
-                        #submitButton("dataSubmit")
+                        
+                        helpText("The corresponding 'Meta-data Table' of the demo file for the single factor experiment is accessible ", 
+                                 a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount-meta.txt", sep="")))
+                                 ,style="color:black;")
                     )
                   ),
-                  
-                  helpText(HTML("<div style=\" color: black; font-size: 20px;\">Note: Please make sure the format of you input data are the same as examples of input data shown as below (collapsible by clicking top right corner '+' sign).</div>")),
-                  
-                  fluidRow(
-                    box(title = "Example of input 1",
-                        solidHeader = T, status = "warning",
-                        collapsible = T, collapsed = T,
-                        width = 6,
-                        tableOutput("countTabSamp1"),
-                        tags$style("#countTabSamp1 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#countTabSamp1 th {border: 1px solid black;}","#countTabSamp1 td {border: 1px solid black;}"),
-                        helpText(HTML("<div style=\"color: black \">Example of the input data1 - 'raw count data' for the single-factor experiment, 
-                                      the 1st column corresponds to the tag ID, such as gene ID, transcript ID, or miRNA ID; 
-                                      and 1st row corresponds to the sample ID. 
-                                      <br>An example of full 'Raw Count Data' text file for the single-factor experiment is available "), 
-                                 a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep="")))
-                        )
-                        ),
-                    box(title = "Example of input 2",
-                        solidHeader = T, status = "warning",
-                        collapsible = T, collapsed = T,
-                        width = 6,
-                        fluidRow(
-                          tableOutput("metaTabSamp1"),
-                          tags$style("#metaTabSamp1 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#metaTabSamp1 th {border: 1px solid black;}","#metaTabSamp1 td {border: 1px solid black;}", "#metaTabSamp1 caption {font-size: 16px; color: black; text-align: center;}"),
-                          #column(6,
-                          #       tableOutput("metaTabSamp1"),
-                          #       tags$style("#metaTabSamp1 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#metaTabSamp1 th {border: 1px solid black;}","#metaTabSamp1 td {border: 1px solid black;}", "#metaTabSamp1 caption {font-size: 16px; color: black; text-align: center;}")
-                          
-                          #),
-                          #column(6,
-                          #       tableOutput("multimetaTabSamp1"),
-                          #       tags$style("#multimetaTabSamp1 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#multimetaTabSamp1 th {border: 1px solid black;}","#multimetaTabSamp1 td {border: 1px solid black;}", "#multimetaTabSamp1 caption {font-size: 16px; color: black; text-align: center;}")
-                          #),
-                          #column(4,
-                          #       tableOutput("multimetaTabSamp2"),
-                          #       tags$style("#multimetaTabSamp2 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#multimetaTabSamp2 th {border: 1px solid black;}","#multimetaTabSamp2 td {border: 1px solid black;}", "#multimetaTabSamp2 caption {font-size: 16px; color: black; text-align: center;}")
-                          #),
-                          br(),
-                          br(),
-                          helpText(HTML("<div style=\"color: black; padding-left: 1em; padding-right: 1em; margin-top: 1cm \"> Example of the meta-data table for single-factor experiment, 
-                                        the 1st column corresponds to the sample name, the 2nd columns corresponds to the single experimental factor - 'Group'. 
-                                        <br>An example of 'Meta-data Table' text file corresponding to the example of input 1 - 'Raw Count Data' for the single factor experiment is accessible "), 
-                                   a(HTML("here</div>"), 
-                                     href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount-meta.txt", sep=""))
-                                     )
-                          )
-                          
-                          #helpText("Please specify the factor group level based on your experimental design for DE analysis, 
-                          #for the single-factor experiment, it can be any 2 levels of the factor level,
-                          #for the multi-factor experiment, it can be any 2 levels of the combined factor levels. 
-                          #Please provide correct comparison factor levels for DE analysis, which are summarized on the 'Data Input' tab.")
-                          )
-                          )
-                        )
+
+                  actionButton("dataSubmit", label = "Submit"),
+                  tags$style("button#dataSubmit {margin-left:auto;margin-right:auto;display:block; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}"),
+                  helpText(textOutput("errorInputSingle"), style="color:red;")
                   
                     )
                     ),
@@ -421,8 +360,13 @@ body <- dashboardBody(
                     box(title = "Input 1: Raw Count Data",
                         solidHeader = T, status = "info",
                         width = 6,
+                        
+                        helpText("Upload your 'Raw Count Data' here, if no file selected, 
+                                 the demo file for multi-factor experiment will be used and displayed."
+                                 ,style="color:black; padding-right:0em;"),
+                        
                         fileInput(inputId="countFileMulti", 
-                                  label=h4("Raw Count Table"), 
+                                  label=NULL, 
                                   accept=c('text/tab-separated-values',
                                            'text/csv',
                                            'text/comma-separated-values',
@@ -437,15 +381,25 @@ body <- dashboardBody(
                                                Semicolon=';',
                                                Tab='\t'
                                      ),
-                                     selected='\t'
+                                     selected=','
+                        ),
+                        
+                        helpText(HTML("<div style=\"color: black \">An example of full 'Raw Count Data' csv file for the multi-factor experiment is accessible "), 
+                                 a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv", sep="")))
                         )
                     ),
                     ##Meta-data input box under Data Input tab panel
                     box(title = "Input 2: Meta-data Table",
                         solidHeader = T, status = "info",
                         width = 6,
+                        
+                        helpText("Upload your 'Meta-data Table' here, if no file selected, 
+                                 the corresponding demo file for multi-factor experiment 
+                                 will be used and displayed."
+                                 ,style="color:black; padding-right:0em;"),
+                        
                         fileInput(inputId="metaTabMulti", 
-                                  label=h4("Metadata Table"),
+                                  label=NULL,
                                   accept = c('text/tab-separated-values',
                                              'text/csv',
                                              'text/comma-separated-values',
@@ -460,50 +414,27 @@ body <- dashboardBody(
                                                Semicolon=';',
                                                Tab='\t'
                                      ),
-                                     selected='\t'
+                                     selected=','
                         ),
-                        br(),
-                        actionButton("MultiSubmit", label = "Submit")
-                        #submitButton("MultiSubmit")
+                        
+                        helpText("An example of 'Meta-data Table' csv file corresponding to the example of input 1 - 'Raw Count Data' for the multi-factor experiment is accessible ",
+                                 a("here", href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv", sep="")))
+                                 , style="color: black")
+                        
+                        #helpText(HTML("<div style=\"color: black; padding-left: 1em; padding-right: 1em; margin-top: 1cm \"> An example of 'Meta-data Table' csv file corresponding to the example of input 1 - 'Raw Count Data' for the multi-factor experiment is accessible ")
+                        #         , a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv", sep="")))
+                        #)
                     )
                     
                   ),
-                  
-                  helpText(HTML("<div style=\" color: black; font-size: 20px;\">Note: Please make sure the format of you input data are the same as examples of input data shown as below (collapsible by clicking top right corner '+' sign).</div>")),
-                  
-                  fluidRow(
-                    box(title = "Example of input 1",
-                        solidHeader = T, status = "warning",
-                        collapsible = T, collapsed = T,
-                        width = 6,
-                        tableOutput("countTabSampMulti1"),
-                        tags$style("#countTabSampMulti1 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#countTabSampMulti1 th {border: 1px solid black;}","#countTabSampMulti1 td {border: 1px solid black;}"),
-                        helpText(HTML("<div style=\"color: black \">Example of the input data1 - 'Raw Count Data' for the multi-factor experiment, 
-                                the 1st column corresponds to the tag ID, such as gene ID, transcript ID, or miRNA ID; 
-                                and 1st row corresponds to the sample ID. The format of this 'Raw Count Data' for multi-factor experiment is the same as the single-factor experiment.
-                                <br>An example of full 'Raw Count Data' csv file for the multi-factor experiment is accessible "), 
-                                 a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv", sep="")))
-                        )
-                    ),
-                    
-                    box(title = "Example of input 2",
-                        solidHeader = T, status = "warning",
-                        collapsible = T, collapsed = T,
-                        width = 6,
-                        fluidRow(tableOutput("multimetaTabSamp1"),
-                                 tags$style("#multimetaTabSamp1 table {border: 1px solid black; align: center; margin:auto; margin-bottom: 1em}","#multimetaTabSamp1 th {border: 1px solid black;}","#multimetaTabSamp1 td {border: 1px solid black;}", "#multimetaTabSamp1 caption {font-size: 16px; color: black; text-align: center;}"),
-                                 br(),
-                                 br(),
-                                 helpText(HTML("<div style=\"color: black; padding-left: 1em; padding-right: 1em; margin-top: 1cm \"> Example of the meta-data table for multi-factor experiment, 
-                                        the 1st column corresponds to the sample name, the rest columns correspond to the different experimental factors, which are listed in columns one by one.
-                                        <br>An example of 'Meta-data Table' csv file corresponding to the example of input 1 - 'Raw Count Data' for the multi-factor experiment is accessible ")
-                                          , a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv", sep="")))
-                                 )
-                        )
-                    )
-                  )
+
+                  actionButton("MultiSubmit", label = "Submit"),
+                  tags$style("button#MultiSubmit {margin-left:auto;margin-right:auto;display:block; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}"),
+
+                  helpText(textOutput("errorInputMulti"), style="color:red;")
+
               )
-            ),            
+            ),    
             
             fluidRow(
               box(title = "Input Information Summary",
@@ -522,6 +453,7 @@ body <- dashboardBody(
                   )
               )
             ),
+
             
             fluidRow(
               
@@ -560,15 +492,8 @@ body <- dashboardBody(
                   solidHeader = T, status = "info",
                   collapsible = T, collapsed = F,
                   width = 12,
-                  footer = "Note: Contents in the left dark yellow window are calculated from original raw count data, and contents in 
-                  the right green window are results calculated from removing the low expression tags/genes based on the filtering 
-                  options specified in the middle blue window, where CPM is count per million, it corresponds 
-                  to the read count of (CPM * Library sizes * Normalization factors * 1e-6). 
-                  For detailed information regarding filtering low expression tag, 
-                  please check the 'Introduction' tab.",
+                  
                   fluidRow(
-                    
-                    
                     ##Raw Count Summary box under the Data Summarization panel
                     box(title = "Raw Count Summary",
                         #background = "yellow",
@@ -603,7 +528,9 @@ body <- dashboardBody(
                                            value="2")
                           )
                         ),
-                        actionButton(inputId="rmlow", label="Submit")
+                        actionButton(inputId="rmlow", label="Submit"),
+                        tags$style("button#rmlow {margin-left:auto;margin-right:auto;display:block;background-color:#00CCFF; font-family:Andika, Arial, sans-serif; font-size:0.8em; letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
+                        
                     ),
                     
                     ##After Low Expression Removal box under Data Summarization panel
@@ -675,12 +602,12 @@ body <- dashboardBody(
                           column(6,
                                  textInput(inputId="edgercompGroup1", 
                                            label="Level 1", 
-                                           value="control")
+                                           value="")
                           ),
                           column(6,
                                  textInput(inputId="edgercompGroup2", 
                                            label="Level 2", 
-                                           value="treated")
+                                           value="")
                           )
                           #helpText("Please specify the factor group level based on your experimental design for DE analysis, 
                           #for the single-factor experiment, it can be any 2 levels of the factor level,
@@ -715,9 +642,12 @@ body <- dashboardBody(
                                            label="Fold Change (FC)", 
                                            value="1.5")
                           )
-                        ),
-                        actionButton(inputId="edgerdeAnalysis", label="Submit")
-                    )
+                        )
+                        
+                    ),
+                    
+                    actionButton(inputId="edgerdeAnalysis", label="Submit"),
+                    tags$style("button#edgerdeAnalysis {margin-top:0.5em;float:right; margin-right: 1em; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
                   )
               )
             ),
@@ -772,7 +702,8 @@ body <- dashboardBody(
                          downloadButton("edgerDownload", 
                                         label = "Download",
                                         class = NULL),
-                         helpText("Download DEGs results", align="right")
+                         tags$style("#edgerDownload {float:right; }")
+                         #helpText("Download DEGs results", align="right")
                      ),
                      
                      ## Volcano plot of DE analysis results
@@ -813,12 +744,12 @@ body <- dashboardBody(
                           column(6,
                                  textInput(inputId="voomcompGroup1", 
                                            label="Group 1", 
-                                           value="control")
+                                           value="")
                           ),
                           column(6,
                                  textInput(inputId="voomcompGroup2", 
                                            label="Group 2", 
-                                           value="treated")
+                                           value="")
                           )
                         )
                     ),
@@ -848,9 +779,11 @@ body <- dashboardBody(
                                            label="Fold Change (FC)", 
                                            value="1.5")
                           )
-                        ),
-                        actionButton(inputId="voomdeAnalysis", label="Submit")
-                    )
+                        )
+                        
+                    ),
+                    actionButton(inputId="voomdeAnalysis", label="Submit"),
+                    tags$style("button#voomdeAnalysis {margin-top:0.5em;float:right; margin-right: 1em; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
                   )
               )
             ),
@@ -893,7 +826,8 @@ body <- dashboardBody(
                          downloadButton("voomDownload", 
                                         label = "Download",
                                         class = NULL),
-                         helpText("Download DEGs results")
+                         tags$style("#voomDownload {float:right; }")
+                         #helpText("Download DEGs results")
                      ),
                      
                      ## Volcano plot of DE analysis results
@@ -934,12 +868,12 @@ body <- dashboardBody(
                           column(6,
                                  textInput(inputId="deseq2compGroup1", 
                                            label="Group 1", 
-                                           value="control")
+                                           value="")
                           ),
                           column(6,
                                  textInput(inputId="deseq2compGroup2", 
                                            label="Group 2", 
-                                           value="treated")
+                                           value="")
                           )
                         )
                     ),
@@ -969,9 +903,11 @@ body <- dashboardBody(
                                            label="Fold Change (FC)", 
                                            value="1.5")
                           )
-                        ),
-                        actionButton(inputId="deseq2deAnalysis", label="Submit")
-                    )
+                        )
+                        
+                    ),
+                    actionButton(inputId="deseq2deAnalysis", label="Submit"),
+                    tags$style("button#deseq2deAnalysis {float:right; margin-right: 1em; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
                   )
               )
             ),
@@ -1013,7 +949,9 @@ body <- dashboardBody(
                          downloadButton("deseq2Download", 
                                         label = "Download",
                                         class = NULL),
-                         helpText("Download DEGs results")
+                         tags$style("#deseq2Download {float:right; }")
+                         
+                         #helpText("Download DEGs results", style="float:right")
                      ),
                      
                      ## Volcano plot of DE analysis results
@@ -1063,12 +1001,12 @@ body <- dashboardBody(
                           column(6,
                                  textInput(inputId="decompGroup1", 
                                            label="Group 1", 
-                                           value="control")
+                                           value="")
                           ),
                           column(6,
                                  textInput(inputId="decompGroup2", 
                                            label="Group 2", 
-                                           value="treated")
+                                           value="")
                           )
                         )
                     ),
@@ -1100,7 +1038,8 @@ body <- dashboardBody(
                     )
                   ),
                   actionButton(inputId="decompAnalysis", label="Submit"),
-                  helpText("Note 1). Please make sure at least 2 methods are selected for DE analysis comparison; 2). DE analysis is conducted between any 2 specified levels out of available group levels.")
+                  tags$style("button#decompAnalysis {margin-left:auto;margin-right:auto;display:block; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
+                  #helpText("Note 1). Please make sure at least 2 methods are selected for DE analysis comparison; 2). DE analysis is conducted between any 2 specified levels out of available group levels.")
               )
             ),
             fluidRow( 

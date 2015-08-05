@@ -6,42 +6,107 @@ shinyServer(function(input, output, session) {
     orgCount = read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, row.names=1),
     orgMeta = read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
     )
-  
+    
   observeEvent(input$MultiSubmit, {
-    dataObs$orgCount <- read.delim(input$countFileMulti$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 )
-    dataObs$orgMeta <- read.delim(input$metaTabMulti$datapath, header=T, sep=input$metaSepMulti)
+    if (is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {
+      dataObs$orgCount <- read.delim(paste(getwd(),"data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv",sep="/"), header=T, sep=input$coutFileSepMulti, row.names=1)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
+    } else if (!is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {
+      dataObs$orgCount <- read.delim(paste(getwd(),"data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv",sep="/"), header=T, sep=input$coutFileSepMulti, row.names=1)
+      dataObs$orgMeta <- NULL
+    } else if (is.null(input$countFileMulti) & !is.null(input$metaTabMulti)) {
+      dataObs$orgCount <- NULL
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
+    } else {
+      dataObs$orgCount <- try(read.delim(input$countFileMulti$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 ), T)
+      dataObs$orgMeta <- try(read.delim(input$metaTabMulti$datapath, header=T, sep=input$metaSepMulti), T)
+    }
   })
   
   observeEvent(input$dataSubmit, {
-    dataObs$orgCount <- read.delim(input$countFile$datapath, header=T, sep=input$coutFileSep, row.names=1 )
-    dataObs$orgMeta <- read.delim(input$metaTab$datapath, header=T, sep=input$metaSep)
-  })
-    
-  ##Reactive expression object for original row count
-  datareactive <- reactive ({  
-    org.counts <- dataObs$orgCount
-    #print(head(org.counts))
-    metadata <- dataObs$orgMeta
-    #print(head(metadata))
-    
-    if (dim(metadata)[2]>2) {
-      groupinfo <- metadata[,2]
-      for (i in 3:length(metadata[1,])) {
-        groupinfo <- paste(groupinfo, metadata[,i], sep=".")
-      }
-      Group <- factor(groupinfo)
+    if (is.null(input$countFile) & is.null(input$metaTab) ) {
+      dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+    } else if (!is.null(input$countFile) & is.null(input$metaTab) ) {
+      dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
+      dataObs$orgMeta <- NULL
+    } else if (is.null(input$countFile) & !is.null(input$metaTab) ) {
+      dataObs$orgCount <- NULL
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
     } else {
-      Group <- factor(metadata[,2])
+      dataObs$orgCount <- try(read.delim(input$countFile$datapath, header=T, sep=input$coutFileSep, row.names=1 ), T)
+      dataObs$orgMeta <- try(read.delim(input$metaTab$datapath, header=T, sep=input$metaSep), T) 
     }
     
-    org.count <- DGEList(counts=org.counts, group=Group)
-    org.count$samples$lib.size <- colSums(org.count$counts)
-    org.count <- calcNormFactors(org.count, lib.size=T, method="TMM")
-    org.count
   })
-    
+  
+  progress <- reactiveValues(time=shiny::Progress$new())
+  
+  observeEvent(input$voomdeAnalysis, { 
+    progress$time$set(message = "Limma-voom analysis", value = 0)
+    progress$time$set(value = 0.2, detail = "processing 20%")
+    Sys.sleep(1)
+  })
+  
+  observeEvent(input$edgerdeAnalysis, { 
+    progress$time$set(message = "edgeR analysis", value = 0)
+    progress$time$set(value = 0.2, detail = "processing 20%")
+    Sys.sleep(1)
+  })
+  
+  observeEvent(input$dataSubmit, { 
+    progress$time$set(message = "Data input", value = 0)
+    progress$time$set(value = 1, detail = "processing 100%")
+    Sys.sleep(1)
+  })
+  
+  observeEvent(input$rmlow, { 
+    progress$time$set(message = "Filtering", value = 0)
+    progress$time$set(value = 0.5, detail = "processing 50%")
+    Sys.sleep(1)
+  })
+  
+  observeEvent(input$deseq2deAnalysis, {
+    progress$time$set(message = "DESeq2 analysis", value = 0)
+    progress$time$set(value = 0.2, detail = "processing 20%")
+    Sys.sleep(1)
+  })
+  
+  observeEvent(input$decompAnalysis, {
+    progress$time$set(message = "Comparison analysis", value = 0)
+    progress$time$set(value = 0.2, detail = "processing 20%")
+    Sys.sleep(1)
+  })
+  
+
+  ##Reactive expression object for original row count
+  datareactive <- reactive ({              
+      org.counts <- dataObs$orgCount
+      metadata <- dataObs$orgMeta
+      
+      #print(head(org.counts))
+      #print(head(metadata))
+      #print("*********")
+      
+      if (dim(metadata)[2]>2) {
+        groupinfo <- metadata[,2]
+        for (i in 3:length(metadata[1,])) {
+          groupinfo <- paste(groupinfo, metadata[,i], sep=".")
+        }
+        Group <- factor(groupinfo)
+      } else {
+        Group <- factor(metadata[,2])
+      }
+      
+      org.count <- DGEList(counts=org.counts, group=Group)
+      org.count$samples$lib.size <- colSums(org.count$counts)
+      org.count <- calcNormFactors(org.count, lib.size=T, method="TMM")
+      org.count
+    })
+
+
   #Reactive expression object for the counts remove low expression tags
-  rmlowReactive <- reactive({
+  rmlowReactive <- reactive({    
     dge.count <- calcNormFactors(datareactive())
     cpm.count <- cpm(dge.count$counts)
     keep = rowSums(cpm.count > as.numeric(input$cpmVal) ) >= as.numeric(input$gThreshold)
@@ -53,6 +118,7 @@ shinyServer(function(input, output, session) {
   
   #Reactive expression object for edgeR glm dispersion estimation
   edgerDispersionEst <- reactive({
+  
     dge <- rmlowReactive()
     if(!is(dge,"DGEList")) stop("Dispersion estimation input must be a DGEList.")
     Group <- rmlowReactive()$samples$group
@@ -61,11 +127,13 @@ shinyServer(function(input, output, session) {
     rownames(design) <- rownames(dge$samples)
     colnames(design) <- levels(Group)
     dge <- estimateDisp(dge, design)
+    progress$time$set(value = 0.4, detail = "processing 40%")
     dge
   })
   
   #Reactive expression object for edgeR glm fit
   edgerglmFit <- reactive({
+  
     Group <- edgerDispersionEst()$samples$group
     f <- factor(Group, levels=levels(Group))
     design <- model.matrix(~0+f)
@@ -77,18 +145,23 @@ shinyServer(function(input, output, session) {
   
   #Reactive expression object for edgeR glmLRT result
   edgerDEres <- reactive({
+    
     Group <- edgerDispersionEst()$samples$group
     f <- factor(Group, levels=levels(Group))
     design <- model.matrix(~0+f)
     rownames(design) <- rownames(edgerDispersionEst()$samples)
     colnames(design) <- levels(Group)
-    comp <- makeContrasts(contrasts=paste(as.character(input$edgercompGroup2), as.character(input$edgercompGroup1), sep="-"), levels=design )
+    comp <- makeContrasts(contrasts=paste(as.character(trim(input$edgercompGroup2)), as.character(trim(input$edgercompGroup1)), sep="-"), levels=design )
     test <- glmLRT(edgerglmFit(), contrast=comp)
     test
   })
   
   #Reactive expression object for edgeR desideTestsDEG results
   edgerDEfilter <- reactive({
+    observeEvent(input$edgerdeAnalysis, { 
+      progress$time$set(value = 1, detail = "processing 100%")
+    })
+    
     fcval <- as.numeric(input$edgerfc)
     fdr <- as.numeric(input$edgerfdr)
     if (input$edgerP == 'normp') {
@@ -100,6 +173,7 @@ shinyServer(function(input, output, session) {
     }
     tp$table$filter <- as.factor(filter)
     tp
+        
   }) 
   
   ##Reactive expression object for limma-voom voom function
@@ -112,6 +186,8 @@ shinyServer(function(input, output, session) {
     par(mar=c(0,0,0,0))
     v <- voom(rmlowReactive(), design=design, plot=T, normalize="quantile")
     fit <- lmFit(v, design)
+    progress$time$set(value = 0.6, detail = "processing 60%")
+    Sys.sleep(1)
     fit
   })
   
@@ -123,7 +199,7 @@ shinyServer(function(input, output, session) {
     rownames(design) <- rownames(rmlowReactive()$samples)
     colnames(design) <- levels(Group)
     
-    comp <- makeContrasts(contrasts=paste(as.character(input$voomcompGroup2), as.character(input$voomcompGroup1), sep="-"), levels=design )
+    comp <- makeContrasts(contrasts=paste(as.character(trim(input$voomcompGroup2)), as.character(trim(input$voomcompGroup1)), sep="-"), levels=design )
     
     contrast.fit <- contrasts.fit(voomRes(), contrasts=comp)
     contrast.fit <- eBayes(contrast.fit)  
@@ -132,6 +208,7 @@ shinyServer(function(input, output, session) {
   
   ##Reactive expression object for limma-voom decideTests results
   voomDEfilter <- reactive({
+    
     voomfcval <- as.numeric(input$voomfc)
     voomfdr <- as.numeric(input$voomfdr)
     if (input$voomP == 'normp') {
@@ -141,6 +218,7 @@ shinyServer(function(input, output, session) {
       tpvoom <- topTable(voomDEres(), number=Inf, adjust="BH", sort.by="none") 
       filtervoom <- decideTests(voomDEres(), adjust.method="BH", p.value=voomfdr, lfc=log2(voomfcval))
     }
+    progress$time$set(value = 1, detail = "processing 100%")
     tpvoom$filter <- as.factor(filtervoom)
     tpvoom
   })
@@ -151,16 +229,17 @@ shinyServer(function(input, output, session) {
     colData <- data.frame(Group)
     dds <- DESeqDataSetFromMatrix(rmlowReactive()$count, colData=colData, design=formula(~Group) )
     dds <- DESeq(dds, test="Wald")  
+    progress$time$set(value = 0.7, detail = "processing 70%")
     dds
   })
   
   ##Reactive expression object for DESeq2 results()
   deseq2DEres <- reactive({
-    res <- results(deseq2Res(), contrast=c("Group", as.character(input$deseq2compGroup2), as.character(input$deseq2compGroup1)), format="DataFrame")
+    res <- results(deseq2Res(), contrast=c("Group", as.character(trim(input$deseq2compGroup2)), as.character(trim(input$deseq2compGroup1))), format="DataFrame")
     as.data.frame(res)
   })
   
-  ##Reactive expression object for limma-voom decideTests results
+  ##Reactive expression object for DESeq2 decideTests results
   deseq2DEfilter <- reactive({
     deseq2fcval <- as.numeric(input$deseq2fc)
     deseq2fdr <- as.numeric(input$deseq2fdr)
@@ -185,7 +264,7 @@ shinyServer(function(input, output, session) {
     rownames(design) <- rownames(edgerDispersionEst()$samples)
     colnames(design) <- levels(Group)
     
-    comp <- makeContrasts(contrasts=paste(as.character(input$decompGroup2), as.character(input$decompGroup1), sep="-"), levels=design )
+    comp <- makeContrasts(contrasts=paste(as.character(trim(input$decompGroup2)), as.character(trim(input$decompGroup1)), sep="-"), levels=design )
     compRes <- glmLRT(edgerglmFit(), contrast=comp)
     fcval <- as.numeric(input$decompfc)
     fdr <- as.numeric(input$decompfdr)
@@ -208,7 +287,7 @@ shinyServer(function(input, output, session) {
     rownames(design) <- rownames(rmlowReactive()$samples)
     colnames(design) <- levels(Group)
     
-    comp <- makeContrasts(contrasts=paste(as.character(input$decompGroup2), as.character(input$decompGroup1), sep="-"), levels=design )
+    comp <- makeContrasts(contrasts=paste(as.character(trim(input$decompGroup2)), as.character(trim(input$decompGroup1)), sep="-"), levels=design )
     contrast.fit <- contrasts.fit(voomRes(), contrasts=comp)
     contrast.fit <- eBayes(contrast.fit)  
     
@@ -227,7 +306,7 @@ shinyServer(function(input, output, session) {
   
   ##Reactive expression object of DESeq2 for methods comparison
   deseq2Decomp <- reactive({
-    deseq2res  <- results(deseq2Res(), contrast=c("Group", as.character(input$decompGroup2), as.character(input$decompGroup1)), format="DataFrame")
+    deseq2res  <- results(deseq2Res(), contrast=c("Group", as.character(trim(input$decompGroup2)), as.character(trim(input$decompGroup1)) ), format="DataFrame")
     deseq2fcval <- as.numeric(input$decompfc)
     deseq2fdr <- as.numeric(input$decompfdr)
     deseq2res$filter <- 0
@@ -270,40 +349,18 @@ shinyServer(function(input, output, session) {
     org.counts <- read.delim(paste(getwd(),"www/dataInput1-exp.txt",sep="/"), header=T, row.names=1)
     org.counts
   }, align="l|cccccc")
-  
-  output$countTabSamp1 <- renderTable({     
-    org.counts <- read.delim(paste(getwd(),"www/dataInput1-exp.txt",sep="/"), header=T, row.names=1)
-    org.counts
-  }, align="l|cccccc")
-  
+    
   output$metaTabSamp <- renderTable({
     metadata <- read.delim(paste(getwd(),"/www/dataInput2-exp0.txt",sep=""), header=T)
     metadata
   }, include.rownames=F, align="llc")
-  
-  output$metaTabSamp1 <- renderTable({
-    metadata <- read.delim(paste(getwd(),"/www/dataInput2-exp0.txt",sep=""), header=T)
-    metadata
-  }, align="ll|c", include.rownames=F, caption = "Single-factor",
-  caption.placement = getOption("xtable.caption.placement", "top"), 
-  caption.width = getOption("xtable.caption.width", NULL))
-  
-  output$countTabSampMulti1 <- renderTable({     
-    org.counts <- read.delim(paste(getwd(),"www/Multi-dataInput1-exp.txt",sep="/"), header=T, row.names=1)
-    org.counts
-  }, align="l|cccccc")
-  
+      
   output$multimetaTabSamp22 <- renderTable({
     metadata <- read.delim(paste(getwd(),"/www/Multi-dataInput2-exp2.txt",sep=""), header=T)
     metadata
   }, include.rownames=F, align="llcccc")
   
-  output$multimetaTabSamp1 <- renderTable({
-    metadata <- read.delim(paste(getwd(),"/www/Multi-dataInput2-exp1.txt",sep=""), header=T)
-    metadata
-  }, align="ll|cc", include.rownames=F, caption = "Multi-factor",
-  caption.placement = getOption("xtable.caption.placement", "top"), 
-  caption.width = getOption("xtable.caption.width", NULL))
+
   
   ################################################################################################
   ################################################################################################
@@ -350,10 +407,7 @@ shinyServer(function(input, output, session) {
   output$expDesign <- renderText({
     input$dataSubmit
     isolate({
-      inputMetatab <- input$metaTab
-      
-      if (is.null(inputMetatab)) metadata <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
-      else metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
+      metadata <- dataObs$orgMeta
       
       if (dim(metadata)[2]>2) {
         paste("ERROR: Your input data is multi-factor experiment, please restart the APP and use 'Multi-factor Experiment' tab to input your data.")
@@ -362,14 +416,12 @@ shinyServer(function(input, output, session) {
       }  
     })
   })
+
   
   output$GroupLevel <- renderText({ 
     input$dataSubmit
     isolate({
-      inputMetatab <- input$metaTab
-      
-      if (is.null(inputMetatab)) metadata <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T)
-      else metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSep)
+      metadata <- dataObs$orgMeta
       
       if (dim(metadata)[2]>2) {
         paste("ERROR!!!")
@@ -377,6 +429,29 @@ shinyServer(function(input, output, session) {
         paste(as.character(levels(as.factor(metadata[,2]))), collapse=", ") 
       }
     })
+  })
+  
+  output$errorInputSingle <- renderText({
+    if (input$dataSubmit )
+    isolate({
+      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {paste("ERROR!!! Please provide the corresponding input 2: Meta-data Table!")}
+      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {paste("ERROR!!! Please provide the input 1: Raw Count Data!")}
+      else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+        if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+          paste(dataObs$orgCount[1])
+        } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+          paste(dataObs$orgMeta[1])
+        } else {
+          orgCount <- dataObs$orgCount
+          orgMeta <- dataObs$orgMeta
+          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {paste("ERROR!!! Input files do not correspond with each other. ")}
+          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {paste("ERROR!!! Input files do not correspond with each other. ")}
+          else if (dim(orgMeta)[2] < 2 ) {paste("ERROR!!! Input 2 file format is wrong.") }
+        }        
+        
+      }
+    })
+    
   })
   
   #################################################
@@ -425,8 +500,7 @@ shinyServer(function(input, output, session) {
   output$expDesignMulti <- renderText({
     if ( input$MultiSubmit ) {
       isolate({        
-        inputMetatab <- input$metaTabMulti
-        metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
+        metadata <- dataObs$orgMeta
         if (dim(metadata)[2]>2) {
           paste("This is a multi-factor experiment with ", (dim(metadata)[2]-1), " factors levels, they are", sep="" )
         } else {
@@ -440,8 +514,10 @@ shinyServer(function(input, output, session) {
   output$GroupLevelMulti <- renderText({ 
     if ( input$MultiSubmit ) {
       isolate({ 
-        inputMetatab <- input$metaTabMulti
-        metadata <- read.delim(inputMetatab$datapath, header=T, sep=input$metaSepMulti)
+        #org.counts <- dataObs$orgCount
+        #print(head(org.counts))
+        #metadata <- dataObs$orgMeta
+        metadata <- dataObs$orgMeta
         
         if (dim(metadata)[2]>2) {
           factor <- paste(as.character(colnames(metadata)[-1]), collapse=", ")        
@@ -460,6 +536,27 @@ shinyServer(function(input, output, session) {
     
   })
   
+  output$errorInputMulti <- renderText({
+    if ( input$MultiSubmit )
+      isolate({
+        if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {paste("ERROR!!! Please provide the corresponding input 2: Meta-data Table!")}
+        else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {paste("ERROR!!! Please provide the input 1: Raw Count Data!")}
+        else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+          if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+            paste(dataObs$orgCount[1])
+          } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+            paste(dataObs$orgMeta[1])
+          } else {
+            orgCount <- dataObs$orgCount
+            orgMeta <- dataObs$orgMeta
+            if (dim(orgCount)[2] != dim(orgMeta)[1] ) {paste("ERROR!!! Input files do not correspond with each other. ")}
+            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {paste("ERROR!!! Input files do not correspond with each other. ")}
+          }        
+          
+        }
+      })
+    
+  })
   ##End data input tab panel
   ################################################
   
@@ -518,6 +615,7 @@ shinyServer(function(input, output, session) {
     input$rmlow | input$MultiSubmit | input$dataSubmit
     isolate({
       Group <- as.factor(rmlowReactive()$samples$group)
+      progress$time$set(value = 1, detail = "processing 100%")
       par(mar=c(5,5,4,2))
       plotMDS(rmlowReactive(), col=as.numeric(Group)+1, 
               cex=2, main="MDS plot", ndim=3, gene.selection="common",
@@ -537,6 +635,7 @@ shinyServer(function(input, output, session) {
   output$edgerBCV <- renderPlot({ 
     if (input$edgerdeAnalysis)
       isolate({ 
+        
         par(mar=c(5,5,2,2))
         plotBCV(edgerDispersionEst(), cex=0.5, cex.lab=1.8, cex.axis=1.5)
       })
@@ -555,12 +654,13 @@ shinyServer(function(input, output, session) {
   })
   
   output$edgerTagwiseDisp <- renderTable({ 
+    
     if(input$edgerdeAnalysis)
-      isolate({ 
+      isolate({       
         res<- as.table(t(summary(edgerDispersionEst()$tagwise.dispersion)))
         res <- t(res)
         colnames(res) <- "Tagwise"
-        res
+        res    
       })
   }, digits=3, align = "l|c")
   ##############
@@ -583,7 +683,7 @@ shinyServer(function(input, output, session) {
   output$edgerTestDGEtitle <- renderText({
     if(input$edgerdeAnalysis)
       isolate({
-        paste(paste(as.character(input$edgercompGroup2), as.character(input$edgercompGroup1), sep="-"), " DE analysis", sep="")
+        paste(paste(as.character(trim(input$edgercompGroup2)), as.character(trim(input$edgercompGroup1)), sep="-"), " DE analysis", sep="")
       })   
   })
   
@@ -662,6 +762,7 @@ shinyServer(function(input, output, session) {
         tpvoom <- topTable(voomDEres(), n=Inf, adjust.method="BH", sort.by="p")
         res <- tpvoom[,c("logFC","P.Value", "adj.P.Val")]
         res$logFC <- round(res$logFC, digits=3)
+        progress$time$set(value = 1, detail = "processing 100%")
         res
       })
   }, 
@@ -672,7 +773,7 @@ shinyServer(function(input, output, session) {
   output$voomTestDGEtitle <- renderText({
     if(input$voomdeAnalysis)
       isolate({
-        paste(paste(as.character(input$voomcompGroup2), as.character(input$voomcompGroup1), sep="-"), " DE analysis", sep="")
+        paste(paste(as.character(trim(input$voomcompGroup2)), as.character(trim(input$voomcompGroup1)), sep="-"), " DE analysis", sep="")
       })   
   })
   
@@ -734,6 +835,8 @@ shinyServer(function(input, output, session) {
   output$deseq2BCV <- renderPlot({
     if (input$deseq2deAnalysis)
       isolate({
+        progress$time$set(value = 0.3, detail = "processing 30%")
+        Sys.sleep(1)
         par(mar=c(4,5,2,2))
         plotDispEsts(deseq2Res(), cex.lab=1.8, cex.axis=1.5)
       })
@@ -745,6 +848,7 @@ shinyServer(function(input, output, session) {
         res.pre <- deseq2DEres()[,c("log2FoldChange", "pvalue", "padj")]
         res <- as.data.frame(res.pre) 
         res$log2FoldChange <- round(res$log2FoldChange, digits=3)
+        progress$time$set(value = 1, detail = "processing 100%")
         res
       })
   }, 
@@ -755,7 +859,7 @@ shinyServer(function(input, output, session) {
   output$deseq2TestDGEtitle <- renderText({
     if (input$deseq2deAnalysis)
       isolate({
-        paste(paste(as.character(input$deseq2compGroup2), as.character(input$deseq2compGroup1), sep="-"), " DE analysis", sep="")
+        paste(paste(as.character(trim(input$deseq2compGroup2)), as.character(trim(input$deseq2compGroup1)), sep="-"), " DE analysis", sep="")
       })
   })
   
@@ -784,7 +888,7 @@ shinyServer(function(input, output, session) {
         } else if (input$deseq2P == 'fdrp') {
           g <- ggplot(data=plotres, aes(x=log2FoldChange, y=-log10(padj), colour=filter, shape=filter))
           g <- g + labs(x="log2 FC", y="-log10 (FDR adjusted-p)")
-        }   
+        }           
         g <- g + geom_point(size=4) + geom_hline(yintercept=-log10(as.numeric(input$deseq2fdr))) 
         g <- g + geom_vline(xintercept=log2(as.numeric(input$deseq2fc))) + geom_vline(xintercept=-log2(as.numeric(input$deseq2fc)))
         g <- g + theme(legend.title=element_blank(),legend.position = "top", legend.direction="vertical")
@@ -907,9 +1011,11 @@ shinyServer(function(input, output, session) {
           rownames(res) <- rownames(res.matrix)[c(2,3,6)]
         }
         colnames(res) <- "No. identified DEGs"
+        progress$time$set(value = 1, detail = "processing 100%")
         res
       })
   },digits = 0, align="l|c")
   
 }) 
+
 
