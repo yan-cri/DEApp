@@ -9,8 +9,14 @@ The input of this App is 2 files in '.txt' or '.csv' format.
 1. 'Raw Count Data' : includes the count results of all tags with respect to each sample.  
 2. 'Meta-data Table' : includes the experimental group factor information for each sample.
 
-**Test data**: 3 sets of data were used to test this App, they are under 'data' folder directory. 
-The default presented DE analysis is based on the count result where are pre-processed with 'featureCount' from the RNA-seq experiment published [here](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0031229). Other 2 sets of data are downloaded from [http://bioinf.wehi.edu.au/edgeRSpringer/](http://bioinf.wehi.edu.au/edgeRSpringer/).
+**Test data**: 3 sets of data were used to test this App, they are under 'data' folder, named as:
+
+1. TestData-featureCount.txt (input data 1) + TestData-featureCount-meta.txt (input data 2)
+2. pnas-count_singleFactor.txt (input data 1) + pnas-count_singleFacotr-meta.txt (input data 2)
+3. ReadCounts-Chen-edgeRSpringer-multiFactor.csv (input data 1) + ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv (input data 2)
+
+Among them, the first and the second data with tab delimited text format are from single-factor experiment, and the third data saved as csv comma delimited format set is from multi-factor experiment. The count results (input data 1) of the first test data set is pre-processed results with 'featureCount' based on the RNA-seq experiment published [here](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0031229), 
+whereas the raw count table of the second and the third data set are downloaded from [https://sites.google.com/site/davismcc/useful-documents](https://sites.google.com/site/davismcc/useful-documents) and [http://bioinf.wehi.edu.au/edgeRSpringer/](http://bioinf.wehi.edu.au/edgeRSpringer/) respectively.
 
 ##App execution
 To run this App after downloading this App from github to your local PC, please follow the steps as below:
