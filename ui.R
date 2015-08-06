@@ -228,6 +228,7 @@ body <- dashboardBody(
     #########################################
     ## First tab content for data input
     tabItem(tabName="dataInputSingle",
+            
             fluidRow(
               box(title = "Input data",
                   solidHeader = T, status = "info",
@@ -549,7 +550,8 @@ body <- dashboardBody(
                           )
                         )
                     )
-                  )
+                  ),
+                  helpText(textOutput("errorFiltering"), style="color:red;")
               )
     ),
     
@@ -648,7 +650,8 @@ body <- dashboardBody(
                     
                     actionButton(inputId="edgerdeAnalysis", label="Submit"),
                     tags$style("button#edgerdeAnalysis {margin-top:0.5em;float:right; margin-right: 1em; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
-                  )
+                  ),
+                  helpText(textOutput("erroredgeR"), style="color:red;")
               )
             ),
             
@@ -784,7 +787,8 @@ body <- dashboardBody(
                     ),
                     actionButton(inputId="voomdeAnalysis", label="Submit"),
                     tags$style("button#voomdeAnalysis {margin-top:0.5em;float:right; margin-right: 1em; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
-                  )
+                  ),
+                  helpText(textOutput("errorVoom"), style="color:red;")
               )
             ),
             
@@ -908,7 +912,8 @@ body <- dashboardBody(
                     ),
                     actionButton(inputId="deseq2deAnalysis", label="Submit"),
                     tags$style("button#deseq2deAnalysis {float:right; margin-right: 1em; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
-                  )
+                  ),
+                  helpText(textOutput("errorDeseq2"), style="color:red;")
               )
             ),
             
@@ -1038,7 +1043,8 @@ body <- dashboardBody(
                     )
                   ),
                   actionButton(inputId="decompAnalysis", label="Submit"),
-                  tags$style("button#decompAnalysis {margin-left:auto;margin-right:auto;display:block; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
+                  tags$style("button#decompAnalysis {margin-left:auto;margin-right:auto;display:block; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}"),
+                  helpText(textOutput("errorComp"), style="color:red;")
                   #helpText("Note 1). Please make sure at least 2 methods are selected for DE analysis comparison; 2). DE analysis is conducted between any 2 specified levels out of available group levels.")
               )
             ),

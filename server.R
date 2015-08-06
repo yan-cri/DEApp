@@ -39,8 +39,26 @@ shinyServer(function(input, output, session) {
     }
     
   })
-  
+    
   progress <- reactiveValues(time=shiny::Progress$new())
+    
+  observeEvent(input$dataSubmit, {     
+    progress$time$set(message = "Data input", value = 0)
+    progress$time$set(value = 0.5, detail = "processing 50%")
+    Sys.sleep(1)
+  })
+  
+  observeEvent(input$MultiSubmit, { 
+    progress$time$set(message = "Data input", value = 0)
+    progress$time$set(value = 0.5, detail = "processing 50%")
+    Sys.sleep(1)
+  })
+    
+  observeEvent(input$rmlow, { 
+    progress$time$set(message = "Filtering", value = 0)
+    progress$time$set(value = 0.5, detail = "processing 50%")
+    Sys.sleep(1)
+  })
   
   observeEvent(input$voomdeAnalysis, { 
     progress$time$set(message = "Limma-voom analysis", value = 0)
@@ -51,18 +69,6 @@ shinyServer(function(input, output, session) {
   observeEvent(input$edgerdeAnalysis, { 
     progress$time$set(message = "edgeR analysis", value = 0)
     progress$time$set(value = 0.2, detail = "processing 20%")
-    Sys.sleep(1)
-  })
-  
-  observeEvent(input$dataSubmit, { 
-    progress$time$set(message = "Data input", value = 0)
-    progress$time$set(value = 1, detail = "processing 100%")
-    Sys.sleep(1)
-  })
-  
-  observeEvent(input$rmlow, { 
-    progress$time$set(message = "Filtering", value = 0)
-    progress$time$set(value = 0.5, detail = "processing 50%")
     Sys.sleep(1)
   })
   
@@ -101,6 +107,7 @@ shinyServer(function(input, output, session) {
       org.count <- DGEList(counts=org.counts, group=Group)
       org.count$samples$lib.size <- colSums(org.count$counts)
       org.count <- calcNormFactors(org.count, lib.size=T, method="TMM")
+
       org.count
     })
 
@@ -109,6 +116,7 @@ shinyServer(function(input, output, session) {
   rmlowReactive <- reactive({    
     dge.count <- calcNormFactors(datareactive())
     cpm.count <- cpm(dge.count$counts)
+    if (as.numeric(input$gThreshold) > length(colnames(datareactive()$counts)) ) stop("Cutoff sample number exceeds the total number of samples")
     keep = rowSums(cpm.count > as.numeric(input$cpmVal) ) >= as.numeric(input$gThreshold)
     dge.count.rmlow <- dge.count[keep,]
     dge.count.rmlow$samples$lib.size <- colSums(dge.count.rmlow$counts)
@@ -117,8 +125,7 @@ shinyServer(function(input, output, session) {
   })
   
   #Reactive expression object for edgeR glm dispersion estimation
-  edgerDispersionEst <- reactive({
-  
+  edgerDispersionEst <- reactive({  
     dge <- rmlowReactive()
     if(!is(dge,"DGEList")) stop("Dispersion estimation input must be a DGEList.")
     Group <- rmlowReactive()$samples$group
@@ -132,8 +139,7 @@ shinyServer(function(input, output, session) {
   })
   
   #Reactive expression object for edgeR glm fit
-  edgerglmFit <- reactive({
-  
+  edgerglmFit <- reactive({  
     Group <- edgerDispersionEst()$samples$group
     f <- factor(Group, levels=levels(Group))
     design <- model.matrix(~0+f)
@@ -144,13 +150,19 @@ shinyServer(function(input, output, session) {
   })
   
   #Reactive expression object for edgeR glmLRT result
-  edgerDEres <- reactive({
-    
+  edgerDEres <- reactive({    
     Group <- edgerDispersionEst()$samples$group
     f <- factor(Group, levels=levels(Group))
     design <- model.matrix(~0+f)
     rownames(design) <- rownames(edgerDispersionEst()$samples)
     colnames(design) <- levels(Group)
+    if (as.character(trim(input$edgercompGroup2)) =="" | as.character(trim(input$edgercompGroup1)) == "") {
+      stop("Please select 2 groups levels for DE analysis!")
+      } else if (as.character(trim(input$edgercompGroup2)) == as.character(trim(input$edgercompGroup1)) ) {
+        stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+        } else if( (! as.character(trim(input$edgercompGroup2)) %in% levels(Group)) | (! as.character(trim(input$edgercompGroup1)) %in% levels(Group)) ) {
+          stop("Group level 1 or level 2 are not in the available group levels!")
+        }     
     comp <- makeContrasts(contrasts=paste(as.character(trim(input$edgercompGroup2)), as.character(trim(input$edgercompGroup1)), sep="-"), levels=design )
     test <- glmLRT(edgerglmFit(), contrast=comp)
     test
@@ -198,6 +210,13 @@ shinyServer(function(input, output, session) {
     design <- model.matrix(~0+f)
     rownames(design) <- rownames(rmlowReactive()$samples)
     colnames(design) <- levels(Group)
+    if (as.character(trim(input$voomcompGroup2)) =="" | as.character(trim(input$voomcompGroup1)) == "") {
+      stop("Please select 2 groups levels for DE analysis!")
+    } else if (as.character(trim(input$voomcompGroup1)) == as.character(trim(input$voomcompGroup2)) ) {
+      stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+    } else if( (! as.character(trim(input$voomcompGroup2)) %in% levels(Group)) | (! as.character(trim(input$voomcompGroup1)) %in% levels(Group)) ) {
+      stop("Group level 1 or level 2 are not in the available group levels!")
+    } 
     
     comp <- makeContrasts(contrasts=paste(as.character(trim(input$voomcompGroup2)), as.character(trim(input$voomcompGroup1)), sep="-"), levels=design )
     
@@ -205,7 +224,7 @@ shinyServer(function(input, output, session) {
     contrast.fit <- eBayes(contrast.fit)  
     contrast.fit
   })
-  
+    
   ##Reactive expression object for limma-voom decideTests results
   voomDEfilter <- reactive({
     
@@ -230,11 +249,20 @@ shinyServer(function(input, output, session) {
     dds <- DESeqDataSetFromMatrix(rmlowReactive()$count, colData=colData, design=formula(~Group) )
     dds <- DESeq(dds, test="Wald")  
     progress$time$set(value = 0.7, detail = "processing 70%")
+    Sys.sleep(1)
     dds
   })
   
   ##Reactive expression object for DESeq2 results()
   deseq2DEres <- reactive({
+    Group <- datareactive()$samples$group
+    if (as.character(trim(input$deseq2compGroup2)) =="" | as.character(trim(input$deseq2compGroup1)) == "") {
+      stop("Please select 2 groups levels for DE analysis!")
+    } else if (as.character(trim(input$deseq2compGroup1)) == as.character(trim(input$deseq2compGroup2)) ) {
+      stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+    } else if( (! as.character(trim(input$deseq2compGroup2)) %in% levels(Group)) | (! as.character(trim(input$deseq2compGroup1)) %in% levels(Group)) ) {
+      stop("Group level 1 or level 2 are not in the available group levels!")
+    } 
     res <- results(deseq2Res(), contrast=c("Group", as.character(trim(input$deseq2compGroup2)), as.character(trim(input$deseq2compGroup1))), format="DataFrame")
     as.data.frame(res)
   })
@@ -264,6 +292,14 @@ shinyServer(function(input, output, session) {
     rownames(design) <- rownames(edgerDispersionEst()$samples)
     colnames(design) <- levels(Group)
     
+    if (as.character(trim(input$decompGroup2)) =="" | as.character(trim(input$decompGroup1)) == "") {
+      stop("Please select 2 groups levels for DE analysis!")
+    } else if (as.character(trim(input$decompGroup1)) == as.character(trim(input$decompGroup2)) ) {
+      stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+    } else if( (! as.character(trim(input$decompGroup2)) %in% levels(Group)) | (! as.character(trim(input$decompGroup1)) %in% levels(Group)) ) {
+      stop("Group level 1 or level 2 are not in the available group levels!")
+    } 
+    
     comp <- makeContrasts(contrasts=paste(as.character(trim(input$decompGroup2)), as.character(trim(input$decompGroup1)), sep="-"), levels=design )
     compRes <- glmLRT(edgerglmFit(), contrast=comp)
     fcval <- as.numeric(input$decompfc)
@@ -287,6 +323,14 @@ shinyServer(function(input, output, session) {
     rownames(design) <- rownames(rmlowReactive()$samples)
     colnames(design) <- levels(Group)
     
+    if (as.character(trim(input$decompGroup2)) =="" | as.character(trim(input$decompGroup1)) == "") {
+      stop("Please select 2 groups levels for DE analysis!")
+    } else if (as.character(trim(input$decompGroup1)) == as.character(trim(input$decompGroup2)) ) {
+      stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+    } else if( (! as.character(trim(input$decompGroup2)) %in% levels(Group)) | (! as.character(trim(input$decompGroup1)) %in% levels(Group)) ) {
+      stop("Group level 1 or level 2 are not in the available group levels!")
+    } 
+    
     comp <- makeContrasts(contrasts=paste(as.character(trim(input$decompGroup2)), as.character(trim(input$decompGroup1)), sep="-"), levels=design )
     contrast.fit <- contrasts.fit(voomRes(), contrasts=comp)
     contrast.fit <- eBayes(contrast.fit)  
@@ -306,6 +350,16 @@ shinyServer(function(input, output, session) {
   
   ##Reactive expression object of DESeq2 for methods comparison
   deseq2Decomp <- reactive({
+    
+    Group <- datareactive()$samples$group
+    if (as.character(trim(input$decompGroup2)) =="" | as.character(trim(input$decompGroup1)) == "") {
+      stop("Please select 2 groups levels for DE analysis!")
+    } else if (as.character(trim(input$decompGroup1)) == as.character(trim(input$decompGroup2)) ) {
+      stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+    } else if( (! as.character(trim(input$decompGroup2)) %in% levels(Group)) | (! as.character(trim(input$decompGroup1)) %in% levels(Group)) ) {
+      stop("Group level 1 or level 2 are not in the available group levels!")
+    }        
+    
     deseq2res  <- results(deseq2Res(), contrast=c("Group", as.character(trim(input$decompGroup2)), as.character(trim(input$decompGroup1)) ), format="DataFrame")
     deseq2fcval <- as.numeric(input$decompfc)
     deseq2fdr <- as.numeric(input$decompfdr)
@@ -322,6 +376,15 @@ shinyServer(function(input, output, session) {
   
   ##Reactive expression object of DE comparison results
   decompRes <- reactive({
+    Group <- datareactive()$samples$group
+    if (as.character(trim(input$decompGroup2)) =="" | as.character(trim(input$decompGroup1)) == "") {
+      stop("Please select 2 groups levels for DE analysis!")
+    } else if (as.character(trim(input$decompGroup1)) == as.character(trim(input$decompGroup2)) ) {
+      stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+    } else if( (! as.character(trim(input$decompGroup2)) %in% levels(Group)) | (! as.character(trim(input$decompGroup1)) %in% levels(Group)) ) {
+      stop("Group level 1 or level 2 are not in the available group levels!")
+    }   
+    
     edgerDEgenename <- rownames(rbind(subset(edgerDecomp()$table, filter==1),subset(edgerDecomp()$table, filter==-1)))
     voomDEgenename <- rownames(rbind(subset(voomDecomp(), filter==1),subset(voomDecomp(), filter==-1)))
     deseq2DEgenename <- rownames(rbind(subset(deseq2Decomp(), filter==1),subset(deseq2Decomp(), filter==-1)))
@@ -368,9 +431,11 @@ shinyServer(function(input, output, session) {
   output$overallDataSummary <- renderTable({ 
     input$dataSubmit
     isolate({
-
       no.samples <- length(colnames(datareactive()$counts))
       no.gene <- dim((datareactive())$counts)[1]
+      observeEvent(input$dataSubmit, { 
+        progress$time$set(value = 1, detail = "processing 100%")
+      })
       res.summary <- rbind(no.samples, no.gene)
       rownames(res.summary) <- c("Samples", "Tags")
       colnames(res.summary) <- "Number"
@@ -382,7 +447,6 @@ shinyServer(function(input, output, session) {
   output$sampleGroup <- renderTable({ 
     input$dataSubmit
     isolate({
-
       groupinfo <- as.matrix(summary(datareactive()$samples$group))
       colnames(groupinfo) <- "No. in each group"
       groupinfo
@@ -453,6 +517,7 @@ shinyServer(function(input, output, session) {
     })
     
   })
+
   
   #################################################
   ##Multi-factor Exp Res Summary
@@ -461,6 +526,9 @@ shinyServer(function(input, output, session) {
       isolate({
         no.samples <- length(colnames(datareactive()$counts))
         no.gene <- dim((datareactive())$counts)[1]
+        observeEvent(input$MultiSubmit, { 
+          progress$time$set(value = 1, detail = "processing 100%")
+        })
         res.summary <- rbind(no.samples, no.gene)
         rownames(res.summary) <- c("Samples", "Tags")
         colnames(res.summary) <- "Number"
@@ -569,7 +637,7 @@ shinyServer(function(input, output, session) {
   }, align="l|cc", digits=c(0,0,2), display=c("s", "e", "f"))
   
   output$rmlowLibsizeNormfactor <- renderTable({ 
-    input$rmlow | input$MultiSubmit | input$dataSubmit 
+    input$rmlow 
     isolate({ 
       tab <- (rmlowReactive())$samples[, -1]
       colnames(tab) <- c("Library sizes", "Normalization factors")
@@ -589,7 +657,7 @@ shinyServer(function(input, output, session) {
   },digits=0, align="l|c")
   
   output$rmlowSamplesize <- renderTable({ 
-    input$rmlow | input$MultiSubmit | input$dataSubmit
+    input$rmlow 
     isolate({ 
       no.samples <- length(colnames(rmlowReactive()$counts))
       no.gene <- dim(rmlowReactive()$counts)[1]
@@ -601,7 +669,7 @@ shinyServer(function(input, output, session) {
   },digits=0, align="l|c")
   
   output$sampleBoxplot <- renderPlot({ 
-    input$rmlow | input$MultiSubmit | input$dataSubmit
+    input$rmlow 
     isolate({
       Group <- as.factor(rmlowReactive()$samples$group)
       bx.p<-boxplot(cpm(rmlowReactive(), log=T)[,])
@@ -612,16 +680,29 @@ shinyServer(function(input, output, session) {
   })
   
   output$sampleMDS <- renderPlot({ 
-    input$rmlow | input$MultiSubmit | input$dataSubmit
+    input$rmlow 
     isolate({
       Group <- as.factor(rmlowReactive()$samples$group)
-      progress$time$set(value = 1, detail = "processing 100%")
+      observeEvent(input$rmlow, { 
+        progress$time$set(value = 1, detail = "processing 100%")
+      })
       par(mar=c(5,5,4,2))
       plotMDS(rmlowReactive(), col=as.numeric(Group)+1, 
               cex=2, main="MDS plot", ndim=3, gene.selection="common",
               xlab = "logFC dim 1", ylab="logFC dim 2", cex.lab=2, cex.main=2, cex.axis=1.5)
     })
   }) 
+  
+  
+  output$errorFiltering <- renderText({
+    input$rmlow 
+    isolate({
+      if (as.numeric(input$gThreshold) > length(colnames(datareactive()$counts)) ) {
+        stop("Cutoff sample number exceeds the total number of samples")
+        paste("ERROR: cutoff sample number exceeds the total number of samples!")
+      }
+    })
+  })  
   ##End Data summary tab Panel
   ################################################
   
@@ -664,7 +745,23 @@ shinyServer(function(input, output, session) {
       })
   }, digits=3, align = "l|c")
   ##############
-  ##tab panel for DE analysis results 
+  ##tab panel for DE analysis results   
+  output$erroredgeR <- renderText({
+    if(input$edgerdeAnalysis)
+      isolate({
+        Group <- edgerDispersionEst()$samples$group
+        if (as.character(trim(input$edgercompGroup2)) =="" | as.character(trim(input$edgercompGroup1)) == "") {
+          paste("Error: please select 2 group levels for DE analysis!")
+        } else {
+          if (as.character(trim(input$edgercompGroup2)) == as.character(trim(input$edgercompGroup1)) ) {
+            stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+            paste("Error: Group 1 and Group 2 are the same, please select 2 different group levels for DE analysis!")
+          } else if( (! as.character(trim(input$edgercompGroup2)) %in% levels(Group)) | (! as.character(trim(input$edgercompGroup1)) %in% levels(Group)) ) {paste("Error: Group level 1 or level 2 are not in the available group levels!")
+          }
+        }        
+      })
+  })
+  
   output$edgerRes <- DT::renderDataTable({ 
     if(input$edgerdeAnalysis)
       isolate({ 
@@ -739,6 +836,20 @@ shinyServer(function(input, output, session) {
   
   ################################################
   ###Limma-voom panel DE analysis
+  output$errorVoom <- renderText({
+    if(input$voomdeAnalysis)
+    isolate({
+      Group <- datareactive()$samples$group
+      if (as.character(trim(input$voomcompGroup2)) =="" | as.character(trim(input$voomcompGroup1)) == "") {
+        paste("Error: Please select 2 groups levels for DE analysis!")
+      } else if (as.character(trim(input$voomcompGroup1)) == as.character(trim(input$voomcompGroup2)) ) {
+        paste("Error: Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+      } else if( (! as.character(trim(input$voomcompGroup2)) %in% levels(Group)) | (! as.character(trim(input$voomcompGroup1)) %in% levels(Group)) ) {
+        paste("Error: Group level 1 or level 2 are not in the available group levels!")
+      } 
+    })    
+  })  
+  
   output$voomGroupLevel <- renderText({ 
     paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")     
   })
@@ -828,6 +939,20 @@ shinyServer(function(input, output, session) {
   
   ################################################
   ###DEseq2 panel DE analysis
+  output$errorDeseq2 <- renderText({
+    if(input$deseq2deAnalysis)
+      isolate({
+        Group <- datareactive()$samples$group
+        if (as.character(trim(input$deseq2compGroup2)) =="" | as.character(trim(input$deseq2compGroup1)) == "") {
+          paste("Error: Please select 2 groups levels for DE analysis!")
+        } else if (as.character(trim(input$deseq2compGroup1)) == as.character(trim(input$deseq2compGroup2)) ) {
+          paste("Error: Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+        } else if( (! as.character(trim(input$deseq2compGroup2)) %in% levels(Group)) | (! as.character(trim(input$deseq2compGroup1)) %in% levels(Group)) ) {
+          paste("Error: Group level 1 or level 2 are not in the available group levels!")
+        }        
+      })    
+  }) 
+
   output$deseq2GroupLevel <- renderText({  
     paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")  
   })
@@ -912,6 +1037,22 @@ shinyServer(function(input, output, session) {
   
   ################################################
   ##DE comparison results
+  
+  output$errorComp <- renderText({
+    if(input$decompAnalysis)
+      isolate({
+        Group <- datareactive()$samples$group
+        if (as.character(trim(input$decompGroup2)) =="" | as.character(trim(input$decompGroup1)) == "") {
+          paste("Error: Please select 2 groups levels for DE analysis!")
+        } else if (as.character(trim(input$decompGroup1)) == as.character(trim(input$decompGroup2)) ) {
+          paste("Error: Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+        } else if( (! as.character(trim(input$decompGroup2)) %in% levels(Group)) | (! as.character(trim(input$decompGroup1)) %in% levels(Group)) ) {
+          paste("Error: Group level 1 or level 2 are not in the available group levels!")
+        } 
+      })
+    
+  })
+  
   output$compGroupLevel <- renderText({ 
     
     paste("The available group levels are: " ,paste(as.character(levels((datareactive())$samples$group)), collapse=", "), sep="")
