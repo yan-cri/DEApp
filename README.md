@@ -1,4 +1,4 @@
-# DEAPP: an interactive web application of differential expression analysis
+# DEApp: an interactive web application of differential expression analysis
 
 ##Introduction
 This DE analysis interactive web application (App) is developed in R with Shiny, aiming to 1). conduct differential expression (DE) analysis with edgeR, limma-voom, and DESeq2, and 2). cross-validate the DE analysis results with these 3 different DE analysis methods based on your own provided input files.
@@ -15,8 +15,8 @@ The input of this App is 2 files in '.txt' or '.csv' format.
 2. pnas-count_singleFactor.txt (input data 1) + pnas-count_singleFacotr-meta.txt (input data 2)
 3. ReadCounts-Chen-edgeRSpringer-multiFactor.csv (input data 1) + ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv (input data 2)
 
-Among them, the first and the second data with tab delimited text format are from single-factor experiment, and the third data saved as csv comma delimited format set is from multi-factor experiment. The count results (input data 1) of the first test data set is pre-processed results with 'featureCount' based on the RNA-seq experiment published [here](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0031229), 
-whereas the raw count table of the second and the third data set are downloaded from [https://sites.google.com/site/davismcc/useful-documents](https://sites.google.com/site/davismcc/useful-documents) and [http://bioinf.wehi.edu.au/edgeRSpringer/](http://bioinf.wehi.edu.au/edgeRSpringer/) respectively.
+Among them, the first and the second data's input files are saved in tab delimited text format, and they both are from single-factor experiment; whereas the third data's input files are saved as csv comma delimited format set, and it is from multi-factor experiment. The 'Raw Count Data' file of the first test data set is pre-processed results with 'featureCount' based on the RNA-seq experiment published [here](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0031229), 
+whereas 'Raw Count Data' input files of the second and the third data set are downloaded from [https://sites.google.com/site/davismcc/useful-documents](https://sites.google.com/site/davismcc/useful-documents) and [http://bioinf.wehi.edu.au/edgeRSpringer/](http://bioinf.wehi.edu.au/edgeRSpringer/) respectively.
 
 ##App execution
 To run this App after downloading this App from github to your local PC, please follow the steps as below:
