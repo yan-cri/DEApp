@@ -23,8 +23,13 @@ sidebar <- dashboardSidebar(
                        menuSubItem("DEseq2", tabName="deseq2")
               ),
               menuItem("Methods Comparison", icon = icon("bar-chart-o"),tabName="decomp"),
-              menuItem("Feedback", tabName="feedback")
+              menuItem("Feedback", icon = icon("comment", lib="glyphicon"), tabName="feedback")
+              
   )
+  ,helpText("Developed by bioinformatics core, Center for Research Informatics (CRI), University of Chicago", style="padding-left:1em; padding-right:1em;position:absolute; bottom:1em; ")
+  #,helpText("Developed by bioinformatics core, Center for Research Informatics (CRI), University of Chicago", style="padding-left:1em; padding-right:1em;position:absolute; bottom:5em; ")
+  #,img(src="CRI_Logo_Text.png", style="height:2%;margin-left:3em;position:absolute; bottom:1em;")
+  
 )
 
 
@@ -65,7 +70,7 @@ body <- dashboardBody(
             p("An example of demo 'Raw Count Data' input text file for single-factor experiment 
               used in this App is provided in the 'data' folder named as 'TestData-featureCount.txt', 
               it is also accessable ", 
-              a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep="")))
+              a("here.", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep="")))
               , style="padding-left: 5em"),
             
             h4("1.2 Meta-data Table", style="padding-left: 3em"),
@@ -81,7 +86,7 @@ body <- dashboardBody(
             tags$style("#metaTabSamp table {border: 1px solid black; align: left;margin-left: 6em}","#metaTabSamp th {border: 1px solid black;}","#metaTabSamp td {border: 1px solid black;}"),
             p("An example of corresponding demo 'Meta-data Table' text file for single-factor experiment 
               used in this App is provided in the 'data' folder named as 'TestData-featureCount-meta.txt', it is also available "
-              , a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount-meta.txt", sep=""))) 
+              , a("here.", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount-meta.txt", sep=""))) 
               , style="padding-left: 5em"),
             
             h5("1.2.2 Multi-factor Experiment", style="padding-left: 5em; font-weight: bold"),
@@ -102,7 +107,7 @@ body <- dashboardBody(
             #####################################################
             ##Filter low expression tags section
             h3("2. Filter low expression tags", style="padding-left: 1em"),
-            p("For the 'Data Summarization' section on this App, it is aiming to filter out genetic features with
+            p("For the 'Data Summarization' section in this App, it is aiming to filter out genetic features with
               very low counts. The guideline of this step is to keep genetic features which are expressed in 
               at least one sample out of each factor level."
               , style="padding-left: 2em"),
@@ -113,7 +118,7 @@ body <- dashboardBody(
             withMathJax(),
             p("The expression cutoff (CPM) value is determined according to the library size 
               and normalization factors with formula $$\\text{CPM} = \\frac{\\text{counts}}{\\text{library size} * \\text{normalization factors} * 10^{-6}}$$ 
-              for example, if the expression cutoff CPM value is 10, 
+              For example, if the expression cutoff CPM value is 10, 
               the library size and normalization factors are estimated approximately equal to \\(\\ 2 \\text{ x} 10 ^ 6\\) and 1 for majority samples, 
               then 10 CPM expression cutoff corresponds to about 20 read counts. 
               Therefore, in this example genetic features in more than 3 samples have less than 
@@ -128,7 +133,7 @@ body <- dashboardBody(
               a("edgeR, ", href="http://bioconductor.org/packages/release/bioc/html/edgeR.html"),
               a("limma-voom, ", href="http://www.genomebiology.com/2014/15/2/R29"), "and ",
               a("DESeq2 ", href="http://bioconductor.org/packages/release/bioc/html/DESeq2.html"),
-              ". The DE analysis is implemented in the 'DE analysis' section. 
+              ", which are implemented in the 'DE analysis' section. 
               For the single-factor experiment, the DE analysis could be conducted between any 
               2 levels of that single-factor; 
               for the multi-factor experiment, the DE analysis could be conducted in a way 
@@ -154,7 +159,7 @@ body <- dashboardBody(
             h3("Analysis Workflow"),
 
             p(strong("Step 1: "), "Uploade your input data ('Raw Count Table' and 'Meta-data Table')
-              on 'Data Input' section for single-factor or multi-factor experiment, 
+              via 'Data Input' section panel for single-factor or multi-factor experiment, 
               a summary of your input data will be presented."
               , style="padding-left: 2em; padding-top: 1em"),
             p(strong("Step 2: "), "Filter out the low expression genetic features via 'Data Summarization' section panel, 
@@ -241,7 +246,7 @@ body <- dashboardBody(
                         solidHeader = T, status = "info",
                         width = 6,
                         helpText("Upload your 'Raw Count Data' here, if no file selected, 
-                                 the demo file for single-factor experiment will be used and displayed."
+                                 the demo file for single-factor experiment is used and displayed."
                                  ,style="color:black; padding-right:0em;"),
                         
                         fileInput(inputId="countFile", 
@@ -273,7 +278,7 @@ body <- dashboardBody(
                         width = 6,
                         helpText("Upload your 'Meta-data Table' here, if no file selected, 
                                  the corresponding demo file for single-factor experiment 
-                                 will be used and displayed."
+                                 is used and displayed."
                                  ,style="color:black; padding-right:0em;"),
                         
                         fileInput(inputId="metaTab", 
@@ -312,7 +317,7 @@ body <- dashboardBody(
             fluidRow(
               box(title = "Input Information Summary",
                   solidHeader = T, status = "success",
-                  footer = "Note: There must be a biological replicates from the experiment for DE analysis",
+                  #footer = "Note: There must be a biological replicates from the experiment for DE analysis",
                   width = 12, 
                   fluidRow(
                     column(6, 
@@ -440,7 +445,7 @@ body <- dashboardBody(
             fluidRow(
               box(title = "Input Information Summary",
                   solidHeader = T, status = "success",
-                  footer = "Note: There must be a biological replicates from the experiment for DE analysis",
+                  #footer = "Note: There must be a biological replicates from the experiment for DE analysis",
                   width = 12, 
                   fluidRow(
                     column(6, 
@@ -489,7 +494,7 @@ body <- dashboardBody(
             
             ##First 3 box under Data Summarization panel
             fluidRow(
-              box(title = "Low Expression Tags/Genes Removal",
+              box(title = "Low Expression Removal",
                   solidHeader = T, status = "info",
                   collapsible = T, collapsed = F,
                   width = 12,
@@ -516,7 +521,7 @@ body <- dashboardBody(
                     box(title = "Low Expression Removal Options",
                         solidHeader = T, status = "info",
                         width = 2,
-                        h6("Low expression tag/gene will be removed with"),
+                        h6("Low expression mapped genetic features will be removed with"),
                         fluidRow(
                           column(6,
                                  textInput(inputId="cpmVal", 

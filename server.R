@@ -43,13 +43,13 @@ shinyServer(function(input, output, session) {
   progress <- reactiveValues(time=shiny::Progress$new())
     
   observeEvent(input$dataSubmit, {     
-    progress$time$set(message = "Data input", value = 0)
+    progress$time$set(message = "Data input (single-factor)", value = 0)
     progress$time$set(value = 0.5, detail = "processing 50%")
     Sys.sleep(1)
   })
   
   observeEvent(input$MultiSubmit, { 
-    progress$time$set(message = "Data input", value = 0)
+    progress$time$set(message = "Data input (multi-factor)", value = 0)
     progress$time$set(value = 0.5, detail = "processing 50%")
     Sys.sleep(1)
   })
@@ -89,6 +89,23 @@ shinyServer(function(input, output, session) {
   datareactive <- reactive ({              
       org.counts <- dataObs$orgCount
       metadata <- dataObs$orgMeta
+
+      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+      else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+        if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+          stop(paste(dataObs$orgCount[1]) )
+        } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+          stop(paste(dataObs$orgMeta[1]) )
+        } else {
+          orgCount <- dataObs$orgCount
+          orgMeta <- dataObs$orgMeta
+          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
+        }        
+        
+      }
       
       #print(head(org.counts))
       #print(head(metadata))
@@ -174,6 +191,17 @@ shinyServer(function(input, output, session) {
       progress$time$set(value = 1, detail = "processing 100%")
     })
     
+    Group <- edgerDispersionEst()$samples$group
+    if (as.character(trim(input$edgercompGroup2)) =="" | as.character(trim(input$edgercompGroup1)) == "") {
+      stop("Please select 2 group levels for DE analysis!")
+    } else {
+      if (as.character(trim(input$edgercompGroup2)) == as.character(trim(input$edgercompGroup1)) ) {
+        stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+      } else if( (! as.character(trim(input$edgercompGroup2)) %in% levels(Group)) | (! as.character(trim(input$edgercompGroup1)) %in% levels(Group)) ) 
+        {stop("Group level 1 or level 2 are not in the available group levels!")
+      }
+    } 
+    
     fcval <- as.numeric(input$edgerfc)
     fdr <- as.numeric(input$edgerfdr)
     if (input$edgerP == 'normp') {
@@ -227,6 +255,14 @@ shinyServer(function(input, output, session) {
     
   ##Reactive expression object for limma-voom decideTests results
   voomDEfilter <- reactive({
+    Group <- datareactive()$samples$group
+    if (as.character(trim(input$voomcompGroup2)) =="" | as.character(trim(input$voomcompGroup1)) == "") {
+      stop("Please select 2 groups levels for DE analysis!")
+    } else if (as.character(trim(input$voomcompGroup1)) == as.character(trim(input$voomcompGroup2)) ) {
+      stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+    } else if( (! as.character(trim(input$voomcompGroup2)) %in% levels(Group)) | (! as.character(trim(input$voomcompGroup1)) %in% levels(Group)) ) {
+      stop("Group level 1 or level 2 are not in the available group levels!")
+    } 
     
     voomfcval <- as.numeric(input$voomfc)
     voomfdr <- as.numeric(input$voomfdr)
@@ -431,6 +467,24 @@ shinyServer(function(input, output, session) {
   output$overallDataSummary <- renderTable({ 
     input$dataSubmit
     isolate({
+      
+      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+      else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+        if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+          stop(paste(dataObs$orgCount[1]) )
+        } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+          stop(paste(dataObs$orgMeta[1]) )
+        } else {
+          orgCount <- dataObs$orgCount
+          orgMeta <- dataObs$orgMeta
+          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
+        }        
+        
+      }
+      
       no.samples <- length(colnames(datareactive()$counts))
       no.gene <- dim((datareactive())$counts)[1]
       observeEvent(input$dataSubmit, { 
@@ -447,6 +501,24 @@ shinyServer(function(input, output, session) {
   output$sampleGroup <- renderTable({ 
     input$dataSubmit
     isolate({
+      
+      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+      else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+        if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+          stop(paste(dataObs$orgCount[1]) )
+        } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+          stop(paste(dataObs$orgMeta[1]) )
+        } else {
+          orgCount <- dataObs$orgCount
+          orgMeta <- dataObs$orgMeta
+          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
+        }        
+        
+      }
+      
       groupinfo <- as.matrix(summary(datareactive()$samples$group))
       colnames(groupinfo) <- "No. in each group"
       groupinfo
@@ -456,6 +528,24 @@ shinyServer(function(input, output, session) {
   output$sampleInfo <- renderText({ 
     input$dataSubmit
     isolate({
+      
+      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+      else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+        if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+          stop(paste(dataObs$orgCount[1]) )
+        } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+          stop(paste(dataObs$orgMeta[1]) )
+        } else {
+          orgCount <- dataObs$orgCount
+          orgMeta <- dataObs$orgMeta
+          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
+        }        
+        
+      }
+      
       paste(as.character(rownames((datareactive())$samples)), collapse=", " )
     })
   })
@@ -463,8 +553,26 @@ shinyServer(function(input, output, session) {
   output$sampleTitle <- renderText({ 
     input$dataSubmit
     isolate({
+      
+      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+      else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+        if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+          stop(paste(dataObs$orgCount[1]) )
+        } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+          stop(paste(dataObs$orgMeta[1]) )
+        } else {
+          orgCount <- dataObs$orgCount
+          orgMeta <- dataObs$orgMeta
+          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
+        }        
+        
+      }
+      
       no.samples <- length(colnames(datareactive()$counts))
-      paste("A total of ", as.character(no.samples), " samples in the experiment, they are:", sep="")
+      paste("There are ", as.character(no.samples), " samples in the experiment:", sep="")
     })  
   })
   
@@ -473,10 +581,27 @@ shinyServer(function(input, output, session) {
     isolate({
       metadata <- dataObs$orgMeta
       
+      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+      else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+        if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+          stop(paste(dataObs$orgCount[1]) )
+        } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+          stop(paste(dataObs$orgMeta[1]) )
+        } else {
+          orgCount <- dataObs$orgCount
+          orgMeta <- dataObs$orgMeta
+          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
+        }        
+        
+      }
+      
       if (dim(metadata)[2]>2) {
         paste("ERROR: Your input data is multi-factor experiment, please restart the APP and use 'Multi-factor Experiment' tab to input your data.")
       } else {
-        paste("This is a single-factor experiment with factor - '", as.character(colnames(metadata)[2]), "', the level of this factor is",sep="")
+        paste("This is a single-factor experiment with factor - '", as.character(colnames(metadata)[2]), "', the levels of this factor are:",sep="")
       }  
     })
   })
@@ -486,6 +611,23 @@ shinyServer(function(input, output, session) {
     input$dataSubmit
     isolate({
       metadata <- dataObs$orgMeta
+      
+      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+      else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+        if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+          stop(paste(dataObs$orgCount[1]) )
+        } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+          stop(paste(dataObs$orgMeta[1]) )
+        } else {
+          orgCount <- dataObs$orgCount
+          orgMeta <- dataObs$orgMeta
+          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
+        }        
+        
+      }
       
       if (dim(metadata)[2]>2) {
         paste("ERROR!!!")
@@ -498,19 +640,19 @@ shinyServer(function(input, output, session) {
   output$errorInputSingle <- renderText({
     if (input$dataSubmit )
     isolate({
-      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {paste("ERROR!!! Please provide the corresponding input 2: Meta-data Table!")}
-      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {paste("ERROR!!! Please provide the input 1: Raw Count Data!")}
+      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
       else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
         if (length(grep('Error',dataObs$orgCount[1]))==1) { 
-          paste(dataObs$orgCount[1])
+          stop(paste(dataObs$orgCount[1]) )
         } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
-          paste(dataObs$orgMeta[1])
+          stop(paste(dataObs$orgMeta[1]) )
         } else {
           orgCount <- dataObs$orgCount
           orgMeta <- dataObs$orgMeta
-          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {paste("ERROR!!! Input files do not correspond with each other. ")}
-          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {paste("ERROR!!! Input files do not correspond with each other. ")}
-          else if (dim(orgMeta)[2] < 2 ) {paste("ERROR!!! Input 2 file format is wrong.") }
+          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+          else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
         }        
         
       }
@@ -524,6 +666,22 @@ shinyServer(function(input, output, session) {
   output$overallDataSummaryMulti <- renderTable({ 
     if ( input$MultiSubmit ) {
       isolate({
+        if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+        else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+        else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+          if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+            stop(paste(dataObs$orgCount[1]) )
+          } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+            stop(paste(dataObs$orgMeta[1]) )
+          } else {
+            orgCount <- dataObs$orgCount
+            orgMeta <- dataObs$orgMeta
+            if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if (dim(orgMeta)[2] < 3 ) {stop("Input 2 file format is wrong.") }
+          }        
+          
+        }
         no.samples <- length(colnames(datareactive()$counts))
         no.gene <- dim((datareactive())$counts)[1]
         observeEvent(input$MultiSubmit, { 
@@ -540,6 +698,23 @@ shinyServer(function(input, output, session) {
   output$sampleGroupMulti <- renderTable({ 
     if ( input$MultiSubmit ) {
       isolate({
+        if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+        else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+        else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+          if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+            stop(paste(dataObs$orgCount[1]) )
+          } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+            stop(paste(dataObs$orgMeta[1]) )
+          } else {
+            orgCount <- dataObs$orgCount
+            orgMeta <- dataObs$orgMeta
+            if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if (dim(orgMeta)[2] < 3 ) {stop("Input 2 file format is wrong.") }
+          }        
+          
+        }
+        
         groupinfo <- as.matrix(summary((datareactive())$samples$group))
         colnames(groupinfo) <- "No. in each group"
         groupinfo
@@ -551,6 +726,23 @@ shinyServer(function(input, output, session) {
   output$sampleInfoMulti <- renderText({ 
     if ( input$MultiSubmit ) {
       isolate({
+        if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+        else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+        else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+          if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+            stop(paste(dataObs$orgCount[1]) )
+          } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+            stop(paste(dataObs$orgMeta[1]) )
+          } else {
+            orgCount <- dataObs$orgCount
+            orgMeta <- dataObs$orgMeta
+            if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if (dim(orgMeta)[2] < 3 ) {stop("Input 2 file format is wrong.") }
+          }        
+          
+        }
+        
         paste(as.character(rownames((datareactive())$samples)), collapse=", " )
       })
     }
@@ -559,6 +751,23 @@ shinyServer(function(input, output, session) {
   output$sampleTitleMulti <- renderText({ 
     if ( input$MultiSubmit ) {
       isolate({
+        if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+        else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+        else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+          if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+            stop(paste(dataObs$orgCount[1]) )
+          } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+            stop(paste(dataObs$orgMeta[1]) )
+          } else {
+            orgCount <- dataObs$orgCount
+            orgMeta <- dataObs$orgMeta
+            if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if (dim(orgMeta)[2] < 3 ) {stop("Input 2 file format is wrong.") }
+          }        
+          
+        }
+        
         no.samples <- length(colnames(datareactive()$counts))
         paste("A total of ", as.character(no.samples), " samples in the experiment, they are:", sep="")
       }) 
@@ -569,6 +778,23 @@ shinyServer(function(input, output, session) {
     if ( input$MultiSubmit ) {
       isolate({        
         metadata <- dataObs$orgMeta
+        if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+        else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+        else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+          if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+            stop(paste(dataObs$orgCount[1]) )
+          } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+            stop(paste(dataObs$orgMeta[1]) )
+          } else {
+            orgCount <- dataObs$orgCount
+            orgMeta <- dataObs$orgMeta
+            if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if (dim(orgMeta)[2] < 3 ) {stop("Input 2 file format is wrong.") }
+          }        
+          
+        }
+        
         if (dim(metadata)[2]>2) {
           paste("This is a multi-factor experiment with ", (dim(metadata)[2]-1), " factors levels, they are", sep="" )
         } else {
@@ -586,6 +812,22 @@ shinyServer(function(input, output, session) {
         #print(head(org.counts))
         #metadata <- dataObs$orgMeta
         metadata <- dataObs$orgMeta
+        if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+        else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
+        else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
+          if (length(grep('Error',dataObs$orgCount[1]))==1) { 
+            stop(paste(dataObs$orgCount[1]) )
+          } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
+            stop(paste(dataObs$orgMeta[1]) )
+          } else {
+            orgCount <- dataObs$orgCount
+            orgMeta <- dataObs$orgMeta
+            if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if (dim(orgMeta)[2] < 3 ) {stop("Input 2 file format is wrong.") }
+          }        
+          
+        }
         
         if (dim(metadata)[2]>2) {
           factor <- paste(as.character(colnames(metadata)[-1]), collapse=", ")        
@@ -607,21 +849,24 @@ shinyServer(function(input, output, session) {
   output$errorInputMulti <- renderText({
     if ( input$MultiSubmit )
       isolate({
-        if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {paste("ERROR!!! Please provide the corresponding input 2: Meta-data Table!")}
-        else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {paste("ERROR!!! Please provide the input 1: Raw Count Data!")}
+        
+        if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
+        else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
         else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
           if (length(grep('Error',dataObs$orgCount[1]))==1) { 
-            paste(dataObs$orgCount[1])
+            stop(paste(dataObs$orgCount[1]) )
           } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
-            paste(dataObs$orgMeta[1])
+            stop(paste(dataObs$orgMeta[1]) )
           } else {
             orgCount <- dataObs$orgCount
             orgMeta <- dataObs$orgMeta
-            if (dim(orgCount)[2] != dim(orgMeta)[1] ) {paste("ERROR!!! Input files do not correspond with each other. ")}
-            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {paste("ERROR!!! Input files do not correspond with each other. ")}
+            if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            else if (dim(orgMeta)[2] < 3 ) {stop("Input 2 file format is wrong.") }
           }        
           
         }
+
       })
     
   })
@@ -659,6 +904,9 @@ shinyServer(function(input, output, session) {
   output$rmlowSamplesize <- renderTable({ 
     input$rmlow 
     isolate({ 
+      if (as.numeric(input$gThreshold) > length(colnames(datareactive()$counts)) ) 
+        stop("Cutoff sample number exceeds the total number of samples")
+      
       no.samples <- length(colnames(rmlowReactive()$counts))
       no.gene <- dim(rmlowReactive()$counts)[1]
       res.summary <- rbind(no.samples, no.gene)
@@ -671,6 +919,9 @@ shinyServer(function(input, output, session) {
   output$sampleBoxplot <- renderPlot({ 
     input$rmlow 
     isolate({
+      if (as.numeric(input$gThreshold) > length(colnames(datareactive()$counts)) ) 
+        stop("Cutoff sample number exceeds the total number of samples")
+      
       Group <- as.factor(rmlowReactive()$samples$group)
       bx.p<-boxplot(cpm(rmlowReactive(), log=T)[,])
       bxp(bx.p, boxfill=as.numeric(Group)+1, 
@@ -682,6 +933,9 @@ shinyServer(function(input, output, session) {
   output$sampleMDS <- renderPlot({ 
     input$rmlow 
     isolate({
+      if (as.numeric(input$gThreshold) > length(colnames(datareactive()$counts)) ) 
+        stop("Cutoff sample number exceeds the total number of samples")
+        
       Group <- as.factor(rmlowReactive()$samples$group)
       observeEvent(input$rmlow, { 
         progress$time$set(value = 1, detail = "processing 100%")
@@ -699,7 +953,7 @@ shinyServer(function(input, output, session) {
     isolate({
       if (as.numeric(input$gThreshold) > length(colnames(datareactive()$counts)) ) {
         stop("Cutoff sample number exceeds the total number of samples")
-        paste("ERROR: cutoff sample number exceeds the total number of samples!")
+        #paste("ERROR: cutoff sample number exceeds the total number of samples!")
       }
     })
   })  
@@ -751,12 +1005,12 @@ shinyServer(function(input, output, session) {
       isolate({
         Group <- edgerDispersionEst()$samples$group
         if (as.character(trim(input$edgercompGroup2)) =="" | as.character(trim(input$edgercompGroup1)) == "") {
-          paste("Error: please select 2 group levels for DE analysis!")
+          stop("Please select 2 group levels for DE analysis!")
         } else {
           if (as.character(trim(input$edgercompGroup2)) == as.character(trim(input$edgercompGroup1)) ) {
             stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
-            paste("Error: Group 1 and Group 2 are the same, please select 2 different group levels for DE analysis!")
-          } else if( (! as.character(trim(input$edgercompGroup2)) %in% levels(Group)) | (! as.character(trim(input$edgercompGroup1)) %in% levels(Group)) ) {paste("Error: Group level 1 or level 2 are not in the available group levels!")
+          } else if( (! as.character(trim(input$edgercompGroup2)) %in% levels(Group)) | (! as.character(trim(input$edgercompGroup1)) %in% levels(Group)) ) {
+            stop("Group level 1 or level 2 are not in the available group levels!")
           }
         }        
       })
@@ -780,6 +1034,16 @@ shinyServer(function(input, output, session) {
   output$edgerTestDGEtitle <- renderText({
     if(input$edgerdeAnalysis)
       isolate({
+        Group <- edgerDispersionEst()$samples$group
+        if (as.character(trim(input$edgercompGroup2)) =="" | as.character(trim(input$edgercompGroup1)) == "") {
+          stop("Please select 2 group levels for DE analysis!")
+        } else {
+          if (as.character(trim(input$edgercompGroup2)) == as.character(trim(input$edgercompGroup1)) ) {
+            stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+          } else if( (! as.character(trim(input$edgercompGroup2)) %in% levels(Group)) | (! as.character(trim(input$edgercompGroup1)) %in% levels(Group)) ) {
+            stop("Group level 1 or level 2 are not in the available group levels!")
+          }
+        } 
         paste(paste(as.character(trim(input$edgercompGroup2)), as.character(trim(input$edgercompGroup1)), sep="-"), " DE analysis", sep="")
       })   
   })
@@ -787,6 +1051,17 @@ shinyServer(function(input, output, session) {
   output$edgerTestDGE <- renderTable({ 
     if(input$edgerdeAnalysis)
       isolate({ 
+        Group <- edgerDispersionEst()$samples$group
+        if (as.character(trim(input$edgercompGroup2)) =="" | as.character(trim(input$edgercompGroup1)) == "") {
+          stop("Please select 2 group levels for DE analysis!")
+        } else {
+          if (as.character(trim(input$edgercompGroup2)) == as.character(trim(input$edgercompGroup1)) ) {
+            stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+          } else if( (! as.character(trim(input$edgercompGroup2)) %in% levels(Group)) | (! as.character(trim(input$edgercompGroup1)) %in% levels(Group)) ) {
+            stop("Group level 1 or level 2 are not in the available group levels!")
+          }
+        }
+        
         edgerDGEsummary <- as.data.frame(summary((edgerDEfilter()$table)$filter))      
         #colnames(edgerDGEsummary) <- paste("No. of gene (",paste(as.character(input$edgercompGroup2), as.character(input$edgercompGroup1), sep="-"), ")", sep="")
         colnames(edgerDGEsummary) <- "Number"
@@ -841,11 +1116,11 @@ shinyServer(function(input, output, session) {
     isolate({
       Group <- datareactive()$samples$group
       if (as.character(trim(input$voomcompGroup2)) =="" | as.character(trim(input$voomcompGroup1)) == "") {
-        paste("Error: Please select 2 groups levels for DE analysis!")
+        stop("Please select 2 groups levels for DE analysis!")
       } else if (as.character(trim(input$voomcompGroup1)) == as.character(trim(input$voomcompGroup2)) ) {
-        paste("Error: Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+        stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
       } else if( (! as.character(trim(input$voomcompGroup2)) %in% levels(Group)) | (! as.character(trim(input$voomcompGroup1)) %in% levels(Group)) ) {
-        paste("Error: Group level 1 or level 2 are not in the available group levels!")
+        stop("Group level 1 or level 2 are not in the available group levels!")
       } 
     })    
   })  
@@ -884,6 +1159,14 @@ shinyServer(function(input, output, session) {
   output$voomTestDGEtitle <- renderText({
     if(input$voomdeAnalysis)
       isolate({
+        Group <- datareactive()$samples$group
+        if (as.character(trim(input$voomcompGroup2)) =="" | as.character(trim(input$voomcompGroup1)) == "") {
+          stop("Please select 2 groups levels for DE analysis!")
+        } else if (as.character(trim(input$voomcompGroup1)) == as.character(trim(input$voomcompGroup2)) ) {
+          stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+        } else if( (! as.character(trim(input$voomcompGroup2)) %in% levels(Group)) | (! as.character(trim(input$voomcompGroup1)) %in% levels(Group)) ) {
+          stop("Group level 1 or level 2 are not in the available group levels!")
+        } 
         paste(paste(as.character(trim(input$voomcompGroup2)), as.character(trim(input$voomcompGroup1)), sep="-"), " DE analysis", sep="")
       })   
   })
@@ -891,6 +1174,14 @@ shinyServer(function(input, output, session) {
   output$voomTestDGE <- renderTable({
     if(input$voomdeAnalysis)
       isolate({
+        Group <- datareactive()$samples$group
+        if (as.character(trim(input$voomcompGroup2)) =="" | as.character(trim(input$voomcompGroup1)) == "") {
+          stop("Please select 2 groups levels for DE analysis!")
+        } else if (as.character(trim(input$voomcompGroup1)) == as.character(trim(input$voomcompGroup2)) ) {
+          stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+        } else if( (! as.character(trim(input$voomcompGroup2)) %in% levels(Group)) | (! as.character(trim(input$voomcompGroup1)) %in% levels(Group)) ) {
+          stop("Group level 1 or level 2 are not in the available group levels!")
+        } 
         voomDGEsummary <- as.data.frame(summary(voomDEfilter()$filter))
         colnames(voomDGEsummary) <- "Number"
         #colnames(voomDGEsummary) <- paste("No. of gene (",paste(as.character(input$voomcompGroup2), as.character(input$voomcompGroup1), sep="-"), ")", sep="")
@@ -944,11 +1235,11 @@ shinyServer(function(input, output, session) {
       isolate({
         Group <- datareactive()$samples$group
         if (as.character(trim(input$deseq2compGroup2)) =="" | as.character(trim(input$deseq2compGroup1)) == "") {
-          paste("Error: Please select 2 groups levels for DE analysis!")
+          stop("Please select 2 groups levels for DE analysis!")
         } else if (as.character(trim(input$deseq2compGroup1)) == as.character(trim(input$deseq2compGroup2)) ) {
-          paste("Error: Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+          stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
         } else if( (! as.character(trim(input$deseq2compGroup2)) %in% levels(Group)) | (! as.character(trim(input$deseq2compGroup1)) %in% levels(Group)) ) {
-          paste("Error: Group level 1 or level 2 are not in the available group levels!")
+          stop("Group level 1 or level 2 are not in the available group levels!")
         }        
       })    
   }) 
@@ -984,6 +1275,14 @@ shinyServer(function(input, output, session) {
   output$deseq2TestDGEtitle <- renderText({
     if (input$deseq2deAnalysis)
       isolate({
+        Group <- datareactive()$samples$group
+        if (as.character(trim(input$deseq2compGroup2)) =="" | as.character(trim(input$deseq2compGroup1)) == "") {
+          stop("Please select 2 groups levels for DE analysis!")
+        } else if (as.character(trim(input$deseq2compGroup1)) == as.character(trim(input$deseq2compGroup2)) ) {
+          stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+        } else if( (! as.character(trim(input$deseq2compGroup2)) %in% levels(Group)) | (! as.character(trim(input$deseq2compGroup1)) %in% levels(Group)) ) {
+          stop("Group level 1 or level 2 are not in the available group levels!")
+        } 
         paste(paste(as.character(trim(input$deseq2compGroup2)), as.character(trim(input$deseq2compGroup1)), sep="-"), " DE analysis", sep="")
       })
   })
@@ -991,6 +1290,14 @@ shinyServer(function(input, output, session) {
   output$deseq2TestDGE <- renderTable({
     if (input$deseq2deAnalysis)
       isolate({
+        Group <- datareactive()$samples$group
+        if (as.character(trim(input$deseq2compGroup2)) =="" | as.character(trim(input$deseq2compGroup1)) == "") {
+          stop("Please select 2 groups levels for DE analysis!")
+        } else if (as.character(trim(input$deseq2compGroup1)) == as.character(trim(input$deseq2compGroup2)) ) {
+          stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+        } else if( (! as.character(trim(input$deseq2compGroup2)) %in% levels(Group)) | (! as.character(trim(input$deseq2compGroup1)) %in% levels(Group)) ) {
+          stop("Group level 1 or level 2 are not in the available group levels!")
+        } 
         deseq2DGEsummary <- as.data.frame(summary(deseq2DEfilter()$filter))
         #colnames(deseq2DGEsummary) <- paste("No. of gene (",paste(as.character(input$deseq2compGroup2), as.character(input$deseq2compGroup1), sep="-"), ")", sep="")
         colnames(deseq2DGEsummary) <- "Number"
@@ -1043,11 +1350,11 @@ shinyServer(function(input, output, session) {
       isolate({
         Group <- datareactive()$samples$group
         if (as.character(trim(input$decompGroup2)) =="" | as.character(trim(input$decompGroup1)) == "") {
-          paste("Error: Please select 2 groups levels for DE analysis!")
+          stop("Please select 2 groups levels for DE analysis!")
         } else if (as.character(trim(input$decompGroup1)) == as.character(trim(input$decompGroup2)) ) {
-          paste("Error: Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+          stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
         } else if( (! as.character(trim(input$decompGroup2)) %in% levels(Group)) | (! as.character(trim(input$decompGroup1)) %in% levels(Group)) ) {
-          paste("Error: Group level 1 or level 2 are not in the available group levels!")
+          stop("Group level 1 or level 2 are not in the available group levels!")
         } 
       })
     
@@ -1062,6 +1369,14 @@ shinyServer(function(input, output, session) {
   output$decomp <- renderPlot({
     if (input$decompAnalysis)
       isolate({      
+        Group <- datareactive()$samples$group
+        if (as.character(trim(input$decompGroup2)) =="" | as.character(trim(input$decompGroup1)) == "") {
+          stop("Please select 2 groups levels for DE analysis!")
+        } else if (as.character(trim(input$decompGroup1)) == as.character(trim(input$decompGroup2)) ) {
+          stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+        } else if( (! as.character(trim(input$decompGroup2)) %in% levels(Group)) | (! as.character(trim(input$decompGroup1)) %in% levels(Group)) ) {
+          stop("Group level 1 or level 2 are not in the available group levels!")
+        } 
         if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
           venncount <- vennCounts(as.matrix(cbind(cbind(edgerDecomp()$table$filter, voomDecomp()$filter),deseq2Decomp()$filter)))
           vennDiagram(venncount, names=c("edgeR","voom", "DESeq2"),
@@ -1086,6 +1401,15 @@ shinyServer(function(input, output, session) {
   output$decompTitle <- renderText({
     if (input$decompAnalysis)
       isolate({
+        Group <- datareactive()$samples$group
+        if (as.character(trim(input$decompGroup2)) =="" | as.character(trim(input$decompGroup1)) == "") {
+          stop("Please select 2 groups levels for DE analysis!")
+        } else if (as.character(trim(input$decompGroup1)) == as.character(trim(input$decompGroup2)) ) {
+          stop("Group level 1 and level 2 are the same, please select 2 different group levels for DE analysis!")
+        } else if( (! as.character(trim(input$decompGroup2)) %in% levels(Group)) | (! as.character(trim(input$decompGroup1)) %in% levels(Group)) ) {
+          stop("Group level 1 or level 2 are not in the available group levels!")
+        } 
+        
         if (input$decompP == 'normp') {
           title <- paste("Below results are based on the nominal p ", 
                          "with filtering level of norminal p = ", as.character(input$decompfdr),
