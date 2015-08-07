@@ -89,23 +89,6 @@ shinyServer(function(input, output, session) {
   datareactive <- reactive ({              
       org.counts <- dataObs$orgCount
       metadata <- dataObs$orgMeta
-
-      if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
-      else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
-      else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
-        if (length(grep('Error',dataObs$orgCount[1]))==1) { 
-          stop(paste(dataObs$orgCount[1]) )
-        } else if (length(grep('Error',dataObs$orgMeta[1]))==1) {
-          stop(paste(dataObs$orgMeta[1]) )
-        } else {
-          orgCount <- dataObs$orgCount
-          orgMeta <- dataObs$orgMeta
-          if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
-          else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
-          else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
-        }        
-        
-      }
       
       #print(head(org.counts))
       #print(head(metadata))
@@ -226,8 +209,9 @@ shinyServer(function(input, output, session) {
     par(mar=c(0,0,0,0))
     v <- voom(rmlowReactive(), design=design, plot=T, normalize="quantile")
     fit <- lmFit(v, design)
-    progress$time$set(value = 0.6, detail = "processing 60%")
-    Sys.sleep(1)
+    observeEvent(input$voomdeAnalysis, { 
+      progress$time$set(value = 0.6, detail = "processing 60%")
+    })
     fit
   })
   
@@ -273,7 +257,9 @@ shinyServer(function(input, output, session) {
       tpvoom <- topTable(voomDEres(), number=Inf, adjust="BH", sort.by="none") 
       filtervoom <- decideTests(voomDEres(), adjust.method="BH", p.value=voomfdr, lfc=log2(voomfcval))
     }
-    progress$time$set(value = 1, detail = "processing 100%")
+    observeEvent(input$voomdeAnalysis, { 
+      progress$time$set(value = 1, detail = "processing 100%")
+    })
     tpvoom$filter <- as.factor(filtervoom)
     tpvoom
   })
@@ -284,8 +270,9 @@ shinyServer(function(input, output, session) {
     colData <- data.frame(Group)
     dds <- DESeqDataSetFromMatrix(rmlowReactive()$count, colData=colData, design=formula(~Group) )
     dds <- DESeq(dds, test="Wald")  
-    progress$time$set(value = 0.7, detail = "processing 70%")
-    Sys.sleep(1)
+    observeEvent(input$deseq2deAnalysis, { 
+      progress$time$set(value = 0.7, detail = "processing 70%")
+    })
     dds
   })
   
@@ -1148,7 +1135,9 @@ shinyServer(function(input, output, session) {
         tpvoom <- topTable(voomDEres(), n=Inf, adjust.method="BH", sort.by="p")
         res <- tpvoom[,c("logFC","P.Value", "adj.P.Val")]
         res$logFC <- round(res$logFC, digits=3)
-        progress$time$set(value = 1, detail = "processing 100%")
+        observeEvent(input$voomdeAnalysis, { 
+          progress$time$set(value = 1, detail = "processing 100%")
+        })
         res
       })
   }, 
@@ -1251,7 +1240,9 @@ shinyServer(function(input, output, session) {
   output$deseq2BCV <- renderPlot({
     if (input$deseq2deAnalysis)
       isolate({
-        progress$time$set(value = 0.3, detail = "processing 30%")
+        observeEvent(input$deseq2deAnalysis, { 
+          progress$time$set(value = 0.3, detail = "processing 30%")
+        })
         Sys.sleep(1)
         par(mar=c(4,5,2,2))
         plotDispEsts(deseq2Res(), cex.lab=1.8, cex.axis=1.5)
@@ -1264,7 +1255,9 @@ shinyServer(function(input, output, session) {
         res.pre <- deseq2DEres()[,c("log2FoldChange", "pvalue", "padj")]
         res <- as.data.frame(res.pre) 
         res$log2FoldChange <- round(res$log2FoldChange, digits=3)
-        progress$time$set(value = 1, detail = "processing 100%")
+        observeEvent(input$deseq2deAnalysis, { 
+          progress$time$set(value = 1, detail = "processing 100%")
+        })
         res
       })
   }, 
@@ -1476,7 +1469,9 @@ shinyServer(function(input, output, session) {
           rownames(res) <- rownames(res.matrix)[c(2,3,6)]
         }
         colnames(res) <- "No. identified DEGs"
-        progress$time$set(value = 1, detail = "processing 100%")
+        observeEvent(input$decompAnalysis, { 
+          progress$time$set(value = 1, detail = "processing 100%")
+        })
         res
       })
   },digits = 0, align="l|c")
