@@ -45,43 +45,36 @@ shinyServer(function(input, output, session) {
   observeEvent(input$dataSubmit, {     
     progress$time$set(message = "Data input (single-factor)", value = 0)
     progress$time$set(value = 0.5, detail = "processing 50%")
-    Sys.sleep(1)
   })
   
   observeEvent(input$MultiSubmit, { 
     progress$time$set(message = "Data input (multi-factor)", value = 0)
     progress$time$set(value = 0.5, detail = "processing 50%")
-    Sys.sleep(1)
   })
     
   observeEvent(input$rmlow, { 
     progress$time$set(message = "Filtering", value = 0)
     progress$time$set(value = 0.5, detail = "processing 50%")
-    Sys.sleep(1)
   })
   
   observeEvent(input$voomdeAnalysis, { 
     progress$time$set(message = "Limma-voom analysis", value = 0)
     progress$time$set(value = 0.2, detail = "processing 20%")
-    Sys.sleep(1)
   })
   
   observeEvent(input$edgerdeAnalysis, { 
     progress$time$set(message = "edgeR analysis", value = 0)
     progress$time$set(value = 0.2, detail = "processing 20%")
-    Sys.sleep(1)
   })
   
   observeEvent(input$deseq2deAnalysis, {
     progress$time$set(message = "DESeq2 analysis", value = 0)
     progress$time$set(value = 0.2, detail = "processing 20%")
-    Sys.sleep(1)
   })
   
   observeEvent(input$decompAnalysis, {
     progress$time$set(message = "Comparison analysis", value = 0)
     progress$time$set(value = 0.2, detail = "processing 20%")
-    Sys.sleep(1)
   })
   
 
@@ -1243,7 +1236,6 @@ shinyServer(function(input, output, session) {
         observeEvent(input$deseq2deAnalysis, { 
           progress$time$set(value = 0.3, detail = "processing 30%")
         })
-        Sys.sleep(1)
         par(mar=c(4,5,2,2))
         plotDispEsts(deseq2Res(), cex.lab=1.8, cex.axis=1.5)
       })
