@@ -69,7 +69,7 @@ body <- dashboardBody(
               , style="padding-left: 5em"),
             p("An example of demo 'Raw Count Data' input text file for single-factor experiment 
               used in this App is provided in the 'data' folder named as 'TestData-featureCount.txt', 
-              it is also accessable ", 
+              it is also accessible ", 
               a("here.", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep="")))
               , style="padding-left: 5em"),
             
@@ -100,7 +100,7 @@ body <- dashboardBody(
               it is also available "
               , a("here.", href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv", sep=""))) 
               , "The corresponding 'Raw Count Data' csv file is also provided in the 'data' folder named as 
-              'ReadCounts-Chen-edgeRSpringer-multiFactor.csv', it is accessable "
+              'ReadCounts-Chen-edgeRSpringer-multiFactor.csv', it is accessible "
               , a("here.", href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv", sep=""))) 
               , style="padding-left: 5em"),
             
@@ -158,7 +158,7 @@ body <- dashboardBody(
             ##Workflow section
             h3("Analysis Workflow"),
 
-            p(strong("Step 1: "), "Uploade your input data ('Raw Count Table' and 'Meta-data Table')
+            p(strong("Step 1: "), "Upload your input data ('Raw Count Table' and 'Meta-data Table')
               via 'Data Input' section panel for single-factor or multi-factor experiment, 
               a summary of your input data will be presented."
               , style="padding-left: 2em; padding-top: 1em"),
@@ -916,7 +916,7 @@ body <- dashboardBody(
                         
                     ),
                     actionButton(inputId="deseq2deAnalysis", label="Submit"),
-                    tags$style("button#deseq2deAnalysis {float:right; margin-right: 1em; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
+                    tags$style("button#deseq2deAnalysis {margin-top:0.5em;float:right; margin-right: 1em; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
                   ),
                   helpText(textOutput("errorDeseq2"), style="color:red;")
               )
