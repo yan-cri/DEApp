@@ -10,15 +10,31 @@ shinyServer(function(input, output, session) {
   observeEvent(input$MultiSubmit, {
     if (is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {
       dataObs$orgCount <- read.delim(paste(getwd(),"data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv",sep="/"), header=T, sep=input$coutFileSepMulti, row.names=1)
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
+      #dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
     } else if (!is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {
       dataObs$orgCount <- read.delim(paste(getwd(),"data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv",sep="/"), header=T, sep=input$coutFileSepMulti, row.names=1)
-      dataObs$orgMeta <- NULL
+      #dataObs$orgMeta <- NULL
     } else if (is.null(input$countFileMulti) & !is.null(input$metaTabMulti)) {
       dataObs$orgCount <- NULL
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
-    } else {
+      #dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
+    } else if (!is.null(input$countFileMulti) & !is.null(input$metaTabMulti)) {
       dataObs$orgCount <- try(read.delim(input$countFileMulti$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 ), T)
+      #dataObs$orgMeta <- try(read.delim(input$metaTabMulti$datapath, header=T, sep=input$metaSepMulti), T)
+    }
+  })
+  
+  observeEvent(input$MultiSubmit, {
+    if (is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {
+      #dataObs$orgCount <- read.delim(paste(getwd(),"data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv",sep="/"), header=T, sep=input$coutFileSepMulti, row.names=1)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
+    } else if (!is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {
+      #dataObs$orgCount <- read.delim(paste(getwd(),"data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv",sep="/"), header=T, sep=input$coutFileSepMulti, row.names=1)
+      dataObs$orgMeta <- NULL
+    } else if (is.null(input$countFileMulti) & !is.null(input$metaTabMulti)) {
+      #dataObs$orgCount <- NULL
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
+    } else if (!is.null(input$countFileMulti) & !is.null(input$metaTabMulti)) {
+      #dataObs$orgCount <- try(read.delim(input$countFileMulti$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 ), T)
       dataObs$orgMeta <- try(read.delim(input$metaTabMulti$datapath, header=T, sep=input$metaSepMulti), T)
     }
   })
@@ -26,18 +42,33 @@ shinyServer(function(input, output, session) {
   observeEvent(input$dataSubmit, {
     if (is.null(input$countFile) & is.null(input$metaTab) ) {
       dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+      #dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
     } else if (!is.null(input$countFile) & is.null(input$metaTab) ) {
       dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
-      dataObs$orgMeta <- NULL
+      #dataObs$orgMeta <- NULL
     } else if (is.null(input$countFile) & !is.null(input$metaTab) ) {
       dataObs$orgCount <- NULL
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
-    } else {
+      #dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+    } else if (!is.null(input$countFile) & !is.null(input$metaTab) ){
       dataObs$orgCount <- try(read.delim(input$countFile$datapath, header=T, sep=input$coutFileSep, row.names=1 ), T)
+      #dataObs$orgMeta <- try(read.delim(input$metaTab$datapath, header=T, sep=input$metaSep), T) 
+    }   
+  })
+  
+  observeEvent(input$dataSubmit, {
+    if (is.null(input$countFile) & is.null(input$metaTab) ) {
+      #dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+    } else if (!is.null(input$countFile) & is.null(input$metaTab) ) {
+      #dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
+      dataObs$orgMeta <- NULL
+    } else if (is.null(input$countFile) & !is.null(input$metaTab) ) {
+      #dataObs$orgCount <- NULL
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+    } else if (!is.null(input$countFile) & !is.null(input$metaTab) ){
+      #dataObs$orgCount <- try(read.delim(input$countFile$datapath, header=T, sep=input$coutFileSep, row.names=1 ), T)
       dataObs$orgMeta <- try(read.delim(input$metaTab$datapath, header=T, sep=input$metaSep), T) 
-    }
-    
+    }   
   })
     
   progress <- reactiveValues(time=shiny::Progress$new())
