@@ -478,7 +478,9 @@ shinyServer(function(input, output, session) {
   output$overallDataSummary <- renderTable({ 
     if(input$dataSubmit)
     isolate({
-      
+      print("=========")
+      print(dataObs$orgMeta)
+      print("=========")
       if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
       else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
       else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
@@ -674,6 +676,9 @@ shinyServer(function(input, output, session) {
   output$overallDataSummaryMulti <- renderTable({ 
     if ( input$MultiSubmit ) {
       isolate({
+        print("=========")
+        print(dataObs$orgMeta)
+        print("=========")
         if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
         else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
         else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
