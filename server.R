@@ -114,9 +114,9 @@ shinyServer(function(input, output, session) {
       org.counts <- dataObs$orgCount
       metadata <- dataObs$orgMeta
       
-      #print(head(org.counts))
-      #print(head(metadata))
-      #print("*********")
+      print(head(org.counts))
+      print(head(metadata))
+      print("*********")
       
       if (dim(metadata)[2]>2) {
         groupinfo <- metadata[,2]
@@ -476,7 +476,7 @@ shinyServer(function(input, output, session) {
   ################################################################################################
   
   output$overallDataSummary <- renderTable({ 
-    input$dataSubmit
+    if(input$dataSubmit)
     isolate({
       
       if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
@@ -510,9 +510,8 @@ shinyServer(function(input, output, session) {
   },digits=0, align="l|c")
   
   output$sampleGroup <- renderTable({ 
-    input$dataSubmit
-    isolate({
-      
+    if(input$dataSubmit)
+    isolate({      
       if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
       else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
       else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
@@ -537,9 +536,8 @@ shinyServer(function(input, output, session) {
   },digits=0, align="l|c")
   
   output$sampleInfo <- renderText({ 
-    input$dataSubmit
-    isolate({
-      
+    if(input$dataSubmit)
+    isolate({      
       if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
       else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
       else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
@@ -562,9 +560,8 @@ shinyServer(function(input, output, session) {
   })
     
   output$sampleTitle <- renderText({ 
-    input$dataSubmit
-    isolate({
-      
+    if(input$dataSubmit)
+    isolate({      
       if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
       else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
       else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
@@ -588,7 +585,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$expDesign <- renderText({
-    input$dataSubmit
+    if(input$dataSubmit)
     isolate({
       metadata <- dataObs$orgMeta
       
@@ -619,7 +616,7 @@ shinyServer(function(input, output, session) {
 
   
   output$GroupLevel <- renderText({ 
-    input$dataSubmit
+    if(input$dataSubmit)
     isolate({
       metadata <- dataObs$orgMeta
       
@@ -886,14 +883,17 @@ shinyServer(function(input, output, session) {
   
   ################################################
   ###tab panel Data summary
-  output$orgLibsizeNormfactor <- renderTable({ 
-    tab <- datareactive()$samples[,-1]
-    colnames(tab) <- c("Library sizes", "Normalization factors")
-    tab
+  output$orgLibsizeNormfactor <- renderTable({
+    if(input$rmlow)
+      isolate({        
+        tab <- datareactive()$samples[,-1]
+        colnames(tab) <- c("Library sizes", "Normalization factors")
+        tab
+      })
   }, align="l|cc", digits=c(0,0,2), display=c("s", "e", "f"))
   
   output$rmlowLibsizeNormfactor <- renderTable({ 
-    input$rmlow 
+    if ( input$rmlow )
     isolate({ 
       tab <- (rmlowReactive())$samples[, -1]
       colnames(tab) <- c("Library sizes", "Normalization factors")
@@ -901,19 +901,20 @@ shinyServer(function(input, output, session) {
     })
   }, align="l|cc", digits=c(0,0,2), display=c("s", "e", "f"))
   
-  output$orgSamplesize <- renderTable({ 
-    
-    no.samples <- length(colnames(datareactive()$counts))
-    no.gene <- dim((datareactive())$counts)[1]
-    res.summary <- rbind(no.samples, no.gene)
-    rownames(res.summary) <- c("Samples", "Tags")
-    colnames(res.summary) <- "Number"
-    res.summary
-    
+  output$orgSamplesize <- renderTable({
+    if(input$rmlow)
+      isolate({   
+        no.samples <- length(colnames(datareactive()$counts))
+        no.gene <- dim((datareactive())$counts)[1]
+        res.summary <- rbind(no.samples, no.gene)
+        rownames(res.summary) <- c("Samples", "Tags")
+        colnames(res.summary) <- "Number"
+        res.summary
+      })
   },digits=0, align="l|c")
   
   output$rmlowSamplesize <- renderTable({ 
-    input$rmlow 
+    if(input$rmlow) 
     isolate({ 
       if (as.numeric(input$gThreshold) > length(colnames(datareactive()$counts)) ) 
         stop("Cutoff sample number exceeds the total number of samples")
@@ -928,7 +929,7 @@ shinyServer(function(input, output, session) {
   },digits=0, align="l|c")
   
   output$sampleBoxplot <- renderPlot({ 
-    input$rmlow 
+    if(input$rmlow) 
     isolate({
       if (as.numeric(input$gThreshold) > length(colnames(datareactive()$counts)) ) 
         stop("Cutoff sample number exceeds the total number of samples")
@@ -942,7 +943,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$sampleMDS <- renderPlot({ 
-    input$rmlow 
+    if(input$rmlow) 
     isolate({
       if (as.numeric(input$gThreshold) > length(colnames(datareactive()$counts)) ) 
         stop("Cutoff sample number exceeds the total number of samples")
