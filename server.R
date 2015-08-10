@@ -10,67 +10,41 @@ shinyServer(function(input, output, session) {
   observeEvent(input$MultiSubmit, {
     if (is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {
       dataObs$orgCount <- read.delim(paste(getwd(),"data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv",sep="/"), header=T, sep=input$coutFileSepMulti, row.names=1)
-      #dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
     } else if (!is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {
       dataObs$orgCount <- read.delim(paste(getwd(),"data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv",sep="/"), header=T, sep=input$coutFileSepMulti, row.names=1)
-      #dataObs$orgMeta <- NULL
+      dataObs$orgMeta <- NULL
     } else if (is.null(input$countFileMulti) & !is.null(input$metaTabMulti)) {
       dataObs$orgCount <- NULL
-      #dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
     } else if (!is.null(input$countFileMulti) & !is.null(input$metaTabMulti)) {
       dataObs$orgCount <- try(read.delim(input$countFileMulti$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 ), T)
-      #dataObs$orgMeta <- try(read.delim(input$metaTabMulti$datapath, header=T, sep=input$metaSepMulti), T)
-    }
-  })
-  
-  observeEvent(input$MultiSubmit, {
-    if (is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {
-      #dataObs$orgCount <- read.delim(paste(getwd(),"data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv",sep="/"), header=T, sep=input$coutFileSepMulti, row.names=1)
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
-    } else if (!is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {
-      #dataObs$orgCount <- read.delim(paste(getwd(),"data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv",sep="/"), header=T, sep=input$coutFileSepMulti, row.names=1)
-      dataObs$orgMeta <- NULL
-    } else if (is.null(input$countFileMulti) & !is.null(input$metaTabMulti)) {
-      #dataObs$orgCount <- NULL
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv",sep=""), header=T, sep=input$metaSepMulti)
-    } else if (!is.null(input$countFileMulti) & !is.null(input$metaTabMulti)) {
-      #dataObs$orgCount <- try(read.delim(input$countFileMulti$datapath, header=T, sep=input$coutFileSepMulti, row.names=1 ), T)
       dataObs$orgMeta <- try(read.delim(input$metaTabMulti$datapath, header=T, sep=input$metaSepMulti), T)
     }
-  })
-  
-  observeEvent(input$dataSubmit, {
-    if (is.null(input$countFile) & is.null(input$metaTab) ) {
-      dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
-      #dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
-    } else if (!is.null(input$countFile) & is.null(input$metaTab) ) {
-      dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
-      #dataObs$orgMeta <- NULL
-    } else if (is.null(input$countFile) & !is.null(input$metaTab) ) {
-      dataObs$orgCount <- NULL
-      #dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
-    } else if (!is.null(input$countFile) & !is.null(input$metaTab) ){
-      dataObs$orgCount <- try(read.delim(input$countFile$datapath, header=T, sep=input$coutFileSep, row.names=1 ), T)
-      #dataObs$orgMeta <- try(read.delim(input$metaTab$datapath, header=T, sep=input$metaSep), T) 
-    }   
-  })
-  
-  observeEvent(input$dataSubmit, {
-    if (is.null(input$countFile) & is.null(input$metaTab) ) {
-      #dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
-    } else if (!is.null(input$countFile) & is.null(input$metaTab) ) {
-      #dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
-      dataObs$orgMeta <- NULL
-    } else if (is.null(input$countFile) & !is.null(input$metaTab) ) {
-      #dataObs$orgCount <- NULL
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
-    } else if (!is.null(input$countFile) & !is.null(input$metaTab) ){
-      #dataObs$orgCount <- try(read.delim(input$countFile$datapath, header=T, sep=input$coutFileSep, row.names=1 ), T)
-      dataObs$orgMeta <- try(read.delim(input$metaTab$datapath, header=T, sep=input$metaSep), T) 
-    }   
+    #print("===*****====")
+    #print(head(dataObs$orgMeta))
+    #print("===*****====")
   })
     
+  observeEvent(input$dataSubmit, {
+    if (is.null(input$countFile) & is.null(input$metaTab) ) {
+      dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+    } else if (!is.null(input$countFile) & is.null(input$metaTab) ) {
+      dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
+      dataObs$orgMeta <- NULL
+    } else if (is.null(input$countFile) & !is.null(input$metaTab) ) {
+      dataObs$orgCount <- NULL
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+    } else if (!is.null(input$countFile) & !is.null(input$metaTab) ){
+      dataObs$orgCount <- try(read.delim(input$countFile$datapath, header=T, sep=input$coutFileSep, row.names=1 ), T)
+      dataObs$orgMeta <- try(read.delim(input$metaTab$datapath, header=T, sep=input$metaSep), T) 
+    }   
+    #print("====*****")
+    #print(head(dataObs$orgMeta))
+    #print("====*****")
+  })
+  
   progress <- reactiveValues(time=shiny::Progress$new())
     
   observeEvent(input$dataSubmit, {     
@@ -114,9 +88,9 @@ shinyServer(function(input, output, session) {
       org.counts <- dataObs$orgCount
       metadata <- dataObs$orgMeta
       
-      print(head(org.counts))
-      print(head(metadata))
-      print("*********")
+      #print(head(org.counts))
+      #print(head(metadata))
+      #print("*********")
       
       if (dim(metadata)[2]>2) {
         groupinfo <- metadata[,2]
@@ -478,9 +452,9 @@ shinyServer(function(input, output, session) {
   output$overallDataSummary <- renderTable({ 
     if(input$dataSubmit)
     isolate({
-      print("=========")
-      print(dataObs$orgMeta)
-      print("=========")
+      #print("=========")
+      #print(dataObs$orgMeta)
+      #print("=========")
       if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
       else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
       else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
@@ -674,11 +648,12 @@ shinyServer(function(input, output, session) {
   #################################################
   ##Multi-factor Exp Res Summary
   output$overallDataSummaryMulti <- renderTable({ 
-    if ( input$MultiSubmit ) {
+    if ( input$MultiSubmit ) 
+      
       isolate({
-        print("=========")
-        print(dataObs$orgMeta)
-        print("=========")
+        #print("=========")
+        #print(dataObs$orgMeta)
+        #print("=========")
         if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
         else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
         else if (!is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {
@@ -705,11 +680,12 @@ shinyServer(function(input, output, session) {
         colnames(res.summary) <- "Number"
         res.summary
       })
-    }    
+    
   },digits=0, align="l|c")
   
   output$sampleGroupMulti <- renderTable({ 
-    if ( input$MultiSubmit ) {
+    if ( input$MultiSubmit )
+      
       isolate({
         if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
         else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
@@ -732,12 +708,13 @@ shinyServer(function(input, output, session) {
         colnames(groupinfo) <- "No. in each group"
         groupinfo
       })
-    }
+    
     
   },digits=0, align="l|c")
   
   output$sampleInfoMulti <- renderText({ 
-    if ( input$MultiSubmit ) {
+    if ( input$MultiSubmit ) 
+      
       isolate({
         if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
         else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
@@ -758,11 +735,12 @@ shinyServer(function(input, output, session) {
         
         paste(as.character(rownames((datareactive())$samples)), collapse=", " )
       })
-    }
+    
   })
   
   output$sampleTitleMulti <- renderText({ 
-    if ( input$MultiSubmit ) {
+    if ( input$MultiSubmit ) 
+      
       isolate({
         if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
         else if (!is.null(dataObs$orgMeta) & is.null(dataObs$orgCount)) {stop("Please provide the input 1: Raw Count Data!")}
@@ -784,11 +762,12 @@ shinyServer(function(input, output, session) {
         no.samples <- length(colnames(datareactive()$counts))
         paste("A total of ", as.character(no.samples), " samples in the experiment, they are:", sep="")
       }) 
-    }     
+    
   })
   
   output$expDesignMulti <- renderText({
-    if ( input$MultiSubmit ) {
+    if ( input$MultiSubmit ) 
+      
       isolate({        
         metadata <- dataObs$orgMeta
         if (is.null(dataObs$orgMeta) & !is.null(dataObs$orgCount)) {stop("Please provide the corresponding input 2: Meta-data Table!")}
@@ -814,12 +793,13 @@ shinyServer(function(input, output, session) {
           paste("ERROR: Your data input is a single-factor experiment, please restart the App and use 'Single-facotr Experiment' tab to input your data.")
         }       
       })
-    }
+    
     
   })
   
   output$GroupLevelMulti <- renderText({ 
-    if ( input$MultiSubmit ) {
+    if ( input$MultiSubmit ) 
+      
       isolate({ 
         #org.counts <- dataObs$orgCount
         #print(head(org.counts))
@@ -855,7 +835,7 @@ shinyServer(function(input, output, session) {
         }
         
       })
-    }
+    
     
   })
   
