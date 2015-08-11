@@ -171,6 +171,7 @@ shinyServer(function(input, output, session) {
       progress$time$set(message = "edgeR analysis", value = 0.2)
       progress$time$set(value = 0.4, detail = "processing 40%")
     })
+    progress$time$set(message = "Comparison analysis", value = 0.2)
     progress$time$set(value = 0.4, detail = "processing 40%")
     dge
   })
@@ -250,6 +251,7 @@ shinyServer(function(input, output, session) {
       progress$time$set(message = "Limma-voom analysis", value = 0.2)
       progress$time$set(value = 0.6, detail = "processing 60%")
     })
+    progress$time$set(message = "Comparison analysis", value = 0.4)
     progress$time$set(value = 0.6, detail = "processing 60%")
     fit
   })
@@ -310,7 +312,7 @@ shinyServer(function(input, output, session) {
     dds <- DESeqDataSetFromMatrix(rmlowReactive()$count, colData=colData, design=formula(~Group) )
     dds <- DESeq(dds, test="Wald")  
     observeEvent(input$deseq2deAnalysis, { 
-      #progress$time$set(message = "DESeq2 analysis", value = 0)
+      progress$time$set(message = "DESeq2 analysis", value = 0)
       progress$time$set(value = 0.7, detail = "processing 70%")
     })
     progress$time$set(value = 0.7, detail = "processing 70%")
