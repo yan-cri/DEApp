@@ -129,21 +129,7 @@ shinyServer(function(input, output, session) {
     if (input$decompAnalysis) {
       progress$time$set(message = "Comparison analysis", value = 0)
       progress$time$set(value = 0.2, detail = "processing 20%")
-    }  
-    if(input$deseq2deAnalysis) { 
-      progress$time$set(message = "DESeq2 analysis", value = 0)
-      progress$time$set(value = 0.1, detail = "processing 10%")
-    }
-    if (input$voomdeAnalysis) { 
-      progress$time$set(message = "Limma-voom analysis", value = 0)
-      progress$time$set(value = 0.2, detail = "processing 20%")
-    }
-    if(input$edgerdeAnalysis) { 
-      progress$time$set(message = "edgeR analysis", value = 0)
-      progress$time$set(value = 0.2, detail = "processing 20%")
-    }
-    
-    
+    }          
     if (dim(metadata)[2]>2) {
       groupinfo <- metadata[,2]
       for (i in 3:length(metadata[1,])) {
@@ -164,6 +150,11 @@ shinyServer(function(input, output, session) {
   
   #Reactive expression object for the counts remove low expression tags
   rmlowReactive <- reactive({    
+    if(input$edgerdeAnalysis) { 
+      progress$time$set(message = "edgeR analysis", value = 0)
+      progress$time$set(value = 0.2, detail = "processing 20%")
+    }
+    
     dge.count <- calcNormFactors(datareactive())
     cpm.count <- cpm(dge.count$counts)
     if (as.numeric(input$gThreshold) > length(colnames(datareactive()$counts)) ) stop("Cutoff sample number exceeds the total number of samples")
@@ -176,6 +167,7 @@ shinyServer(function(input, output, session) {
   
   #Reactive expression object for edgeR glm dispersion estimation
   edgerDispersionEst <- reactive({  
+    
     dge <- rmlowReactive()
     if(!is(dge,"DGEList")) stop("Dispersion estimation input must be a DGEList.")
     Group <- rmlowReactive()$samples$group
@@ -257,7 +249,11 @@ shinyServer(function(input, output, session) {
   }) 
   
   ##Reactive expression object for limma-voom voom function
-  voomRes <- reactive({    
+  voomRes <- reactive({      
+    if (input$voomdeAnalysis) { 
+      progress$time$set(message = "Limma-voom analysis", value = 0)
+      progress$time$set(value = 0.2, detail = "processing 20%")
+    }
     Group <- datareactive()$samples$group
     f <- factor(Group, levels=levels(Group))
     design <- model.matrix(~0+f)  
@@ -328,6 +324,10 @@ shinyServer(function(input, output, session) {
   
   ##Reactive expression object for DEseq2 DESeq analysis results
   deseq2Res <- reactive({    
+    if(input$deseq2deAnalysis) { 
+      progress$time$set(message = "DESeq2 analysis", value = 0)
+      progress$time$set(value = 0.2, detail = "processing20%")
+    }
     Group <- datareactive()$samples$group
     colData <- data.frame(Group)
     dds <- DESeqDataSetFromMatrix(rmlowReactive()$count, colData=colData, design=formula(~Group) )
