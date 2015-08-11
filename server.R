@@ -126,6 +126,23 @@ shinyServer(function(input, output, session) {
     #print(head(org.counts))
     #print(head(metadata))
     #print("*********")
+    if (input$decompAnalysis) {
+      progress$time$set(message = "Comparison analysis", value = 0)
+      progress$time$set(value = 0.2, detail = "processing 20%")
+    }  
+    if(input$deseq2deAnalysis) { 
+      progress$time$set(message = "DESeq2 analysis", value = 0)
+      progress$time$set(value = 0.1, detail = "processing 10%")
+    }
+    if (input$voomdeAnalysis) { 
+      progress$time$set(message = "Limma-voom analysis", value = 0)
+      progress$time$set(value = 0.2, detail = "processing 20%")
+    }
+    if(input$edgerdeAnalysis) { 
+      progress$time$set(message = "edgeR analysis", value = 0)
+      progress$time$set(value = 0.2, detail = "processing 20%")
+    }
+    
     
     if (dim(metadata)[2]>2) {
       groupinfo <- metadata[,2]
@@ -167,12 +184,14 @@ shinyServer(function(input, output, session) {
     rownames(design) <- rownames(dge$samples)
     colnames(design) <- levels(Group)
     dge <- estimateDisp(dge, design)
-    observeEvent(input$edgerdeAnalysis, { 
+    if(input$decompAnalysis) {
+      progress$time$set(message = "Comparison analysis", value = 0.2)
+      progress$time$set(value = 0.4, detail = "processing 40%")
+    }   
+    if(input$edgerdeAnalysis) { 
       progress$time$set(message = "edgeR analysis", value = 0.2)
       progress$time$set(value = 0.4, detail = "processing 40%")
-    })
-    progress$time$set(message = "Comparison analysis", value = 0.2)
-    progress$time$set(value = 0.4, detail = "processing 40%")
+    }
     dge
   })
   
@@ -247,12 +266,14 @@ shinyServer(function(input, output, session) {
     par(mar=c(0,0,0,0))
     v <- voom(rmlowReactive(), design=design, plot=T, normalize="quantile")
     fit <- lmFit(v, design)
-    observeEvent(input$voomdeAnalysis, { 
+    if (input$decompAnalysis) {
+      progress$time$set(message = "Comparison analysis", value = 0.4)
+      progress$time$set(value = 0.6, detail = "processing 60%")
+    }  
+    if (input$voomdeAnalysis) { 
       progress$time$set(message = "Limma-voom analysis", value = 0.2)
       progress$time$set(value = 0.6, detail = "processing 60%")
-    })
-    progress$time$set(message = "Comparison analysis", value = 0.4)
-    progress$time$set(value = 0.6, detail = "processing 60%")
+    }
     fit
   })
   
@@ -310,12 +331,14 @@ shinyServer(function(input, output, session) {
     Group <- datareactive()$samples$group
     colData <- data.frame(Group)
     dds <- DESeqDataSetFromMatrix(rmlowReactive()$count, colData=colData, design=formula(~Group) )
-    dds <- DESeq(dds, test="Wald")  
-    observeEvent(input$deseq2deAnalysis, { 
-      progress$time$set(message = "DESeq2 analysis", value = 0)
+    dds <- DESeq(dds, test="Wald") 
+    if(input$decompAnalysis) {
+      progress$time$set(message = "Comparison analysis", value = 0.4)
+      progress$time$set(value = 0.7, detail = "processing 70%")}
+    if(input$deseq2deAnalysis) { 
+      progress$time$set(message = "DESeq2 analysis", value = 0.4)
       progress$time$set(value = 0.7, detail = "processing 70%")
-    })
-    progress$time$set(value = 0.7, detail = "processing 70%")
+    }
     dds
   })
   
@@ -345,6 +368,9 @@ shinyServer(function(input, output, session) {
     } else if (input$deseq2P== 'fdrp') {
       deseq2res$filter[deseq2res$padj < deseq2fdr & deseq2res$log2FoldChange > log2(deseq2fcval)] <- 1
       deseq2res$filter[deseq2res$padj < deseq2fdr & deseq2res$log2FoldChange < -log2(deseq2fcval)] <- -1
+    }
+    if (input$deseq2deAnalysis) { 
+      progress$time$set(value = 1, detail = "processing 100%")
     }
     deseq2res$filter <- as.factor(deseq2res$filter)
     deseq2res
