@@ -269,7 +269,7 @@ body <- dashboardBody(
                         ),
                         
                         helpText("The demo file of 'Raw Count Data' for the single-factor experiment is available ", 
-                                 a("here"), href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep="")),
+                                 a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep=""))),
                                  style="color: black")
                     ),
                     ##Meta-data input box under Data Input tab panel
