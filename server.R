@@ -3,9 +3,9 @@
 
 shinyServer(function(input, output, session) {
   dataObs <- reactiveValues(
-    orgCount = NULL,
-    orgMeta = NULL
-  )
+    orgCount = read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, row.names=1),
+    orgMeta = read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T) 
+    )
   
   observeEvent(input$MultiSubmit, {
     if (is.null(input$countFileMulti) & is.null(input$metaTabMulti)) {

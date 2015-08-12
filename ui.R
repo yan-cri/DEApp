@@ -40,7 +40,7 @@ body <- dashboardBody(
     tabItem(tabName="intro",
             #img(src="cri.png"),
             h2("Introduction"),
-            p("This interactive web application (DEApp) is developed in R with Shiny, it is aiming to 1). conduct differential 
+            p("This interactive web application (DEApp) is developed in R with Shiny to 1). conduct differential 
               expression (DE) analysis with ",
               a("edgeR, ", href="http://bioconductor.org/packages/release/bioc/html/edgeR.html"),
               a("limma-voom, ", href="http://www.genomebiology.com/2014/15/2/R29"), "and ",
@@ -245,8 +245,8 @@ body <- dashboardBody(
                     box(title = "Input 1: Raw Count Data",
                         solidHeader = T, status = "info",
                         width = 6,
-                        helpText("Upload your 'Raw Count Data' here, if no file selected, 
-                                 the demo file for single-factor experiment is used and displayed."
+                        helpText("Upload your 'Raw Count Data' here, if no file is selected, 
+                                 the demo file for single-factor experiment will be used and displayed."
                                  ,style="color:black; padding-right:0em;"),
                         
                         fileInput(inputId="countFile", 
@@ -276,9 +276,9 @@ body <- dashboardBody(
                     box(title = "Input 2: Meta-data Table",
                         solidHeader = T, status = "info",
                         width = 6,
-                        helpText("Upload your 'Meta-data Table' here, if no file selected, 
+                        helpText("Upload your 'Meta-data Table' here, if no file is selected, 
                                  the corresponding demo file for single-factor experiment 
-                                 is used and displayed."
+                                 will be used and displayed."
                                  ,style="color:black; padding-right:0em;"),
                         
                         fileInput(inputId="metaTab", 
@@ -367,7 +367,7 @@ body <- dashboardBody(
                         solidHeader = T, status = "info",
                         width = 6,
                         
-                        helpText("Upload your 'Raw Count Data' here, if no file selected, 
+                        helpText("Upload your 'Raw Count Data' here, if no file is selected, 
                                  the demo file for multi-factor experiment will be used and displayed."
                                  ,style="color:black; padding-right:0em;"),
                         
@@ -399,7 +399,7 @@ body <- dashboardBody(
                         solidHeader = T, status = "info",
                         width = 6,
                         
-                        helpText("Upload your 'Meta-data Table' here, if no file selected, 
+                        helpText("Upload your 'Meta-data Table' here, if no file is selected, 
                                  the corresponding demo file for multi-factor experiment 
                                  will be used and displayed."
                                  ,style="color:black; padding-right:0em;"),
@@ -633,8 +633,8 @@ body <- dashboardBody(
                           column(4,
                                  radioButtons(inputId="edgerP", 
                                               label="DE Analysis is based on", 
-                                              choices=c("Nominal-p" ='normp',
-                                                        "FDR adjusted-p" ='fdrp'
+                                              choices=c("Nominal p-value" ='normp',
+                                                        "FDR adjusted p-value" ='fdrp'
                                               ),
                                               selected='fdrp'
                                  )
@@ -771,8 +771,8 @@ body <- dashboardBody(
                           column(4,
                                  radioButtons(inputId="voomP", 
                                               label="DE Analysis is based on", 
-                                              choices=c("Nominal-p" ='normp',
-                                                        "FDR adjusted-p" ='fdrp'
+                                              choices=c("Nominal p-value" ='normp',
+                                                        "FDR adjusted p-value" ='fdrp'
                                               ),
                                               selected='fdrp'
                                  )
@@ -896,8 +896,8 @@ body <- dashboardBody(
                           column(4,
                                  radioButtons(inputId="deseq2P", 
                                               label="DE Analysis is based on", 
-                                              choices=c("Nominal-p" ='normp',
-                                                        "FDR adjusted-p" ='fdrp'
+                                              choices=c("Nominal p-value" ='normp',
+                                                        "FDR adjusted p-value" ='fdrp'
                                               ),
                                               selected='fdrp'
                                  )
@@ -990,7 +990,7 @@ body <- dashboardBody(
                         solidHeader = T,
                         status = "info",
                         checkboxGroupInput(inputId="decompMethods",
-                                           label = "DE analysis method choices",
+                                           label = "DE analysis method selection",
                                            choices = list("edgeR" = 'edger',
                                                           "limma-voom" = 'voom',
                                                           "DESeq2" = 'deseq2'),
@@ -1028,15 +1028,15 @@ body <- dashboardBody(
                           column(3,
                                  radioButtons(inputId="decompP", 
                                               label="DE Analysis is based on", 
-                                              choices=c("Nominal-p" ='normp',
-                                                        "FDR adjusted-p" ='fdrp'
+                                              choices=c("Nominal p-value" ='normp',
+                                                        "FDR adjusted p-value" ='fdrp'
                                               ),
                                               selected='fdrp'
                                  )
                           ),
                           column(5,
                                  textInput(inputId="decompfdr", 
-                                           label="p-value or FDR adjusted p-value", 
+                                           label="Nominal p-value or FDR adjusted p-value", 
                                            value="0.05")
                           ),
                           column(4,
