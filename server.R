@@ -3,8 +3,8 @@
 
 shinyServer(function(input, output, session) {
   dataObs <- reactiveValues(
-    orgCount = read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, row.names=1),
-    orgMeta = read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T) 
+    orgCount = read.delim(paste(getwd(),"data/pnas-count_singleFactor.txt",sep="/"), header=T, row.names=1),
+    orgMeta = read.delim(paste(getwd(),"/data/pnas-count_singleFactor-meta.txt",sep=""), header=T) 
     )
   
   observeEvent(input$MultiSubmit, {
@@ -29,14 +29,14 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dataSubmit, {
     if (is.null(input$countFile) & is.null(input$metaTab) ) {
-      dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+      dataObs$orgCount <- read.delim(paste(getwd(),"data/pnas-count_singleFactor.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/pnas-count_singleFactor-meta.txt",sep=""), header=T, sep=input$metaSep)
     } else if (!is.null(input$countFile) & is.null(input$metaTab) ) {
-      dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
+      dataObs$orgCount <- read.delim(paste(getwd(),"data/pnas-count_singleFactor.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
       dataObs$orgMeta <- NULL
     } else if (is.null(input$countFile) & !is.null(input$metaTab) ) {
       dataObs$orgCount <- NULL
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/pnas-count_singleFactor-meta.txt",sep=""), header=T, sep=input$metaSep)
     } else if (!is.null(input$countFile) & !is.null(input$metaTab) ){
       dataObs$orgCount <- try(read.delim(input$countFile$datapath, header=T, sep=input$coutFileSep, row.names=1 ), T)
       dataObs$orgMeta <- try(read.delim(input$metaTab$datapath, header=T, sep=input$metaSep), T) 
@@ -66,14 +66,14 @@ shinyServer(function(input, output, session) {
   
   metaUpdate <- eventReactive(input$dataSubmit, {
     if (is.null(input$countFile) & is.null(input$metaTab) ) {
-      dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+      dataObs$orgCount <- read.delim(paste(getwd(),"data/pnas-count_singleFactor.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/pnas-count_singleFactor-meta.txt",sep=""), header=T, sep=input$metaSep)
     } else if (!is.null(input$countFile) & is.null(input$metaTab) ) {
-      dataObs$orgCount <- read.delim(paste(getwd(),"data/TestData-featureCount.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
+      dataObs$orgCount <- read.delim(paste(getwd(),"data/pnas-count_singleFactor.txt",sep="/"), header=T, sep=input$coutFileSep, row.names=1)
       dataObs$orgMeta <- NULL
     } else if (is.null(input$countFile) & !is.null(input$metaTab) ) {
       dataObs$orgCount <- NULL
-      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/TestData-featureCount-meta.txt",sep=""), header=T, sep=input$metaSep)
+      dataObs$orgMeta <- read.delim(paste(getwd(),"/data/pnas-count_singleFactor-meta.txt",sep=""), header=T, sep=input$metaSep)
     } else if (!is.null(input$countFile) & !is.null(input$metaTab) ){
       dataObs$orgCount <- try(read.delim(input$countFile$datapath, header=T, sep=input$coutFileSep, row.names=1 ), T)
       dataObs$orgMeta <- try(read.delim(input$metaTab$datapath, header=T, sep=input$metaSep), T) 
@@ -539,8 +539,11 @@ shinyServer(function(input, output, session) {
           } else {
             orgCount <- count
             orgMeta <- meta
+            print(dim(orgCount)[2])
+            print(dim(orgMeta)[1])
+            print(sum(colnames(orgCount) == orgMeta[,1]))
             if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
-            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            #else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
             else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
           }                 
         }
@@ -574,7 +577,7 @@ shinyServer(function(input, output, session) {
             orgCount <- count
             orgMeta <- meta
             if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
-            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            #else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
             else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
           }                  
         }
@@ -605,7 +608,7 @@ shinyServer(function(input, output, session) {
             orgCount <- count
             orgMeta <- meta
             if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
-            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            #else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
             else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
           }                 
         }
@@ -634,7 +637,7 @@ shinyServer(function(input, output, session) {
             orgCount <- count
             orgMeta <- meta
             if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
-            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            #else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
             else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
           }        
           
@@ -661,7 +664,7 @@ shinyServer(function(input, output, session) {
             orgCount <- count
             orgMeta <- meta
             if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
-            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            #else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
             else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
           }                 
         }
@@ -690,7 +693,7 @@ shinyServer(function(input, output, session) {
             orgCount <- count
             orgMeta <- meta
             if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
-            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            #else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
             else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
           }                 
         }
@@ -719,7 +722,7 @@ shinyServer(function(input, output, session) {
             orgCount <- count
             orgMeta <- meta
             if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
-            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            #else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
             else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
           }                 
         }
@@ -749,7 +752,7 @@ shinyServer(function(input, output, session) {
             orgCount <- count
             orgMeta <- meta
             if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
-            else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
+            #else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
             else if (dim(orgMeta)[2] < 3 ) {stop("Input 2 file format is wrong.") }
           }          
         }

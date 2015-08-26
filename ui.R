@@ -68,9 +68,9 @@ body <- dashboardBody(
               (e.g. genes, exons, transcript, miRNAs etc.)."
               , style="padding-left: 5em"),
             p("An example of demo 'Raw Count Data' input text file for single-factor experiment 
-              used in this App is provided in the 'data' folder named as 'TestData-featureCount.txt', 
+              used in this App is provided in the 'data' folder named as 'pnas-count_singleFactor.txt', 
               it is also accessible ", 
-              a("here.", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep="")))
+              a("here.", href=as.character(paste("file://~",getwd(),"/data/pnas-count_singleFactor.txt", sep="")))
               , style="padding-left: 5em"),
             
             h4("1.2 Meta-data Table", style="padding-left: 3em"),
@@ -85,8 +85,8 @@ body <- dashboardBody(
             tableOutput("metaTabSamp"),
             tags$style("#metaTabSamp table {border: 1px solid black; align: left;margin-left: 6em}","#metaTabSamp th {border: 1px solid black;}","#metaTabSamp td {border: 1px solid black;}"),
             p("An example of corresponding demo 'Meta-data Table' text file for single-factor experiment 
-              used in this App is provided in the 'data' folder named as 'TestData-featureCount-meta.txt', it is also available "
-              , a("here.", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount-meta.txt", sep=""))) 
+              used in this App is provided in the 'data' folder named as 'pnas-count_singleFactor-meta.txt', it is also available "
+              , a("here.", href=as.character(paste("file://~",getwd(),"/data/pnas-count_singleFactor-meta.txt", sep=""))) 
               , style="padding-left: 5em"),
             
             h5("1.2.2 Multi-factor Experiment", style="padding-left: 5em; font-weight: bold"),
@@ -269,7 +269,7 @@ body <- dashboardBody(
                         ),
                         
                         helpText("The demo file of 'Raw Count Data' for the single-factor experiment is available ", 
-                                 a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount.txt", sep=""))),
+                                 a("here", href=as.character(paste("file://~",getwd(),"/data/pnas-count_singleFactor.txt", sep=""))),
                                  style="color: black")
                     ),
                     ##Meta-data input box under Data Input tab panel
@@ -301,7 +301,7 @@ body <- dashboardBody(
                         ),
                         
                         helpText("The corresponding 'Meta-data Table' of the demo file for the single factor experiment is accessible ", 
-                                 a("here", href=as.character(paste("file://~",getwd(),"/data/TestData-featureCount-meta.txt", sep="")))
+                                 a("here", href=as.character(paste("file://~",getwd(),"/data/pnas-count_singleFactor-meta.txt", sep="")))
                                  ,style="color:black;")
                     )
                   ),
