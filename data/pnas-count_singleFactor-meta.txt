@@ -1,0 +1,1 @@
+sample	TreatmentCon1	ControlCon2	ControlCon3	ControlCon4	ControlDHT1	DHTDHT2	DHTDHT3	DHT
