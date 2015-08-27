@@ -1,19 +1,5 @@
 ## This App is used for RNA-seq DE analysis with different methods together with method comparison
 ## Developed by Yan Li, last update on June, 2015
-packages <- c("shinydashboard", "DT","shiny", "ggplot2")
-if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
-  install.packages(setdiff(packages, rownames(installed.packages())))
-}
-BCpackages <- c("edgeR", "DESeq2", "limma")
-if (length(setdiff(BCpackages, rownames(installed.packages()))) > 0) {
-  source("http://bioconductor.org/biocLite.R")
-  biocLite(setdiff(BCpackages, rownames(installed.packages())))
-}
-sapply(c(packages, BCpackages), require, character.only=T)
-print(sapply(c(packages, BCpackages), require, character.only=T))
-trim <- function (x) gsub("^\\s+|\\s+$", "", x)
-
-
 shinyServer(function(input, output, session) {
   dataObs <- reactiveValues(
     orgCount = read.delim(paste(getwd(),"data/pnas-count_singleFactor.txt",sep="/"), header=T, row.names=1),
