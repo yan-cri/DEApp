@@ -13,6 +13,7 @@ sapply(c(packages, BCpackages), require, character.only=T)
 print(sapply(c(packages, BCpackages), require, character.only=T))
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
+
 shinyServer(function(input, output, session) {
   dataObs <- reactiveValues(
     orgCount = read.delim(paste(getwd(),"data/pnas-count_singleFactor.txt",sep="/"), header=T, row.names=1),
