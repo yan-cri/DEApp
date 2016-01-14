@@ -13,6 +13,7 @@ sapply(c(packages, BCpackages), require, character.only=T)
 print(sapply(c(packages, BCpackages), require, character.only=T))
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
+
 header <- dashboardHeader(
   title = "DE analysis App"
 )
