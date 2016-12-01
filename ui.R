@@ -1,6 +1,8 @@
-## This App is used for interactively visualizing RNA-seq DE analysis 
+## This App is used for interactivaly visualizing RNA-seq DE analysis 
 ## with different methods together with method comparison
 ## Developed by Yan Li, last update on Dec, 2016
+
+## Start checking whether all required packages are successfully loaded
 packages <- c("shinydashboard", "DT","shiny", "ggplot2")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))
@@ -12,8 +14,16 @@ if (length(setdiff(BCpackages, rownames(installed.packages()))) > 0) {
 }
 sapply(c(packages, BCpackages), require, character.only=T)
 print(sapply(c(packages, BCpackages), require, character.only=T))
+## End checking whether all required packages are successfully loaded
+
+## trim function used for comparision group names' processing
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
+### Pathes of example document saveing in google documents
+###/data/pnas-count_singleFactor-meta.txt (https://docs.google.com/spreadsheets/d/14SnDd42WirZVG8qfKakcQILHv4tH6iGT0LmvabqR5Iw/edit?usp=sharing)
+###/data/pnas-count_singleFactor.txt (https://docs.google.com/spreadsheets/d/1AAtD5Qfx-hYeEPr0F7n5tksMn5-qcEd6dhNe6hwjGXI/edit?usp=sharing)
+###/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv (https://docs.google.com/spreadsheets/d/1rO0K5GrrtS4wtnZEoS1NxajnWVkXwitowlAmgeZclv4/edit?usp=sharing)
+###/data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv (https://docs.google.com/spreadsheets/d/1aFX3wrjELGqNIerJNqnYSNhEvdi8hKBmwIzcI2uZy10/edit?usp=sharing)
 
 header <- dashboardHeader(
   title = "DE analysis App"
@@ -40,10 +50,8 @@ sidebar <- dashboardSidebar(
               menuItem("Feedback", icon = icon("comment", lib="glyphicon"), tabName="feedback")
               
   )
-  ,helpText("Developed by bioinformatics core, Center for Research Informatics (CRI), University of Chicago", style="padding-left:1em; padding-right:1em;position:absolute; bottom:1em; ")
-  #,helpText("Developed by bioinformatics core, Center for Research Informatics (CRI), University of Chicago", style="padding-left:1em; padding-right:1em;position:absolute; bottom:5em; ")
-  #,img(src="CRI_Logo_Text.png", style="height:2%;margin-left:3em;position:absolute; bottom:1em;")
-  
+  ,helpText("Developed by", a("bioinformatics core, ", href="http://cri.uchicago.edu/bioinformatics/"), 
+            a("Center for Research Informatics (CRI), ", href="http://cri.uchicago.edu/"), "University of Chicago", style="padding-left:1em; padding-right:1em;position:absolute; bottom:1em; ")
 )
 
 
@@ -65,10 +73,17 @@ body <- dashboardBody(
             p("The goal of this App is to provide biologists with an easy way to 
               conduct and cross-validate DE analysis with 3 different methods on their own data."
               , style="padding-left: 0em"),
+            p("If your are ready for the DE analysis on your own data, you can skip the below introductions,
+              uploade the 'Signel-factor Experiment' data through  ", 
+              actionButton('switchTab01', label = "Data Input (Single-factor)"  ), 
+              " page, and 'Multi-factor Experiment' data through ",
+              actionButton('switchTab02', label = "Data Input (Multi-factor)"  ), 
+              " page."
+              , style="padding-left: 0em"),
             #####################################################
             ##Data input section
             h3("1. Data input", style="padding-left: 1em"),
-            p("The input data of this App is 2 files in '.txt' or '.csv' format, 
+            p("The input data for this App is 2 files in '.txt' or '.csv' format, 
               they are named as 'Raw Count Data' and 'Meta-data Table'."
               , style="padding-left: 2em"),
             h4("1.1 Raw Count Data", style="padding-left: 3em"),            
@@ -84,7 +99,7 @@ body <- dashboardBody(
             p("An example of demo 'Raw Count Data' input text file for single-factor experiment 
               used in this App is provided in the 'data' folder named as 'pnas-count_singleFactor.txt', 
               it is also accessible ", 
-              a("here.", href=as.character(paste("file://~",getwd(),"/data/pnas-count_singleFactor.txt", sep="")))
+              a("here.", href="https://docs.google.com/spreadsheets/d/1AAtD5Qfx-hYeEPr0F7n5tksMn5-qcEd6dhNe6hwjGXI/edit?usp=sharing")
               , style="padding-left: 5em"),
             
             h4("1.2 Meta-data Table", style="padding-left: 3em"),
@@ -100,7 +115,7 @@ body <- dashboardBody(
             tags$style("#metaTabSamp table {border: 1px solid black; align: left;margin-left: 6em}","#metaTabSamp th {border: 1px solid black;}","#metaTabSamp td {border: 1px solid black;}"),
             p("An example of corresponding demo 'Meta-data Table' text file for single-factor experiment 
               used in this App is provided in the 'data' folder named as 'pnas-count_singleFactor-meta.txt', it is also available "
-              , a("here.", href=as.character(paste("file://~",getwd(),"/data/pnas-count_singleFactor-meta.txt", sep=""))) 
+              , a("here.", href="https://docs.google.com/spreadsheets/d/14SnDd42WirZVG8qfKakcQILHv4tH6iGT0LmvabqR5Iw/edit?usp=sharing") 
               , style="padding-left: 5em"),
             
             h5("1.2.2 Multi-factor Experiment", style="padding-left: 5em; font-weight: bold"),
@@ -112,10 +127,10 @@ body <- dashboardBody(
             p("An example of the 'Meta-data Table' csv file for multi-factor experiment used in this App 
               is provided in the 'data' folder named as 'ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv',
               it is also available "
-              , a("here.", href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv", sep=""))) 
+              , a("here.", href="https://docs.google.com/spreadsheets/d/1rO0K5GrrtS4wtnZEoS1NxajnWVkXwitowlAmgeZclv4/edit?usp=sharing") 
               , "The corresponding 'Raw Count Data' csv file is also provided in the 'data' folder named as 
               'ReadCounts-Chen-edgeRSpringer-multiFactor.csv', it is accessible "
-              , a("here.", href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv", sep=""))) 
+              , a("here.", href="https://docs.google.com/spreadsheets/d/1aFX3wrjELGqNIerJNqnYSNhEvdi8hKBmwIzcI2uZy10/edit?usp=sharing") 
               , style="padding-left: 5em"),
             
             #####################################################
@@ -172,16 +187,16 @@ body <- dashboardBody(
             ##Workflow section
             h3("Analysis Workflow"),
 
-            p(strong("Step 1: "), "Upload your input data ('Raw Count Table' and 'Meta-data Table')
+            p(strong("Step 1: Data Input "), "Upload your input data ('Raw Count Table' and 'Meta-data Table')
               via 'Data Input' section panel for single-factor or multi-factor experiment, 
               a summary of your input data will be presented."
               , style="padding-left: 2em; padding-top: 1em"),
-            p(strong("Step 2: "), "Filter out the low expression genetic features via 'Data Summarization' section panel, 
+            p(strong("Step 2: Data Summarization "), "Filter out the low expression genetic features via 'Data Summarization' section panel, 
               summarized count results after filtering will be presented here."
               , style="padding-left: 2em"),
-            p(strong("Step 3: "), "Conduct DE analysis on the 'Data Analysis' section."
+            p(strong("Step 3: DE analysis (3 methods) "), "Conduct DE analysis on the 'Data Analysis' section."
               , style="padding-left: 2em"),
-            p(strong("Step 4: "), "Compare/cross-validate DE analysis results via 'Methods Comparison' section panel."
+            p(strong("Step 4: Methods Comparison "), "Compare/cross-validate DE analysis results via 'Methods Comparison' section panel."
               , style="padding-left: 2em"),
             #includeHTML(path=paste(getwd(),"www/Introduction.html",sep="/"))
             #imageOutput(paste(getwd(),"www/Introduction.pdf",sep="/"))
@@ -190,7 +205,7 @@ body <- dashboardBody(
           
             #img(src="analysis-workflow.png", width=800, style="display: block; margin-left: auto; margin-right: auto;"),
             p("The analysis execution workflow of this App is illustrated in a pdf file, which can be downloaded from  ",
-              a("here.", href=as.character(paste("file://~",getwd(),"/www/workflow.pdf", sep="")))
+              a("here.", href="https://drive.google.com/file/d/0BzY9lIv6cGWKUTByNkYzcG5ENk0/view?usp=sharing")
               , style="padding-left: 1em; padding-top: 1em")
             ),
     
@@ -233,8 +248,10 @@ body <- dashboardBody(
             ############################################
             ##Feedback section
             h2("Feedback"),
-            p("This App is developed and maintained by Yan Li at the bioinformatics core, Center for Research Informatics (CRI), 
-              Biological Science Division (BSD), University of Chicago."),
+            p("This App is developed and maintained by Yan Li at the",
+              a("bioinformatics core, ", href="http://cri.uchicago.edu/bioinformatics/"), 
+              a("Center for Research Informatics (CRI), ", href="http://cri.uchicago.edu/"), 
+              "Biological Science Division (BSD), University of Chicago."),
             p("As a bioinformatics core, we are actively improving and expanding our NGS analysis services and analysis products.
               If you have any questions, comments, or suggestions, feel free to contact our core at bioinformatics@bsd.uchicago.edu or the developer at yli22@bsd.uchicago.edu"),
             br()#,
@@ -249,7 +266,7 @@ body <- dashboardBody(
     tabItem(tabName="dataInputSingle",
             
             fluidRow(
-              box(title = "Input data",
+              box(title = "Input data: Single-factor Experiment",
                   solidHeader = T, status = "info",
                   collapsible = T, collapsed = F,
                   width = 12,
@@ -283,7 +300,7 @@ body <- dashboardBody(
                         ),
                         
                         helpText("The demo file of 'Raw Count Data' for the single-factor experiment is available ", 
-                                 a("here", href=as.character(paste("file://~",getwd(),"/data/pnas-count_singleFactor.txt", sep=""))),
+                                 a("here", href="https://docs.google.com/spreadsheets/d/1AAtD5Qfx-hYeEPr0F7n5tksMn5-qcEd6dhNe6hwjGXI/edit?usp=sharing"),
                                  style="color: black")
                     ),
                     ##Meta-data input box under Data Input tab panel
@@ -315,7 +332,7 @@ body <- dashboardBody(
                         ),
                         
                         helpText("The corresponding 'Meta-data Table' of the demo file for the single factor experiment is accessible ", 
-                                 a("here", href=as.character(paste("file://~",getwd(),"/data/pnas-count_singleFactor-meta.txt", sep="")))
+                                 a("here", href="https://docs.google.com/spreadsheets/d/14SnDd42WirZVG8qfKakcQILHv4tH6iGT0LmvabqR5Iw/edit?usp=sharing")
                                  ,style="color:black;")
                     )
                   ),
@@ -366,11 +383,13 @@ body <- dashboardBody(
                   tags$style("#sampleGroup table {border: 1px solid black; align: center; margin:auto;}","#sampleGroup th {border: 1px solid black;}","#sampleGroup td {border: 1px solid black;}")
               )
             )
+            
+            ,uiOutput("singleDataInputLink", align="center")
               ),
     
     tabItem(tabName="dataInputMulti",
             fluidRow(
-              box(title = "Input data",
+              box(title = "Input data: Multi-factor Experiment",
                   solidHeader = T, status = "info",
                   collapsible = T, collapsed = F,
                   width = 12,
@@ -405,7 +424,7 @@ body <- dashboardBody(
                         ),
                         
                         helpText(HTML("<div style=\"color: black \">An example of full 'Raw Count Data' csv file for the multi-factor experiment is accessible "), 
-                                 a(HTML("here</div>"), href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor.csv", sep="")))
+                                 a(HTML("here</div>"), href="https://docs.google.com/spreadsheets/d/1aFX3wrjELGqNIerJNqnYSNhEvdi8hKBmwIzcI2uZy10/edit?usp=sharing")
                         )
                     ),
                     ##Meta-data input box under Data Input tab panel
@@ -438,7 +457,7 @@ body <- dashboardBody(
                         ),
                         
                         helpText("An example of 'Meta-data Table' csv file corresponding to the example of input 1 - 'Raw Count Data' for the multi-factor experiment is accessible ",
-                                 a("here", href=as.character(paste("file://~",getwd(),"/data/ReadCounts-Chen-edgeRSpringer-multiFactor-meta.csv", sep="")))
+                                 a("here", href="https://docs.google.com/spreadsheets/d/1rO0K5GrrtS4wtnZEoS1NxajnWVkXwitowlAmgeZclv4/edit?usp=sharing")
                                  , style="color: black")
                         
                         #helpText(HTML("<div style=\"color: black; padding-left: 1em; padding-right: 1em; margin-top: 1cm \"> An example of 'Meta-data Table' csv file corresponding to the example of input 1 - 'Raw Count Data' for the multi-factor experiment is accessible ")
@@ -496,6 +515,7 @@ body <- dashboardBody(
               )
             )
             
+            ,uiOutput("multiDataInputLink", align="center")
               ),
             
     
@@ -571,6 +591,7 @@ body <- dashboardBody(
                     )
                   ),
                   helpText(textOutput("errorFiltering"), style="color:red;")
+                  
               )
     ),
     
@@ -591,6 +612,9 @@ body <- dashboardBody(
           plotOutput("sampleMDS")
       )
     )
+    
+    ,uiOutput("step2Tostep3", align="center")
+
     ),
     ## End second tab content for data summarization panel
     #########################################
@@ -671,6 +695,7 @@ body <- dashboardBody(
                     tags$style("button#edgerdeAnalysis {margin-top:0.5em;float:right; margin-right: 1em; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
                   ),
                   helpText(textOutput("erroredgeR"), style="color:red;")
+
               )
             ),
             
@@ -735,7 +760,10 @@ body <- dashboardBody(
                          plotOutput("edgerVolcano")
                      )
               )
-            )            
+            )  
+            
+            ,uiOutput("step31Tostep4", align="center")
+            
     ),
     ## End edgeR DE analysis tab panel under DE analysis menu tab
     #########################################
@@ -808,6 +836,7 @@ body <- dashboardBody(
                     tags$style("button#voomdeAnalysis {margin-top:0.5em;float:right; margin-right: 1em; background-color:#00CCFF; padding: 5px 25px; font-family:Andika, Arial, sans-serif; font-size:1.5em;  letter-spacing:0.05em; text-transform:uppercase ;color:#fff; text-shadow: 0px 1px 10px #000;border-radius: 15px;box-shadow: rgba(0, 0, 0, .55) 0 1px 6px;}")
                   ),
                   helpText(textOutput("errorVoom"), style="color:red;")
+
               )
             ),
             
@@ -860,7 +889,9 @@ body <- dashboardBody(
                          plotOutput("voomVolcano")
                      )
               )
-            )            
+            )   
+            
+            ,uiOutput("step32Tostep4", align="center")
     ),
     ## End DE analysis tab panel for limma-voom
     #########################################
@@ -985,7 +1016,9 @@ body <- dashboardBody(
                          plotOutput("deseq2Volcano")
                      )
               )
-            )            
+            )    
+            
+            ,uiOutput("step33Tostep4", align="center")
     ),
     ## End DE analysis tab panel for deseq2 analysis under DE analysis menu tab
     #########################################
@@ -1088,6 +1121,8 @@ body <- dashboardBody(
                      )
               )
             )
+            
+            ,uiOutput("step4Final", align="center")
     )
     ## End DE analysis comparison tab panel for single factor experiment
     #########################################

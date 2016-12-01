@@ -1,23 +1,26 @@
-## This App is used for interactively visualizing RNA-seq DE analysis 
+## This App is used for interactivaly visualizing RNA-seq DE analysis 
 ## with different methods together with method comparison
 ## Developed by Yan Li, last update on Dec, 2016
+
+## Start checking whether all required packages are successfully loaded
 packages <- c("shinydashboard", "DT","shiny", "ggplot2")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))  
 }
-
 BCpackages <- c("edgeR", "DESeq2", "limma")
 if (length(setdiff(BCpackages, rownames(installed.packages()))) > 0) {
   source("http://bioconductor.org/biocLite.R")
   biocLite(setdiff(BCpackages, rownames(installed.packages())))
 }
-
 sapply(c(packages, BCpackages), require, character.only=T)
-
 print(sapply(c(packages, BCpackages), require, character.only=T))
+## End checking whether all required packages are successfully loaded
 
+## trim function used for comparision group names' processing
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
+## Uploading file's size requirement
+options(shiny.maxRequestSize = 9*1024^2)
 
 shinyServer(function(input, output, session) {
   dataObs <- reactiveValues(
@@ -140,7 +143,7 @@ shinyServer(function(input, output, session) {
   datareactive <- reactive ({              
     org.counts <- dataObs$orgCount
     metadata <- dataObs$orgMeta
-    # metadata <- metadata[match(colnames(org.counts), metadata$Sample),]
+
     #print(head(org.counts))
     #print(head(metadata))
     #print("*********")
@@ -1594,6 +1597,144 @@ shinyServer(function(input, output, session) {
         res
       })
   },digits = 0, align="l|c")
+  
+  ###########################
+  ##Adding tab switch button
+  output$singleDataInputLink <- renderUI({
+    if(input$dataSubmit)
+      isolate({
+        actionButton('switchTab11', label = "GO TO STEP 2: Data Summarization", class="btn-info")
+      })
+  })
+    
+  output$multiDataInputLink <- renderUI({
+    if(input$MultiSubmit)
+      isolate({
+        actionButton('switchTab12', label = "GO TO STEP 2: Data Summarization", class="btn-info")
+      })
+  })
+  
+  output$step2Tostep3 <- renderUI({
+    if(input$rmlow)
+      isolate({
+        list(actionButton('switchTab21', label = "GO TO STEP 3: DE Analysis - edgeR", class="btn-info"),
+             actionButton('switchTab22', label = "GO TO STEP 3: DE Analysis - Limma-voom", class="btn-primary"),
+             actionButton('switchTab23', label = "GO TO STEP 3: DE Analysis - DESeq2", class="btn-danger")
+             )
+        
+      })
+  })
+  
+  output$step31Tostep4 <- renderUI({
+    if(input$edgerdeAnalysis)
+      isolate({
+        list(
+          actionButton('switchTab311', label = "GO TO STEP 4: Methods Comparison", class="btn-info"),
+          actionButton('switchTab312', label = "GO TO STEP 3: DE Analysis - Limma-voom", class="btn-primary"),
+          actionButton('switchTab313', label = "GO TO STEP 3: DE Analysis - DESeq2", class="btn-danger")
+        )
+      })
+  })
+  
+  output$step32Tostep4 <- renderUI({
+    if(input$voomdeAnalysis)
+      isolate({
+        list(
+          actionButton('switchTab321', label = "GO TO STEP 4: Methods Comparison", class="btn-info"),
+          actionButton('switchTab322', label = "GO TO STEP 3: DE Analysis - edgeR", class="btn-primary"),
+          actionButton('switchTab323', label = "GO TO STEP 3: DE Analysis - DESeq2", class="btn-danger")
+        )
+      })
+  })
+  
+  output$step33Tostep4 <- renderUI({
+    if(input$deseq2deAnalysis)
+      isolate({
+        list(
+          actionButton('switchTab331', label = "GO TO STEP 4: Methods Comparison", class="btn-info"),
+          actionButton('switchTab332', label = "GO TO STEP 3: DE Analysis -- edgeR", class="btn-primary"),
+          actionButton('switchTab333', label = "GO TO STEP 3: DE Analysis -- Limma-voom", class="btn-danger")
+        )
+      })
+  })
+    
+  output$step4Final <- renderUI({
+    if(input$decompAnalysis)
+      isolate({
+        actionButton('step4Final', label = "DE analysis complete! Thanks for using DEApp!", class="btn-info")
+      })
+  })
+  
+  observeEvent(input$switchTab01, {
+    newtab <- switch(input$menu1, "intro" = "dataInputSingle","dataInputSingle" = "intro")
+    updateTabItems(session, "menu1", newtab)
+  }) 
+  observeEvent(input$switchTab02, {
+    newtab <- switch(input$menu1, "intro" = "dataInputMulti","dataInputMulti" = "intro")
+    updateTabItems(session, "menu1", newtab)
+  }) 
+  
+  observeEvent(input$switchTab11, {
+    newtab <- switch(input$menu1, "dataInputSingle" = "dataSummary","dataInputSingle" = "dataInputMulti")
+    updateTabItems(session, "menu1", newtab)
+  })
+  
+  observeEvent(input$switchTab12, {
+    newtab <- switch(input$menu1, "dataInputMulti" = "dataSummary","dataSummary" = "dataInputMulti")
+    updateTabItems(session, "menu1", newtab)
+  })
+  
+  observeEvent(input$switchTab21, {
+    newtab <- switch(input$menu1, "dataSummary" = "edger","edger" = "dataSummary")
+    updateTabItems(session, "menu1", newtab)
+  })
+  observeEvent(input$switchTab22, {
+    newtab <- switch(input$menu1, "dataSummary" = "limmavoom","limmavoom" = "dataSummary")
+    updateTabItems(session, "menu1", newtab)
+  })
+  observeEvent(input$switchTab23, {
+    newtab <- switch(input$menu1, "dataSummary" = "deseq2","deseq2" = "dataSummary")
+    updateTabItems(session, "menu1", newtab)
+  })
+  
+  observeEvent(input$switchTab311, {
+    newtab <- switch(input$menu1, "edger" = "decomp","decomp" = "edger")
+    updateTabItems(session, "menu1", newtab)
+  })
+  observeEvent(input$switchTab312, {
+    newtab <- switch(input$menu1, "edger" = "limmavoom","limmavoom" = "edger")
+    updateTabItems(session, "menu1", newtab)
+  })
+  observeEvent(input$switchTab313, {
+    newtab <- switch(input$menu1, "edger" = "deseq2","deseq2" = "edger")
+    updateTabItems(session, "menu1", newtab)
+  })
+  
+  observeEvent(input$switchTab321, {
+    newtab <- switch(input$menu1, "limmavoom" = "decomp","decomp" = "limmavoom")
+    updateTabItems(session, "menu1", newtab)
+  })
+  observeEvent(input$switchTab322, {
+    newtab <- switch(input$menu1, "limmavoom" = "edger","edger" = "limmavoom")
+    updateTabItems(session, "menu1", newtab)
+  })
+  observeEvent(input$switchTab323, {
+    newtab <- switch(input$menu1, "limmavoom" = "deseq2","deseq2" = "limmavoom")
+    updateTabItems(session, "menu1", newtab)
+  })
+  
+  observeEvent(input$switchTab331, {
+    newtab <- switch(input$menu1, "deseq2" = "decomp","decomp" = "deseq2")
+    updateTabItems(session, "menu1", newtab)
+  })
+  observeEvent(input$switchTab332, {
+    newtab <- switch(input$menu1, "deseq2" = "edger","edger" = "deseq2")
+    updateTabItems(session, "menu1", newtab)
+  })
+  observeEvent(input$switchTab333, {
+    newtab <- switch(input$menu1, "deseq2" = "limmavoom","limmavoom" = "deseq2")
+    updateTabItems(session, "menu1", newtab)
+  })
   
 }) 
 
