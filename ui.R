@@ -1,5 +1,6 @@
-## This App is used for RNA-seq DE analysis with different methods together with method comparison
-## Developed by Yan Li, last update on June, 2015
+## This App is used for interactively visualizing RNA-seq DE analysis 
+## with different methods together with method comparison
+## Developed by Yan Li, last update on Dec, 2016
 packages <- c("shinydashboard", "DT","shiny", "ggplot2")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))
