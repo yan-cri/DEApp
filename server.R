@@ -3,7 +3,7 @@
 ## Developed by Yan Li, last update on Dec, 2016
 
 ## Start checking whether all required packages are successfully loaded
-packages <- c("shinydashboard", "DT","shiny", "ggplot2")
+packages <- c("shinydashboard", "DT","shiny", "ggplot2", "gplots")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))  
 }
@@ -1036,6 +1036,7 @@ shinyServer(function(input, output, session) {
         bxp(bx.p, boxfill=as.numeric(Group)+1, 
             cex.axis=1.5, whisklwd=3, outcol=as.numeric(Group)+1, 
             main="Normalized sample distribution", cex.main=2)
+        mtext("log2 CPM", side = 2, line = 2.5, cex = 1.8)
       }) 
   })
   
@@ -1052,7 +1053,7 @@ shinyServer(function(input, output, session) {
         par(mar=c(5,5,4,2))
         plotMDS(rmlowReactive(), col=as.numeric(Group)+1, 
                 cex=2, main="MDS plot", ndim=3, gene.selection="common",
-                xlab = "logFC dim 1", ylab="logFC dim 2", cex.lab=2, cex.main=2, cex.axis=1.5)
+                xlab = "Distance of log2 FC", ylab="Distance of log2 FC", cex.lab=2, cex.main=2, cex.axis=1.5)
       })
   }) 
   
@@ -1598,54 +1599,55 @@ shinyServer(function(input, output, session) {
       })
   },digits = 0, rownames = TRUE, align="lc")
   
-  
-#   edgerDEgenename <- rownames(rbind(subset(edgerDecomp()$table, filter==1),subset(edgerDecomp()$table, filter==-1)))
-#   voomDEgenename <- rownames(rbind(subset(voomDecomp(), filter==1),subset(voomDecomp(), filter==-1)))
-#   deseq2DEgenename <- rownames(rbind(subset(deseq2Decomp(), filter==1),subset(deseq2Decomp(), filter==-1)))
-
   output$overlap_genes_download <- downloadHandler(
-    filename = function() {paste("overlapped_genes_", Sys.Date(), ".zip", sep="")},
-    content = function(file) {
+    filename = function() {paste("comparison_results_", paste(input$decompMethods, collapse = "-"), "_", Sys.Date(), ".zip", sep="")},
+    content = function(fname) { 
       tmpdir <- tempdir()
       setwd(tempdir())
-      print(tempdir())
-      voomRes <- voomDecomp()$table
-      edgerRes <- edgerDecomp()$table
-      deseq2Res <- deseq2Decomp()$table
-      
-      if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods){
-        fs <- c("all3_overlap.txt","edger_voom_overlap.txt", "edger_deseq2_overlap.txt", "voom_deseq2_overlap.txt", "deseq2_only.txt", "edgeR_only.txt", "voom_only.txt")
-        all3overlap
-        write.table(datareactive()$counts, file = "all3_overlap.txt", sep ="\t")
-        write.table(datareactive()$counts, file = "edger_voom_overlap.txt", sep ="\t")
-        write.table(datareactive()$counts, file = "edger_deseq2_overlap.txt", sep ="\t")
-        write.table(voomRes()$counts, file = "voom_deseq2_overlap.txt", sep ="\t")
-        write.table(datareactive()$counts, file = "deseq2_only.txt", sep ="\t")
-        write.table(datareactive()$counts, file = "edgeR_only.txt", sep ="\t")
-        write.table(voomRes()$counts, file = "voom_only.txt", sep ="\t")
-        print (fs)
-      } else if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods){
+      if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+        edgerRes <- subset(edgerDecomp()$table, filter==1 | filter==-1)
+        voomRes <- subset(voomDecomp(), filter==1 | filter==-1)
+        deseq2Res <- subset(deseq2Decomp(), filter==1 | filter==-1)
+        fs <- c("all3_overlap.txt","edger_voom_overlap_only.txt", "edger_deseq2_overlap_only.txt", "voom_deseq2_overlap_only.txt", "deseq2_only.txt", "edgeR_only.txt", "voom_only.txt")
+        vennres <- venn(list(voom = rownames(voomRes), edgeR = rownames(edgerRes), DESeq2=rownames(deseq2Res)))
+        plot(vennres)
+        write.table(attr(vennres, "intersections")$`voom:edgeR:DESeq2`, file = "all3_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`voom:edgeR`, file = "edger_voom_overlap_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`edgeR:DESeq2`, file = "edger_deseq2_overlap_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`voom:DESeq2`, file = "voom_deseq2_overlap_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`DESeq2`, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`edgeR`, file = "edgeR_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`voom`, file = "voom_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+      } else if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods){ 
+        voomRes <- subset(voomDecomp(), filter==1 | filter==-1)
+        edgerRes <- subset(edgerDecomp()$table, filter==1 | filter==-1)
         fs <- c("edger_voom_overlap.txt", "edger_only.txt", "voom_only.txt")
-        write.table(datareactive()$counts, file = "edger_voom_overlap.txt", sep ="\t")
-        write.table(datareactive()$counts, file = "edger_only.txt", sep ="\t")
-        write.table(datareactive()$counts, file = "voom_only.txt", sep ="\t")
-        print (fs)
-      } else if (as.character("edger")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods){
+        vennres <- venn(list(voom = rownames(voomRes), edgeR = rownames(edgerRes)))
+        plot(vennres)
+        write.table(attr(vennres, "intersections")$`voom:edgeR`, file = "edger_voom_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`edgeR`, file = "edger_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`voom`, file = "voom_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+      } else if (as.character("edger")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+        edgerRes <- subset(edgerDecomp()$table, filter==1 | filter==-1)
+        deseq2Res <- subset(deseq2Decomp(), filter==1 | filter==-1)
         fs <- c("edger_deseq2_overlap.txt", "edger_only.txt", "deseq2_only.txt")
-        write.table(datareactive()$counts, file = "edger_deseq2_overlap.txt", sep ="\t")
-        write.table(datareactive()$counts, file = "edger_only.txt", sep ="\t")
-        write.table(datareactive()$counts, file = "deseq2_only.txt", sep ="\t")
-        print (fs)
+        vennres <- venn(list(DESeq2=rownames(deseq2Res), edgeR = rownames(edgerRes)))
+        plot(vennres)
+        write.table(attr(vennres, "intersections")$`DESeq2:edgeR`,file = "edger_deseq2_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`edgeR`, file = "edger_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`DESeq2`, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
       } else if (as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+        voomRes <- subset(voomDecomp(), filter==1 | filter==-1)
+        deseq2Res <- subset(deseq2Decomp(), filter==1 | filter==-1)
         fs <- c("voom_deseq2_overlap.txt", "voom_only.txt", "deseq2_only.txt")
-        write.table(datareactive()$counts, file = "voom_deseq2_overlap.txt", sep ="\t")
-        write.table(datareactive()$counts, file = "voom_only.txt", sep ="\t")
-        write.table(datareactive()$counts, file = "deseq2_only.txt", sep ="\t")
-        print (fs)
+        vennres <- venn(list(voom = rownames(voomRes), DESeq2=rownames(deseq2Res)))
+        plot(vennres)
+        write.table(attr(vennres, "intersections")$`voom:DESeq2`, file = "voom_deseq2_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`voom`, file = "voom_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        write.table(attr(vennres, "intersections")$`DESeq2`, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
       }
-      
-      zip(zipfile=file, files=fs)
-    },
+      zip(zipfile=fname, files=fs)
+      },
     contentType = "application/zip"
   )
   

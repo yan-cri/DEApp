@@ -3,7 +3,7 @@
 ## Developed by Yan Li, last update on Dec, 2016
 
 ## Start checking whether all required packages are successfully loaded
-packages <- c("shinydashboard", "DT","shiny", "ggplot2")
+packages <- c("shinydashboard", "DT","shiny", "ggplot2", "gplots")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))
 }
@@ -1110,20 +1110,21 @@ body <- dashboardBody(
                          tableOutput("decompTab"),
                          tags$style("#decompTab table {border: 1px solid black; align: center; margin:auto;}","#decompTab th {border: 1px solid black;}","#decompTab td {border: 1px solid black;}"),
                          br(),
-                         verbatimTextOutput("decompText"),
-                         p("The overlapped results can be downloaded here:"
-                           , style="font-weight: bold"),
-                         downloadButton("overlap_genes_download", 
-                                        label = "Download",
-                                        class = NULL),
-                         tags$style("#overlap_genes_download {float:right; }")
+                         verbatimTextOutput("decompText")
                      )
               ),
               column(6,
                      box(title = "Comparison Venn-Diagram",
                          width = NULL,
                          solidHeader = T, status = "success",
-                         plotOutput("decomp")
+                         plotOutput("decomp"),
+                         br(),
+                         p("Full gene lists of comparison results can be downloaded here:"
+                           , style="font-weight: bold"),
+                         downloadButton("overlap_genes_download", 
+                                        label = "Download",
+                                        class = NULL),
+                         tags$style("#overlap_genes_download {float:right; }")
                      )
               )
             )
