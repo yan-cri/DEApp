@@ -1110,7 +1110,13 @@ body <- dashboardBody(
                          tableOutput("decompTab"),
                          tags$style("#decompTab table {border: 1px solid black; align: center; margin:auto;}","#decompTab th {border: 1px solid black;}","#decompTab td {border: 1px solid black;}"),
                          br(),
-                         verbatimTextOutput("decompText")
+                         verbatimTextOutput("decompText"),
+                         p("The overlapped results can be downloaded here:"
+                           , style="font-weight: bold"),
+                         downloadButton("overlap_genes_download", 
+                                        label = "Download",
+                                        class = NULL),
+                         tags$style("#overlap_genes_download {float:right; }")
                      )
               ),
               column(6,

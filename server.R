@@ -522,19 +522,19 @@ shinyServer(function(input, output, session) {
   ################################################################################################
   ##tab Panel Data input
   output$countTabSamp <- renderTable({     
-    org.counts <- read.delim(paste(getwd(),"www/dataInput1-exp.txt",sep="/"), header=T, row.names=1)
+    org.counts <- read.delim(paste(getwd(),"www/dataInput1-exp.txt",sep="/"), header=T, row.names=1, skipNul = T)
     org.counts
-  }, align="l|cccccc")
+  }, rownames = T, align="lcccccc", na = "")
   
   output$metaTabSamp <- renderTable({
     metadata <- read.delim(paste(getwd(),"/www/dataInput2-exp0.txt",sep=""), header=T)
     metadata
-  }, include.rownames=F, align="llc")
+  }, rownames=F, align="lc")
   
   output$multimetaTabSamp22 <- renderTable({
     metadata <- read.delim(paste(getwd(),"/www/Multi-dataInput2-exp2.txt",sep=""), header=T)
     metadata
-  }, include.rownames=F, align="llcccc")
+  }, rownames=F, align="lcccc", na = "")
   
   
   
@@ -580,7 +580,7 @@ shinyServer(function(input, output, session) {
         res.summary
       })
     
-  },digits=0, align="l|c")
+  },digits=0, rownames = TRUE, align="lc")
   
   output$sampleGroup <- renderTable({ 
     if(input$dataSubmit)
@@ -608,7 +608,7 @@ shinyServer(function(input, output, session) {
         colnames(groupinfo) <- "No. in each group"
         groupinfo
       })
-  },digits=0, align="l|c")
+  },digits=0, rownames = TRUE, align="lc")
   
   output$sampleInfo <- renderText({ 
     if(input$dataSubmit)
@@ -788,7 +788,7 @@ shinyServer(function(input, output, session) {
         res.summary
       })
     
-  },digits=0, align="l|c")
+  },digits=0, rownames = TRUE, align="lc")
   
   output$sampleGroupMulti <- renderTable({ 
     if ( input$MultiSubmit )     
@@ -817,7 +817,7 @@ shinyServer(function(input, output, session) {
       })
     
     
-  },digits=0, align="l|c")
+  },digits=0, rownames = TRUE, align="lc")
   
   
   
@@ -987,7 +987,7 @@ shinyServer(function(input, output, session) {
         colnames(tab) <- c("Library sizes", "Normalization factors")
         tab
       })
-  }, align="l|cc", digits=c(0,0,2), display=c("s", "e", "f"))
+  }, align="lcc", rownames = TRUE, digits=c(0,0,2), display=c("s", "e", "f"))
   
   output$rmlowLibsizeNormfactor <- renderTable({ 
     if ( input$rmlow )
@@ -996,7 +996,7 @@ shinyServer(function(input, output, session) {
         colnames(tab) <- c("Library sizes", "Normalization factors")
         tab
       })
-  }, align="l|cc", digits=c(0,0,2), display=c("s", "e", "f"))
+  }, align="lcc", rownames = TRUE, digits=c(0,0,2), display=c("s", "e", "f"))
   
   output$orgSamplesize <- renderTable({
     if(input$rmlow)
@@ -1008,7 +1008,7 @@ shinyServer(function(input, output, session) {
         colnames(res.summary) <- "Number"
         res.summary
       })
-  },digits=0, align="l|c")
+  },digits=0, rownames = TRUE, align="lc")
   
   output$rmlowSamplesize <- renderTable({ 
     if(input$rmlow) 
@@ -1023,7 +1023,7 @@ shinyServer(function(input, output, session) {
         colnames(res.summary) <- "Number"
         res.summary
       })
-  },digits=0, align="l|c")
+  },digits=0, rownames = TRUE, align="lc")
   
   output$sampleBoxplot <- renderPlot({ 
     if(input$rmlow) 
@@ -1098,15 +1098,15 @@ shinyServer(function(input, output, session) {
   })
   
   output$edgerTagwiseDisp <- renderTable({ 
-    
     if(input$edgerdeAnalysis)
       isolate({       
         res<- as.table(t(summary(edgerDispersionEst()$tagwise.dispersion)))
-        res <- t(res)
-        colnames(res) <- "Tagwise"
+#         print(res)
+#         print(dim(res))
+        rownames(res) <- "Tagwise"
         res    
       })
-  }, digits=3, align = "l|c")
+  }, digits=3, rownames = FALSE, colnames = FALSE)
   ##############
   ##tab panel for DE analysis results   
   output$erroredgeR <- renderText({
@@ -1180,7 +1180,7 @@ shinyServer(function(input, output, session) {
         
         edgerDGEsummary
       })
-  }, align="l|c", digits=0)
+  }, align="lc", rownames = TRUE, digits=0)
   
   output$edgerVolcano <- renderPlot({
     if(input$edgerdeAnalysis)
@@ -1303,7 +1303,7 @@ shinyServer(function(input, output, session) {
         
         voomDGEsummary
       })
-  }, align="l|c", digits=0)
+  }, align="lc", rownames = TRUE, digits=0)
   
   output$voomVolcano <- renderPlot({
     if (input$voomdeAnalysis)
@@ -1421,7 +1421,7 @@ shinyServer(function(input, output, session) {
         
         deseq2DGEsummary
       })
-  }, align="l|c", digits=0)
+  }, align="lc", rownames = TRUE, digits=0)
   
   output$deseq2Volcano <- renderPlot({
     if (input$deseq2deAnalysis)
@@ -1596,7 +1596,57 @@ shinyServer(function(input, output, session) {
         })
         res
       })
-  },digits = 0, align="l|c")
+  },digits = 0, rownames = TRUE, align="lc")
+  
+  
+#   edgerDEgenename <- rownames(rbind(subset(edgerDecomp()$table, filter==1),subset(edgerDecomp()$table, filter==-1)))
+#   voomDEgenename <- rownames(rbind(subset(voomDecomp(), filter==1),subset(voomDecomp(), filter==-1)))
+#   deseq2DEgenename <- rownames(rbind(subset(deseq2Decomp(), filter==1),subset(deseq2Decomp(), filter==-1)))
+
+  output$overlap_genes_download <- downloadHandler(
+    filename = function() {paste("overlapped_genes_", Sys.Date(), ".zip", sep="")},
+    content = function(file) {
+      tmpdir <- tempdir()
+      setwd(tempdir())
+      print(tempdir())
+      voomRes <- voomDecomp()$table
+      edgerRes <- edgerDecomp()$table
+      deseq2Res <- deseq2Decomp()$table
+      
+      if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods){
+        fs <- c("all3_overlap.txt","edger_voom_overlap.txt", "edger_deseq2_overlap.txt", "voom_deseq2_overlap.txt", "deseq2_only.txt", "edgeR_only.txt", "voom_only.txt")
+        write.table(datareactive()$counts, file = "all3_overlap.txt", sep ="\t")
+        write.table(datareactive()$counts, file = "edger_voom_overlap.txt", sep ="\t")
+        write.table(datareactive()$counts, file = "edger_deseq2_overlap.txt", sep ="\t")
+        write.table(voomRes()$counts, file = "voom_deseq2_overlap.txt", sep ="\t")
+        write.table(datareactive()$counts, file = "deseq2_only.txt", sep ="\t")
+        write.table(datareactive()$counts, file = "edgeR_only.txt", sep ="\t")
+        write.table(voomRes()$counts, file = "voom_only.txt", sep ="\t")
+        print (fs)
+      } else if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods){
+        fs <- c("edger_voom_overlap.txt", "edger_only.txt", "voom_only.txt")
+        write.table(datareactive()$counts, file = "edger_voom_overlap.txt", sep ="\t")
+        write.table(datareactive()$counts, file = "edger_only.txt", sep ="\t")
+        write.table(datareactive()$counts, file = "voom_only.txt", sep ="\t")
+        print (fs)
+      } else if (as.character("edger")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods){
+        fs <- c("edger_deseq2_overlap.txt", "edger_only.txt", "deseq2_only.txt")
+        write.table(datareactive()$counts, file = "edger_deseq2_overlap.txt", sep ="\t")
+        write.table(datareactive()$counts, file = "edger_only.txt", sep ="\t")
+        write.table(datareactive()$counts, file = "deseq2_only.txt", sep ="\t")
+        print (fs)
+      } else if (as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
+        fs <- c("voom_deseq2_overlap.txt", "voom_only.txt", "deseq2_only.txt")
+        write.table(datareactive()$counts, file = "voom_deseq2_overlap.txt", sep ="\t")
+        write.table(datareactive()$counts, file = "voom_only.txt", sep ="\t")
+        write.table(datareactive()$counts, file = "deseq2_only.txt", sep ="\t")
+        print (fs)
+      }
+      
+      zip(zipfile=file, files=fs)
+    },
+    contentType = "application/zip"
+  )
   
   ###########################
   ##Adding tab switch button
