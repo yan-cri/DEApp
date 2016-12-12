@@ -3,17 +3,28 @@
 ## Developed by Yan Li, last update on Dec, 2016
 
 ## Start checking whether all required packages are successfully loaded
-packages <- c("shinydashboard", "DT","shiny", "ggplot2", "gplots")
-if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
-  install.packages(setdiff(packages, rownames(installed.packages())))  
-}
-BCpackages <- c("edgeR", "DESeq2", "limma")
-if (length(setdiff(BCpackages, rownames(installed.packages()))) > 0) {
-  source("http://bioconductor.org/biocLite.R")
-  biocLite(setdiff(BCpackages, rownames(installed.packages())))
-}
-sapply(c(packages, BCpackages), require, character.only=T)
-print(sapply(c(packages, BCpackages), require, character.only=T))
+library(shiny)
+library(shinydashboard)
+library(DT)
+library(ggplot2)
+library(gplots)
+library(edgeR)
+library(DESeq2)
+library(limma)
+##new version of Shinyapps.io detects and installs packages for you automatically when you call deployApp(). 
+##Do not need, nor should have any calls to install.packages() as below anywhere in your source code.
+##Below installation check is only for local installation
+# packages <- c("shinydashboard", "DT","shiny", "ggplot2", "gplots")
+# if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+#   install.packages(setdiff(packages, rownames(installed.packages())))  
+# }
+# BCpackages <- c("edgeR", "DESeq2", "limma")
+# if (length(setdiff(BCpackages, rownames(installed.packages()))) > 0) {
+#   source("http://bioconductor.org/biocLite.R")
+#   biocLite(setdiff(BCpackages, rownames(installed.packages())))
+# }
+# lapply(c(packages, BCpackages), require, character.only=T)
+# print(lapply(c(packages, BCpackages), require, character.only=T))
 ## End checking whether all required packages are successfully loaded
 
 ## trim function used for comparision group names' processing
