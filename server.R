@@ -1615,6 +1615,7 @@ shinyServer(function(input, output, session) {
       
       if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods){
         fs <- c("all3_overlap.txt","edger_voom_overlap.txt", "edger_deseq2_overlap.txt", "voom_deseq2_overlap.txt", "deseq2_only.txt", "edgeR_only.txt", "voom_only.txt")
+        all3overlap
         write.table(datareactive()$counts, file = "all3_overlap.txt", sep ="\t")
         write.table(datareactive()$counts, file = "edger_voom_overlap.txt", sep ="\t")
         write.table(datareactive()$counts, file = "edger_deseq2_overlap.txt", sep ="\t")

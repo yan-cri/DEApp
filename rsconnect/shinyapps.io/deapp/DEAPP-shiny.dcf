@@ -1,7 +1,10 @@
 name: DEAPP-shiny
+title:
 account: deapp
 server: shinyapps.io
-appId: 72122
-bundleId: 324893
-url: https://deapp.shinyapps.io/DEAPP-shiny
-when: 1449264135.32733
+appId: 144305
+bundleId: 645686
+url: https://yanli.shinyapps.io/DEAPP-shiny/
+when: 1481567211.54464
+asMultiple: FALSE
+asStatic: FALSE
