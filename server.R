@@ -3,14 +3,6 @@
 ## Developed by Yan Li, last update on Dec, 2016
 
 ## Start checking whether all required packages are successfully loaded
-library(shiny)
-library(shinydashboard)
-library(DT)
-library(ggplot2)
-library(gplots)
-library(edgeR)
-library(DESeq2)
-library(limma)
 ##new version of Shinyapps.io detects and installs packages for you automatically when you call deployApp(). 
 ##Do not need, nor should have any calls to install.packages() as below anywhere in your source code.
 ##Below installation check is only for local installation
@@ -26,14 +18,27 @@ library(limma)
 # lapply(c(packages, BCpackages), require, character.only=T)
 # print(lapply(c(packages, BCpackages), require, character.only=T))
 ## End checking whether all required packages are successfully loaded
+## Load required packages
+library(shiny)
+library(shinydashboard)
+library(DT)
+library(ggplot2)
+library(gplots)
+library(edgeR)
+library(DESeq2)
+library(limma)
 
 ## trim function used for comparision group names' processing
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
-## Uploading file's size requirement
+## Uploading file's size requirement (<9GB)
 options(shiny.maxRequestSize = 9*1024^2)
 
+## Start shiny server
 shinyServer(function(input, output, session) {
+  
+  #################################
+  ###START observing data uploading
   dataObs <- reactiveValues(
     orgCount = read.delim(paste(getwd(),"data/pnas-count_singleFactor.txt",sep="/"), header=T, row.names=1),
     orgMeta = read.delim(paste(getwd(),"/data/pnas-count_singleFactor-meta.txt",sep=""), header=T) 
@@ -149,6 +154,12 @@ shinyServer(function(input, output, session) {
     progress$time$set(message = "DESeq2 analysis", value = 0)
     progress$time$set(value = 0.2, detail = "processing 20%")
   })
+  ###End observing data uploading
+  #################################
+  
+  
+  ################################################################################################
+  ##START all reactive expression object
   
   ##Reactive expression object for original row count
   datareactive <- reactive ({              
@@ -175,12 +186,11 @@ shinyServer(function(input, output, session) {
     org.count <- DGEList(counts=org.counts, group=Group)
     org.count$samples$lib.size <- colSums(org.count$counts)
     org.count <- calcNormFactors(org.count, lib.size=T, method="TMM")
-    
+  
     org.count
   })
   
-  
-  #Reactive expression object for the counts remove low expression tags
+  ##Reactive expression object for the counts remove low expression tags
   rmlowReactive <- reactive({    
     if(input$edgerdeAnalysis) { 
       progress$time$set(message = "edgeR analysis", value = 0)
@@ -527,11 +537,11 @@ shinyServer(function(input, output, session) {
     
     res.matrix
   })
-  
   ##End of all reactive expression object
   ################################################################################################
+  
   ################################################################################################
-  ##tab Panel Data input
+  ##START tab Panel Data input
   output$countTabSamp <- renderTable({     
     org.counts <- read.delim(paste(getwd(),"www/dataInput1-exp.txt",sep="/"), header=T, row.names=1, skipNul = T)
     org.counts
@@ -546,11 +556,6 @@ shinyServer(function(input, output, session) {
     metadata <- read.delim(paste(getwd(),"/www/Multi-dataInput2-exp2.txt",sep=""), header=T)
     metadata
   }, rownames=F, align="lcccc", na = "")
-  
-  
-  
-  ################################################################################################
-  ################################################################################################
   
   output$overallDataSummary <- renderTable({ 
     if(input$dataSubmit)
@@ -571,9 +576,9 @@ shinyServer(function(input, output, session) {
           } else {
             orgCount <- count
             orgMeta <- meta
-            print(dim(orgCount)[2])
-            print(dim(orgMeta)[1])
-            print(sum(colnames(orgCount) == orgMeta[,1]))
+            #print(dim(orgCount)[2])
+            #print(dim(orgMeta)[1])
+            #print(sum(colnames(orgCount) == orgMeta[,1]))
             if (dim(orgCount)[2] != dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
             #else if ( sum(colnames(orgCount) == orgMeta[,1]) !=dim(orgMeta)[1] ) {stop("Input files do not correspond with each other. ")}
             else if (dim(orgMeta)[2] < 2 ) {stop("Input 2 file format is wrong.") }
@@ -759,12 +764,11 @@ shinyServer(function(input, output, session) {
           }                 
         }
       })
-    
   })
   #################################################
   
   #################################################
-  ##Multi-factor Exp Res Summary
+  ##START multi-factor Exp Res Summary
   output$overallDataSummaryMulti <- renderTable({ 
     if ( input$MultiSubmit )       
       isolate({
@@ -829,8 +833,6 @@ shinyServer(function(input, output, session) {
     
     
   },digits=0, rownames = TRUE, align="lc")
-  
-  
   
   output$sampleInfoMulti <- renderText({ 
     if ( input$MultiSubmit ) 
@@ -919,8 +921,6 @@ shinyServer(function(input, output, session) {
           paste("ERROR: Your data input is a single-factor experiment, please restart the App and use 'Single-facotr Experiment' tab to input your data.")
         }       
       })
-    
-    
   })
   
   output$GroupLevelMulti <- renderText({ 
@@ -958,10 +958,7 @@ shinyServer(function(input, output, session) {
         } else {
           paste("ERROR!") 
         }
-        
       })
-    
-    
   })
   
   output$errorInputMulti <- renderText({
@@ -986,11 +983,13 @@ shinyServer(function(input, output, session) {
         }        
       })  
   })
-  ##End data input tab panel
+  ##End multi-factor Exp Res Summary
   ################################################
+  ##End tab Panel Data input
+  ################################################################################################
   
   ################################################
-  ###tab panel Data summary
+  ###START data summary tab Panel
   output$orgLibsizeNormfactor <- renderTable({
     if(input$rmlow)
       isolate({        
@@ -1068,7 +1067,6 @@ shinyServer(function(input, output, session) {
       })
   }) 
   
-  
   output$errorFiltering <- renderText({
     input$rmlow 
     isolate({
@@ -1078,11 +1076,11 @@ shinyServer(function(input, output, session) {
       }
     })
   })  
-  ##End Data summary tab Panel
+  ##End data summary tab Panel
   ################################################
   
   ################################################
-  ###tab panel edgeR
+  ##START edgeR panel DE analysis   
   output$edgerGroupLevel <- renderText({ 
     paste("The available group levels are: " , paste(as.character(levels((datareactive())$samples$group)), collapse=", "), ".", sep="")
   })
@@ -1119,8 +1117,7 @@ shinyServer(function(input, output, session) {
         res    
       })
   }, digits=3, rownames = FALSE, colnames = FALSE)
-  ##############
-  ##tab panel for DE analysis results   
+  
   output$erroredgeR <- renderText({
     if(input$edgerdeAnalysis)
       isolate({
@@ -1227,11 +1224,11 @@ shinyServer(function(input, output, session) {
     )},
     contentType = "text"
   )
-  ###end tab panel edgeR
+  ###END edgeR panel DE analysis
   ################################################
   
   ################################################
-  ###Limma-voom panel DE analysis
+  ###START Limma-voom panel DE analysis
   output$errorVoom <- renderText({
     if(input$voomdeAnalysis)
       isolate({
@@ -1348,11 +1345,11 @@ shinyServer(function(input, output, session) {
     contentType = "text"
   )
   
-  ###end tab panel limma-voom
+  ###END Limma-voom panel DE analysis
   ################################################
   
   ################################################
-  ###DEseq2 panel DE analysis
+  ###START DEseq2 panel DE analysis
   output$errorDeseq2 <- renderText({
     if(input$deseq2deAnalysis)
       isolate({
@@ -1469,8 +1466,7 @@ shinyServer(function(input, output, session) {
   ################################################
   
   ################################################
-  ##DE comparison results
-  
+  ##START DE comparison results
   output$errorComp <- renderText({
     if(input$decompAnalysis)
       isolate({
@@ -1621,7 +1617,6 @@ shinyServer(function(input, output, session) {
         deseq2Res <- subset(deseq2Decomp(), filter==1 | filter==-1)
         fs <- c("all3_overlap.txt","edger_voom_overlap_only.txt", "edger_deseq2_overlap_only.txt", "voom_deseq2_overlap_only.txt", "deseq2_only.txt", "edgeR_only.txt", "voom_only.txt")
         vennres <- venn(list(voom = rownames(voomRes), edgeR = rownames(edgerRes), DESeq2=rownames(deseq2Res)))
-        plot(vennres)
         write.table(attr(vennres, "intersections")$`voom:edgeR:DESeq2`, file = "all3_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
         write.table(attr(vennres, "intersections")$`voom:edgeR`, file = "edger_voom_overlap_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
         write.table(attr(vennres, "intersections")$`edgeR:DESeq2`, file = "edger_deseq2_overlap_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
@@ -1634,7 +1629,6 @@ shinyServer(function(input, output, session) {
         edgerRes <- subset(edgerDecomp()$table, filter==1 | filter==-1)
         fs <- c("edger_voom_overlap.txt", "edger_only.txt", "voom_only.txt")
         vennres <- venn(list(voom = rownames(voomRes), edgeR = rownames(edgerRes)))
-        plot(vennres)
         write.table(attr(vennres, "intersections")$`voom:edgeR`, file = "edger_voom_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
         write.table(attr(vennres, "intersections")$`edgeR`, file = "edger_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
         write.table(attr(vennres, "intersections")$`voom`, file = "voom_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
@@ -1643,7 +1637,6 @@ shinyServer(function(input, output, session) {
         deseq2Res <- subset(deseq2Decomp(), filter==1 | filter==-1)
         fs <- c("edger_deseq2_overlap.txt", "edger_only.txt", "deseq2_only.txt")
         vennres <- venn(list(DESeq2=rownames(deseq2Res), edgeR = rownames(edgerRes)))
-        plot(vennres)
         write.table(attr(vennres, "intersections")$`DESeq2:edgeR`,file = "edger_deseq2_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
         write.table(attr(vennres, "intersections")$`edgeR`, file = "edger_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
         write.table(attr(vennres, "intersections")$`DESeq2`, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
@@ -1652,7 +1645,6 @@ shinyServer(function(input, output, session) {
         deseq2Res <- subset(deseq2Decomp(), filter==1 | filter==-1)
         fs <- c("voom_deseq2_overlap.txt", "voom_only.txt", "deseq2_only.txt")
         vennres <- venn(list(voom = rownames(voomRes), DESeq2=rownames(deseq2Res)))
-        plot(vennres)
         write.table(attr(vennres, "intersections")$`voom:DESeq2`, file = "voom_deseq2_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
         write.table(attr(vennres, "intersections")$`voom`, file = "voom_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
         write.table(attr(vennres, "intersections")$`DESeq2`, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
@@ -1661,9 +1653,11 @@ shinyServer(function(input, output, session) {
       },
     contentType = "application/zip"
   )
+  ##END DE comparison results
+  ################################################
   
   ###########################
-  ##Adding tab switch button
+  ##START adding tab switch button
   output$singleDataInputLink <- renderUI({
     if(input$dataSubmit)
       isolate({
@@ -1799,7 +1793,9 @@ shinyServer(function(input, output, session) {
     newtab <- switch(input$menu1, "deseq2" = "limmavoom","limmavoom" = "deseq2")
     updateTabItems(session, "menu1", newtab)
   })
+  ##END adding tab switch button
+  ###########################
   
 }) 
 
-
+##END shiny server
