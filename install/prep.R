@@ -1,4 +1,4 @@
-packages <- c("shinydashboard", "DT","shiny", "ggplot2")
+packages <- c("shinydashboard", "DT","shiny", "ggplot2", "gplots")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))  
 }
@@ -12,5 +12,3 @@ if (length(setdiff(BCpackages, rownames(installed.packages()))) > 0) {
 sapply(c(packages, BCpackages), require, character.only=T)
 
 print(sapply(c(packages, BCpackages), require, character.only=T))
-
-trim <- function (x) gsub("^\\s+|\\s+$", "", x)
