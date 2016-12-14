@@ -1,0 +1,10 @@
+name: DEApp
+title:
+account: deapp
+server: shinyapps.io
+appId: 72193
+bundleId: 650148
+url: https://yanli.shinyapps.io/DEApp/
+when: 1481738215.05875
+asMultiple: FALSE
+asStatic: FALSE

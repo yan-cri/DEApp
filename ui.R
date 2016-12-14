@@ -252,7 +252,19 @@ body <- dashboardBody(
               so that DE analysis can be conducted in any 2 chosen combined factor levels.
               Additionally, please make sure there is more than 1 biological replicate (>=2 samples) 
               for each factor/combined-factor levels."
+              , style="padding-left: 4em"),
+            
+            p("Q4. What is normaliation factor used for DE analysis in DEApp?"
+              , style="padding-left: 2em; font-weight: bold"),
+            p("A: According to the ", a("edgeR ", href="http://bioconductor.org/packages/release/bioc/html/edgeR.html"), 
+               " users guide, the normalization factor presented in the 'Data Summarization' panel is calculated with 
+              calcNormFactors() function in the edgeR, this function normalizes for RNA composition by finding 
+              a set of scaling factors for the library sizes that minimize the log-fold changes between the samples for most
+              genes. The default method for computing these scale factors uses a trimmed mean of M-values (TMM) 
+              between each pair of samples. The product of original library size and the scaling factor will be used 
+              in the downsteam DE analyses."
               , style="padding-left: 4em")
+            
             
     ),
     
