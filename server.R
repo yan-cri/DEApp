@@ -1609,7 +1609,7 @@ shinyServer(function(input, output, session) {
   output$overlap_genes_download <- downloadHandler(
     filename = function() {paste("comparison_results_", paste(input$decompMethods, collapse = "-"), "_", Sys.Date(), ".zip", sep="")},
     content = function(fname) { 
-      tmpdir <- tempdir()
+      workDir <- getwd()
       setwd(tempdir())
       if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
         edgerRes <- subset(edgerDecomp()$table, filter==1 | filter==-1)
@@ -1617,39 +1617,115 @@ shinyServer(function(input, output, session) {
         deseq2Res <- subset(deseq2Decomp(), filter==1 | filter==-1)
         fs <- c("all3_overlap.txt","edger_voom_overlap_only.txt", "edger_deseq2_overlap_only.txt", "voom_deseq2_overlap_only.txt", "deseq2_only.txt", "edgeR_only.txt", "voom_only.txt")
         vennres <- venn(list(voom = rownames(voomRes), edgeR = rownames(edgerRes), DESeq2=rownames(deseq2Res)))
-        write.table(attr(vennres, "intersections")$`voom:edgeR:DESeq2`, file = "all3_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`voom:edgeR`, file = "edger_voom_overlap_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`edgeR:DESeq2`, file = "edger_deseq2_overlap_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`voom:DESeq2`, file = "voom_deseq2_overlap_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`DESeq2`, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`edgeR`, file = "edgeR_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`voom`, file = "voom_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        ol1 <- cbind(edgerRes[match(attr(vennres, "intersections")$`voom:edgeR:DESeq2`, rownames(edgerRes)),],
+                     voomRes[match(attr(vennres, "intersections")$`voom:edgeR:DESeq2`, rownames(voomRes)),],
+                     deseq2Res[match(attr(vennres, "intersections")$`voom:edgeR:DESeq2`, rownames(deseq2Res)),])
+        ol2 <- cbind(edgerRes[match(attr(vennres, "intersections")$`voom:edgeR`, rownames(edgerRes)),],
+                     voomRes[match(attr(vennres, "intersections")$`voom:edgeR`, rownames(voomRes)),])
+        ol3 <- cbind(edgerRes[match(attr(vennres, "intersections")$`edgeR:DESeq2`, rownames(edgerRes)),],
+                     deseq2Res[match(attr(vennres, "intersections")$`edgeR:DESeq2`, rownames(deseq2Res)),])
+        ol4 <- cbind(voomRes[match(attr(vennres, "intersections")$`voom:DESeq2`, rownames(voomRes)),],
+                     deseq2Res[match(attr(vennres, "intersections")$`voom:DESeq2`, rownames(deseq2Res)),])
+        ol5 <- deseq2Res[match(attr(vennres, "intersections")$`DESeq2`, rownames(deseq2Res)),]
+        ol6 <- edgerRes[match(attr(vennres, "intersections")$`edgeR`, rownames(edgerRes)),]
+        ol7 <- voomRes[match(attr(vennres, "intersections")$`voom`, rownames(voomRes)),]
+        
+        colnames(ol1) <- c(paste("edgeR", colnames(edgerRes), sep = "_"), paste("voom", colnames(voomRes), sep = "_"), paste("DESeq2", colnames(deseq2Res), sep = "_") )
+        colnames(ol2) <- c(paste("edgeR", colnames(edgerRes), sep = "_"), paste("voom", colnames(voomRes), sep = "_"))
+        colnames(ol3) <- c(paste("edgeR", colnames(edgerRes), sep = "_"), paste("DESeq2", colnames(deseq2Res), sep = "_"))
+        colnames(ol4) <- c(paste("voom", colnames(voomRes), sep = "_"), paste("DESeq2", colnames(deseq2Res), sep = "_"))
+        colnames(ol5) <- colnames(deseq2Res)
+        colnames(ol6) <- colnames(edgerRes)
+        colnames(ol7) <- colnames(voomRes)
+        
+        ol1.save <- ol1[order(ol1$`edgeR_PValue`), c(1,4,5,7,10,11,15,18,19)]
+        ol2.save <- ol2[order(ol2$`edgeR_PValue`), c(1,4,5,7,10,11)]
+        ol3.save <- ol3[order(ol3$`edgeR_PValue`), c(1,4,5,8,11,12)]
+        ol4.save <- ol4[order(ol4$`voom_P.Value`), c(1,4,5,9,12,13)]
+        ol5.save <- ol5[order(ol5$`pvalue`), c(2,5,6)]
+        ol6.save <- ol6[order(ol6$`PValue`), c(1,4,5)]
+        ol7.save <- ol7[order(ol7$`P.Value`), c(1,4,5)]
+        
+        write.table(ol1.save, file = "all3_overlap.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol2.save, file = "edger_voom_overlap_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol3.save, file = "edger_deseq2_overlap_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol4.save, file = "voom_deseq2_overlap_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol5.save, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol6.save, file = "edgeR_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol7.save, file = "voom_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
       } else if (as.character("edger")%in%input$decompMethods & as.character("voom")%in%input$decompMethods){ 
         voomRes <- subset(voomDecomp(), filter==1 | filter==-1)
         edgerRes <- subset(edgerDecomp()$table, filter==1 | filter==-1)
         fs <- c("edger_voom_overlap.txt", "edger_only.txt", "voom_only.txt")
         vennres <- venn(list(voom = rownames(voomRes), edgeR = rownames(edgerRes)))
-        write.table(attr(vennres, "intersections")$`voom:edgeR`, file = "edger_voom_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`edgeR`, file = "edger_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`voom`, file = "voom_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        ol1 <- cbind(edgerRes[match(attr(vennres, "intersections")$`voom:edgeR`, rownames(edgerRes)),],
+                     voomRes[match(attr(vennres, "intersections")$`voom:edgeR`, rownames(voomRes)),])
+        ol2 <- edgerRes[match(attr(vennres, "intersections")$`edgeR`, rownames(edgerRes)),]
+        ol3 <- voomRes[match(attr(vennres, "intersections")$`voom`, rownames(voomRes)),]
+        
+        colnames(ol1) <- c(paste("edgeR", colnames(edgerRes), sep = "_"), paste("voom", colnames(voomRes), sep = "_"))
+        colnames(ol2) <- colnames(edgerRes)
+        colnames(ol3) <- colnames(voomRes)
+#         print(dim(voomRes))
+#         print(head(voomRes))
+
+        ol1.save <- ol1[order(ol1$`edgeR_PValue`),c(1,4,5,7,10,11)]
+        ol2.save <- ol2[order(ol2$`PValue`), c(1,4,5)]
+        ol3.save <- ol3[order(ol3$`P.Value`), c(1,4,5)]
+        
+        write.table(ol1.save, file = "edger_voom_overlap.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol2.save, file = "edger_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol3.save, file = "voom_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
       } else if (as.character("edger")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
         edgerRes <- subset(edgerDecomp()$table, filter==1 | filter==-1)
         deseq2Res <- subset(deseq2Decomp(), filter==1 | filter==-1)
         fs <- c("edger_deseq2_overlap.txt", "edger_only.txt", "deseq2_only.txt")
         vennres <- venn(list(DESeq2=rownames(deseq2Res), edgeR = rownames(edgerRes)))
-        write.table(attr(vennres, "intersections")$`DESeq2:edgeR`,file = "edger_deseq2_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`edgeR`, file = "edger_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`DESeq2`, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        ol1 <- cbind(edgerRes[match(attr(vennres, "intersections")$`DESeq2:edgeR`, rownames(edgerRes)),],
+                     deseq2Res[match(attr(vennres, "intersections")$`DESeq2:edgeR`, rownames(deseq2Res)),])
+        ol2 <- edgerRes[match(attr(vennres, "intersections")$`edgeR`, rownames(edgerRes)),]
+        ol3 <- deseq2Res[match(attr(vennres, "intersections")$`DESeq2`, rownames(deseq2Res)),]
+        
+        colnames(ol1) <- c(paste("edgeR", colnames(edgerRes), sep = "_"), paste("DESeq2", colnames(deseq2Res), sep = "_"))
+        colnames(ol2) <- colnames(edgerRes)
+        colnames(ol3) <- colnames(deseq2Res)
+        
+        ol1.save <- ol1[order(ol1$`edgeR_PValue`),c(1,4,5,8,11,12)]
+        ol2.save <- ol2[order(ol2$`PValue`), c(1,4,5)]
+        ol3.save <- ol3[order(ol3$pvalue),c(2,5,6)]
+        
+        write.table(ol1.save, file = "edger_deseq2_overlap.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol2.save, file = "edger_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol3.save, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
       } else if (as.character("voom")%in%input$decompMethods & as.character("deseq2")%in%input$decompMethods) {
         voomRes <- subset(voomDecomp(), filter==1 | filter==-1)
         deseq2Res <- subset(deseq2Decomp(), filter==1 | filter==-1)
         fs <- c("voom_deseq2_overlap.txt", "voom_only.txt", "deseq2_only.txt")
         vennres <- venn(list(voom = rownames(voomRes), DESeq2=rownames(deseq2Res)))
-        write.table(attr(vennres, "intersections")$`voom:DESeq2`, file = "voom_deseq2_overlap.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`voom`, file = "voom_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
-        write.table(attr(vennres, "intersections")$`DESeq2`, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = F, col.names = F)
+        
+        ol1 <- cbind(voomRes[match(attr(vennres, "intersections")$`voom:DESeq2`, rownames(voomRes)),],
+                     deseq2Res[match(attr(vennres, "intersections")$`voom:DESeq2`, rownames(deseq2Res)),])
+        ol2 <- voomRes[match(attr(vennres, "intersections")$`voom`, rownames(voomRes)),]
+        ol3 <- deseq2Res[match(attr(vennres, "intersections")$`DESeq2`, rownames(deseq2Res)),]
+        
+        # print(colnames(voomRes))
+        colnames(ol1) <- c(paste("voom", as.character(colnames(voomRes)), sep = "_"), paste("DESeq2", colnames(deseq2Res), sep = "_"))
+        colnames(ol2) <- colnames(voomRes)
+        colnames(ol3) <- colnames(deseq2Res)
+        # print(head(ol1))
+        ol1.save <- ol1[order(ol1$`voom_P.Value`), c(1,4,5,9,12,13)]
+        ol2.save <- ol2[order(ol2$`P.Value`), c(1,4,5)]
+        ol3.save <- ol3[order(ol3$`pvalue`),c(2,5,6)]
+        # print(ol1.save)
+        
+        write.table(ol1.save, file = "voom_deseq2_overlap.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol2.save, file = "voom_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
+        write.table(ol3.save, file = "deseq2_only.txt", sep ="\t", quote = F, row.names = T, col.names = NA)
       }
       zip(zipfile=fname, files=fs)
+#       print(getwd())
+#       print(workDir)
+      setwd(as.character(workDir))
       },
     contentType = "application/zip"
   )
