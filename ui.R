@@ -263,6 +263,13 @@ body <- dashboardBody(
               genes. The default method for computing these scale factors uses a trimmed mean of M-values (TMM) 
               between each pair of samples. The product of original library size and the scaling factor will be used 
               in the downsteam DE analyses."
+              , style="padding-left: 4em"),
+            
+            p("Q5. What is the maximum size of uploading data? What can I do if exceeding the maximum uploading data size?"
+              ,style="padding-left: 2em; font-weight: bold"),
+            p("A: The maximum size of uploading data is 10Mb. 
+              If your data exceeds the maximum size, 
+              you can install the application in your local computer."
               , style="padding-left: 4em")
             
             
