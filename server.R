@@ -118,7 +118,11 @@ shinyServer(function(input, output, session) {
     list(meta=as.data.frame(dataObs$orgMeta), count=as.data.frame(dataObs$orgCount) )
   })
   
-  progress <- reactiveValues(time=shiny::Progress$new(style = "old"))
+  # progress <- reactiveValues(time=shiny::Progress$new(style = "old"))
+  progress <- reactiveValues(time=shiny::Progress$new())
+  observeEvent(input$menu1, {
+    progress$time$set(message = "Analysis progress indicator", value = 0)
+  })
 
   observeEvent(input$dataSubmit, {  
    progress$time$set(message = "Data input (single-factor)", value = 0)
