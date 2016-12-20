@@ -122,6 +122,7 @@ shinyServer(function(input, output, session) {
   progress <- reactiveValues(time=shiny::Progress$new())
   observeEvent(input$menu1, {
     progress$time$set(message = "Analysis progress indicator", value = 0)
+    progress$time$set(value = 0, detail = "processing 0%")
   })
 
   observeEvent(input$dataSubmit, {  
