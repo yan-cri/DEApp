@@ -32,7 +32,7 @@ library(limma)
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
 ## Uploading file's size requirement (<30MB)
-options(shiny.maxRequestSize = 10*1024^2)
+options(shiny.maxRequestSize = 30*1024^2)
 
 ## Start shiny server
 shinyServer(function(input, output, session) {
