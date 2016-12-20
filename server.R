@@ -31,8 +31,8 @@ library(limma)
 ## trim function used for comparision group names' processing
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
-## Uploading file's size requirement (<9GB)
-options(shiny.maxRequestSize = 9*1024^2)
+## Uploading file's size requirement (<30MB)
+options(shiny.maxRequestSize = 30*1024^2)
 
 ## Start shiny server
 shinyServer(function(input, output, session) {
@@ -118,9 +118,9 @@ shinyServer(function(input, output, session) {
     list(meta=as.data.frame(dataObs$orgMeta), count=as.data.frame(dataObs$orgCount) )
   })
   
-  progress <- reactiveValues(time=shiny::Progress$new())
-  
-  observeEvent(input$dataSubmit, {     
+  progress <- reactiveValues(time=shiny::Progress$new(style = "old"))
+
+  observeEvent(input$dataSubmit, {  
    progress$time$set(message = "Data input (single-factor)", value = 0)
    progress$time$set(value = 0.5, detail = "processing 50%")
   })
