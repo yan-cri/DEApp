@@ -62,7 +62,7 @@ sidebar <- dashboardSidebar(
               menuItem("Feedback", icon = icon("comment", lib="glyphicon"), tabName="feedback")
               
   )
-  ,helpText("Developed by", a("bioinformatics core, ", href="http://cri.uchicago.edu/bioinformatics/"), 
+  ,helpText("Developed by the ", a("bioinformatics core, ", href="http://cri.uchicago.edu/bioinformatics/"), 
             a("Center for Research Informatics (CRI), ", href="http://cri.uchicago.edu/"), "University of Chicago", style="padding-left:1em; padding-right:1em;position:absolute; bottom:1em; ")
 )
 
@@ -216,7 +216,7 @@ body <- dashboardBody(
             #  , style="padding-left: 0em, padding-bottom: 4em"),
           
             #img(src="analysis-workflow.png", width=800, style="display: block; margin-left: auto; margin-right: auto;"),
-            p("The analysis execution workflow of this App is illustrated in a pdf file, which can be downloaded from  ",
+            p("The analysis execution workflow for this App is illustrated in a pdf file, that can be downloaded ",
               a("here.", href="https://drive.google.com/file/d/0BzY9lIv6cGWKUTByNkYzcG5ENk0/view?usp=sharing")
               , style="padding-left: 1em; padding-top: 1em")
             ),
@@ -257,7 +257,7 @@ body <- dashboardBody(
             p("Q4. What is normaliation factor used for DE analysis in DEApp?"
               , style="padding-left: 2em; font-weight: bold"),
             p("A: According to the ", a("edgeR ", href="http://bioconductor.org/packages/release/bioc/html/edgeR.html"), 
-               " users guide, the normalization factor presented in the 'Data Summarization' panel is calculated with 
+               " user's guide, the normalization factor presented in the 'Data Summarization' panel is calculated with 
               calcNormFactors() function in the edgeR, this function normalizes for RNA composition by finding 
               a set of scaling factors for the library sizes that minimize the log-fold changes between the samples for most
               genes. The default method for computing these scale factors uses a trimmed mean of M-values (TMM) 
@@ -1150,7 +1150,7 @@ body <- dashboardBody(
                          solidHeader = T, status = "success",
                          plotOutput("decomp"),
                          br(),
-                         p("Full gene lists of comparison results can be downloaded here:"
+                         p("Gene lists results can be downloaded here:"
                            , style="font-weight: bold"),
                          downloadButton("overlap_genes_download", 
                                         label = "Download",
