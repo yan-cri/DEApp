@@ -1795,7 +1795,7 @@ shinyServer(function(input, output, session) {
   output$step4Final <- renderUI({
     if(input$decompAnalysis)
       isolate({
-        actionButton('step4Final', label = "DE analysis complete! Thanks for using DEApp!", class="btn-info")
+        actionButton('step4Final', label = "DE analysis is completed! Thanks for using DEApp!", class="btn-info")
       })
   })
   
