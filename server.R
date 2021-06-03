@@ -445,7 +445,7 @@ shinyServer(function(input, output, session) {
       tp <- topTags(compRes, n=Inf, adjust.method="BH", sort.by="none")
       filter <- decideTestsDGE(compRes, adjust.method="BH", p.value=fdr, lfc=log2(fcval) )
     }
-    tp$table$filter <- filter
+    tp$table$filter <- as.numeric(filter)
     tp
   })
   
@@ -478,7 +478,7 @@ shinyServer(function(input, output, session) {
       tpvoom <- topTable(contrast.fit, number=Inf, adjust="BH", sort.by="none") 
       filtervoom <- decideTests(contrast.fit, adjust.method="BH", p.value=voomfdr, lfc=log2(voomfcval))
     }
-    tpvoom$filter <- filtervoom
+    tpvoom$filter <- as.numeric(filtervoom)
     tpvoom
   })
   
@@ -522,7 +522,7 @@ shinyServer(function(input, output, session) {
     edgerDEgenename <- rownames(rbind(subset(edgerDecomp()$table, filter==1),subset(edgerDecomp()$table, filter==-1)))
     voomDEgenename <- rownames(rbind(subset(voomDecomp(), filter==1),subset(voomDecomp(), filter==-1)))
     deseq2DEgenename <- rownames(rbind(subset(deseq2Decomp(), filter==1),subset(deseq2Decomp(), filter==-1)))
-    
+
     #res.matrix <- matrix(0, nrow=7, ncol=1)
     res.matrix <- data.frame(res=rep(0,7))
     rownames(res.matrix) <- c("edgeR", "limma-voom", "DESeq2", "edgeR & limma-voom", "edgeR & DESeq2", "limma-voom & DESeq2", "All")

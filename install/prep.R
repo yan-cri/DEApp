@@ -5,8 +5,9 @@ if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
 
 BCpackages <- c("edgeR", "DESeq2", "limma")
 if (length(setdiff(BCpackages, rownames(installed.packages()))) > 0) {
-  source("http://bioconductor.org/biocLite.R")
-  biocLite(setdiff(BCpackages, rownames(installed.packages())))
+  # source("http://bioconductor.org/biocLite.R")
+  # biocLite(setdiff(BCpackages, rownames(installed.packages())))
+  BiocManager::install(setdiff(BCpackages, rownames(installed.packages())))
 }
 
 sapply(c(packages, BCpackages), require, character.only=T)
